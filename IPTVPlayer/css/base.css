@@ -1,0 +1,163 @@
+/* ============================================================
+   IPTV Player — Base Styles, Viewport & 10-ft TV Focus
+   Native 1920x1080 Full HD 10-Foot Design (Zero Zoom Hack)
+   ============================================================ */
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: 1.25;
+}
+
+html, body {
+    width: 1920px;
+    height: 1080px;
+    background: var(--bg-base);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 20px;
+    line-height: 1.4;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#app {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background: var(--bg-base);
+}
+
+/* ---- 10-foot TV Remote Focus Ring ---- */
+*:focus {
+    outline: 4px solid var(--accent) !important;
+    outline-offset: 3px !important;
+    box-shadow: var(--shadow-focus) !important;
+    z-index: 10;
+}
+
+/* Disable focus outline on containers that aren't action targets */
+body:focus, #app:focus, main:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* ---- Screen Management ---- */
+.screen {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    inset: 0;
+    display: none;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+}
+.screen.active {
+    display: flex;
+}
+
+/* ---- Main App Shell ---- */
+#main-shell {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    display: none;
+    background: var(--bg-base);
+}
+#main-shell.active {
+    display: flex;
+}
+
+/* ---- Content Area ---- */
+.content-area {
+    margin-left: var(--nav-w, 104px);
+    width: 1816px;
+    width: calc(100% - var(--nav-w, 104px));
+    height: 1080px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.content-area::-webkit-scrollbar {
+    width: 8px;
+}
+.content-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+.content-area::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: 4px;
+}
+
+.section {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    min-height: 1080px;
+}
+.section.active {
+    display: flex;
+}
+
+/* ---- Section Header ---- */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 48px 0;
+    flex-shrink: 0;
+}
+.section-header h2 {
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.4px;
+}
+.section-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.section-controls > * + * {
+    margin-left: 16px;
+}
+.section-controls select {
+    padding: 12px 20px;
+    background: var(--bg-input);
+    border: 2px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* ---- Empty States ---- */
+.empty-state {
+    width: 100%;
+    text-align: center;
+    color: var(--text-muted);
+    padding: 100px 32px;
+    font-size: 24px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}

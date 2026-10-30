@@ -1,0 +1,19 @@
+{
+  "name": "miiptv-webos-legacy-build",
+  "private": true,
+  "description": "Transpiles IPTVPlayer to ES5 + CSS fallbacks so it runs on webOS 3.x (Chromium 38).",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "acorn": "^8.19.0",
+    "autoprefixer": "^10.6.2",
+    "core-js": "^3.39.0",
+    "esbuild": "^0.24.0",
+    "postcss": "^8.4.49",
+    "regenerator-runtime": "^0.14.1"
+  }
+}

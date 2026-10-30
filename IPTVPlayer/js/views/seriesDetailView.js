@@ -1,0 +1,221 @@
+/* ============================================================
+   IPTV Player — Series Detail View Component
+   Shows poster, metadata, season selector tabs & episodes
+   ============================================================ */
+
+window.IPTV = window.IPTV || {};
+
+window.IPTV.SeriesDetailView = {
+    init(app) {
+        this.app = app;
+        this.screen = document.getElementById('series-detail-screen');
+        const backBtn = document.getElementById('series-back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => this.close());
+        }
+        const favBtn = document.getElementById('series-fav-btn');
+        if (favBtn) {
+            favBtn.addEventListener('click', () => {
+                if (this.currentSeries) {
+                    this.app.toggleFavorite(this.currentSeries);
+                    this.updateFavoriteState();
+                }
+            });
+        }
+    },
+
+    updateFavoriteState() {
+        const favBtn = document.getElementById('series-fav-btn');
+        const favText = document.getElementById('series-fav-text');
+        if (!favBtn || !this.currentSeries) return;
+        const isFav = this.app.isFavorite(this.currentSeries.id);
+        favBtn.classList.toggle('active', isFav);
+        if (favText) {
+            favText.textContent = isFav ? 'Remove from Favorites' : 'Add to Favorites';
+        }
+    },
+
+    async open(item) {
+        this.lastFocusedElement = document.activeElement;
+        this.app.showLoading('Loading series details...');
+        try {
+            let seasonsData = {};
+            let seriesInfo = { ...item };
+
+            if (this.app.connection && this.app.connection.type === 'xtream') {
+                const resp = await window.IPTV.XtreamService.getSeriesInfo(this.app.connection, item.id);
+                if (resp) {
+                    if (resp.info) {
+                        seriesInfo.name = resp.info.name || item.name;
+                        seriesInfo.poster = resp.info.cover || resp.info.movie_image || item.poster;
+                        seriesInfo.plot = resp.info.plot || item.plot;
+                        seriesInfo.rating = resp.info.rating || item.rating;
+                        seriesInfo.year = resp.info.releaseDate || resp.info.year || item.year;
+                        seriesInfo.category = resp.info.genre || item.category;
+                    }
+                    if (resp.episodes && typeof resp.episodes === 'object') {
+                        seasonsData = resp.episodes;
+                    }
+                }
+            }
+
+            // Fallback if no episodes data from API (e.g. M3U playlist)
+            const seasonKeys = Object.keys(seasonsData);
+            if (seasonKeys.length === 0 && item.url) {
+                seasonsData['1'] = [{
+                    id: item.id,
+                    episode_num: 1,
+                    title: item.name,
+                    url: item.url,
+                    info: { movie_image: item.poster, plot: item.plot }
+                }];
+            }
+
+            this.currentSeries = seriesInfo;
+            this.app.hideLoading();
+            this.renderScreen(seriesInfo, seasonsData);
+        } catch(err) {
+            this.app.hideLoading();
+            this.app.toast('Failed to load series details');
+            console.error('Series detail error:', err);
+        }
+    },
+
+    renderScreen(seriesInfo, seasonsData) {
+        this.currentSeries = seriesInfo;
+        document.getElementById('series-title').textContent = seriesInfo.name;
+        this.updateFavoriteState();
+        
+        const posterEl = document.getElementById('series-poster');
+        posterEl.src = seriesInfo.poster || '';
+        posterEl.onerror = function() { this.style.display = 'none'; };
+        posterEl.style.display = seriesInfo.poster ? 'block' : 'none';
+
+        const yearEl = document.getElementById('series-year');
+        yearEl.textContent = seriesInfo.year ? `Year: ${seriesInfo.year}` : '';
+        yearEl.style.display = seriesInfo.year ? 'inline-flex' : 'none';
+
+        const ratingEl = document.getElementById('series-rating');
+        ratingEl.textContent = seriesInfo.rating ? `★ ${seriesInfo.rating}` : '';
+        ratingEl.style.display = seriesInfo.rating ? 'inline-flex' : 'none';
+
+        const catEl = document.getElementById('series-category');
+        catEl.textContent = seriesInfo.category || '';
+        catEl.style.display = seriesInfo.category ? 'inline-flex' : 'none';
+
+        document.getElementById('series-plot').textContent = seriesInfo.plot || 'No description available.';
+
+        // Seasons tabs
+        const tabsContainer = document.getElementById('series-seasons-tabs');
+        const episodesGrid = document.getElementById('series-episodes-list');
+        tabsContainer.innerHTML = '';
+        episodesGrid.innerHTML = '';
+
+        const seasonKeys = Object.keys(seasonsData).sort((a, b) => Number(a) - Number(b));
+
+        if (seasonKeys.length === 0) {
+            episodesGrid.innerHTML = '<p class="empty-state">No episodes available for this series.</p>';
+        } else {
+            seasonKeys.forEach((seasonNum, index) => {
+                const btn = document.createElement('button');
+                btn.className = `season-tab-btn ${index === 0 ? 'active' : ''}`;
+                btn.textContent = `Season ${seasonNum}`;
+                btn.tabIndex = 0;
+                btn.addEventListener('click', () => {
+                    tabsContainer.querySelectorAll('.season-tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    this.renderEpisodesList(seriesInfo, seasonsData[seasonNum], seasonNum);
+                });
+                tabsContainer.appendChild(btn);
+            });
+
+            // Render first season by default
+            this.renderEpisodesList(seriesInfo, seasonsData[seasonKeys[0]], seasonKeys[0]);
+        }
+
+        // Show series detail screen
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        this.screen.classList.add('active');
+        this.screen.scrollTop = 0;
+
+        setTimeout(() => {
+            const firstTarget = this.screen.querySelector('.episode-card, .season-tab-btn.active, #series-fav-btn, #series-back-btn');
+            if (firstTarget && window.IPTV.SpatialNav) {
+                window.IPTV.SpatialNav.focusElement(firstTarget);
+            } else if (firstTarget) {
+                firstTarget.focus();
+            }
+        }, 60);
+    },
+
+    renderEpisodesList(seriesInfo, episodes, seasonNum) {
+        const grid = document.getElementById('series-episodes-list');
+        grid.innerHTML = '';
+
+        if (!episodes || !Array.isArray(episodes) || episodes.length === 0) {
+            grid.innerHTML = '<p class="empty-state">No episodes in this season.</p>';
+            return;
+        }
+
+        const base = (this.app.connection && this.app.connection.type === 'xtream')
+            ? this.app.connection.server.replace(/\/+$/, '')
+            : '';
+
+        episodes.forEach(ep => {
+            const card = document.createElement('div');
+            card.className = 'episode-card';
+            card.tabIndex = 0;
+
+            let streamUrl = ep.url;
+            if (!streamUrl && this.app.connection && this.app.connection.type === 'xtream') {
+                const ext = ep.container_extension || 'mp4';
+                streamUrl = `${base}/series/${this.app.connection.user}/${this.app.connection.pass}/${ep.id}.${ext}`;
+            }
+
+            const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
+            const epTitle = ep.title || `Episode ${ep.episode_num || ''}`;
+            const epNumStr = `S${seasonNum} E${ep.episode_num || ep.episode || ''}`;
+
+            card.innerHTML = `
+                <div class="episode-thumb-container">
+                    ${thumb ? `<img class="episode-thumb" src="${thumb}" alt="${epTitle}" loading="lazy" onerror="this.style.display='none'">` : ''}
+                    <div class="episode-play-icon">${window.IPTV.Icons ? window.IPTV.Icons.get('play', 'ep-play-svg') : '▶'}</div>
+                </div>
+                <div class="episode-info">
+                    <span class="episode-number">${epNumStr}</span>
+                    <h4 class="episode-title">${epTitle}</h4>
+                    ${ep.info && ep.info.plot ? `<p class="episode-plot">${ep.info.plot}</p>` : ''}
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                if (!streamUrl) {
+                    this.app.toast('No episode stream URL available');
+                    return;
+                }
+                this.app.playerService.play({
+                    id: `series_${seriesInfo.id || ''}_${ep.id || ''}`,
+                    name: `${seriesInfo.name} - ${epNumStr}: ${epTitle}`,
+                    type: 'series',
+                    url: streamUrl,
+                    logo: thumb || seriesInfo.poster,
+                    category: seriesInfo.name
+                });
+            });
+
+            grid.appendChild(card);
+        });
+    },
+
+    close() {
+        if (this.screen) this.screen.classList.remove('active');
+        const mainShell = document.getElementById('main-shell');
+        if (mainShell) mainShell.classList.add('active');
+
+        if (this.lastFocusedElement && document.contains(this.lastFocusedElement)) {
+            setTimeout(() => {
+                try { this.lastFocusedElement.focus(); } catch(e) {}
+            }, 60);
+        }
+    }
+};

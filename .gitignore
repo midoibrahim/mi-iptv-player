@@ -1,0 +1,53 @@
+# Build outputs & dependencies
+/build/
+node_modules/
+**/node_modules/
+
+# Ignore extra/legacy IPKs, zips, and store icon drafts in dist/, keep only the final IPK
+/dist/*
+!/dist/com.miiptv.player_1.0.0_all.ipk
+
+# Ignore workspace-level scratch folders, design exports, and temporary scripts
+/.agents/
+/IPTVPlayer-FHD/
+/LG_Seller_Lounge_Icons/
+/Lineicons/
+/ss/
+/ux_screens/
+/*.py
+/*.ppt
+/*.pptx
+/*.pdf
+/*.png
+/LG WEBOS APP  GUIDE.md
+
+# Ignore unreferenced dev/backup folders and unused files inside IPTVPlayer
+/IPTVPlayer/Config/
+/IPTVPlayer/Downloads/
+/IPTVPlayer/OSE/
+/IPTVPlayer/Tools/
+/IPTVPlayer/TV/
+/IPTVPlayer/store_icons/
+/IPTVPlayer/*.py
+!/IPTVPlayer/server.py
+/IPTVPlayer/*.jpg
+/IPTVPlayer/icon-svg.svg
+/IPTVPlayer/launcher_bg.png
+/IPTVPlayer/splash_bg.png
+/IPTVPlayer/test_svg.png
+/IPTVPlayer/README.md
+/IPTVPlayer/package.json
+/IPTVPlayer/css/style.css
+/IPTVPlayer/fonts/lineicons/*.html
+/IPTVPlayer/fonts/lineicons/*.json
+/IPTVPlayer/fonts/lineicons/*.less
+/IPTVPlayer/fonts/lineicons/*.scss
+/IPTVPlayer/fonts/lineicons/*.styl
+/IPTVPlayer/fonts/lineicons/*.symbol.svg
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

@@ -1,0 +1,11 @@
+{
+  "id": "com.miiptv.player.service",
+  "description": "MI IPTV Player on-TV companion server (phone QR setup + stream proxy)",
+  "services": [
+    {
+      "name": "com.miiptv.player.service",
+      "description": "MI IPTV Player on-TV companion server"
+    }
+  ]
+}
+

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MI IPTV Player — TV Remote Setup</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="largeicon.png">
+    <style>
+        :root {
+            --bg-base: #0a0c14;
+            --bg-surface: #121624;
+            --bg-card: #181d30;
+            --bg-input: #101422;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-medium: rgba(255, 255, 255, 0.16);
+            --accent: #4f46e5;
+            --accent-glow: rgba(79, 70, 229, 0.45);
+            --accent-gradient: linear-gradient(135deg, #6366f1, #4338ca);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.35);
+            --text-bright: #ffffff;
+            --text-normal: #e2e8f0;
+            --text-dim: #94a3b8;
+            --radius: 12px;
+            --radius-lg: 18px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-normal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px 40px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 10px 0 6px;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 88px;
+            height: 88px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            margin-bottom: 14px;
+            overflow: visible;
+            padding: 0;
+        }
+
+        .logo-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-bright);
+            letter-spacing: -0.4px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin: 12px auto 0;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.85);
+            }
+        }
+
+        .setup-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 24px 20px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius);
+            color: var(--text-bright);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        .form-group input::placeholder {
+            color: #475569;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: var(--radius);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            box-shadow: 0 6px 20px var(--accent-glow);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Success Card */
+        .success-box {
+            display: none;
+            text-align: center;
+            padding: 30px 10px 10px;
+        }
+
+        .success-icon {
+            width: 68px;
+            height: 68px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 16px;
+            box-shadow: 0 0 24px var(--success-glow);
+        }
+
+        .success-box h2 {
+            font-size: 20px;
+            color: var(--text-bright);
+            margin-bottom: 8px;
+        }
+
+        .success-box p {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .btn-secondary {
+            padding: 12px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius);
+            color: var(--text-normal);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-badge">
+                <img src="icon.png" alt="MI IPTV Player Logo">
+            </div>
+            <h1>Fast TV Setup</h1>
+            <p class="subtitle">Enter your playlist credentials to send them directly to your TV screen.</p>
+            <div class="status-pill">
+                <span class="pulse-dot"></span>
+                <span>Connected to TV on Local Wi-Fi</span>
+            </div>
+        </header>
+
+        <main class="setup-card">
+            <!-- SETUP FORM -->
+            <div id="form-container">
+                <div class="form-group">
+                    <label for="input-name">Profile Name (Optional)</label>
+                    <input type="text" id="input-name" placeholder="e.g. Living Room IPTV">
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="xtream">Xtream Codes API</button>
+                    <button class="tab-btn" data-tab="m3u">M3U Playlist</button>
+                </div>
+
+                <!-- Tab 1: Xtream Codes API -->
+                <div id="tab-xtream" class="tab-content active">
+                    <div class="form-group">
+                        <label for="input-server">Server URL</label>
+                        <input type="url" id="input-server" placeholder="http://example.com:8080" autocomplete="off"
+                            autocorrect="off" autocapitalize="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-user">Username</label>
+                        <input type="text" id="input-user" placeholder="Enter username" autocomplete="off"
+                            autocorrect="off" autocapitalize="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-pass">Password</label>
+                        <input type="text" id="input-pass" placeholder="Enter password" autocomplete="off"
+                            autocorrect="off" autocapitalize="off">
+                    </div>
+                    <button id="btn-submit-xtream" class="btn-submit">
+                        <span>Send to TV</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M13.25 4.5C13.25 4.08579 12.9142 3.75 12.5 3.75C12.0858 3.75 11.75 4.08579 11.75 4.5V11.25H5C4.58579 11.25 4.25 11.5858 4.25 12C4.25 12.4142 4.58579 12.75 5 12.75H11.75V19.5C11.75 19.9142 12.0858 20.25 12.5 20.25C12.9142 20.25 13.25 19.9142 13.25 19.5V12.75H20C20.4142 12.75 20.75 12.4142 20.75 12C20.75 11.5858 20.4142 11.25 20 11.25H13.25V4.5Z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Tab 2: M3U Playlist -->
+                <div id="tab-m3u" class="tab-content">
+                    <div class="form-group">
+                        <label for="input-url">M3U / M3U8 Playlist URL</label>
+                        <input type="url" id="input-url" placeholder="http://example.com/playlist.m3u"
+                            autocomplete="off" autocorrect="off" autocapitalize="off">
+                    </div>
+                    <button id="btn-submit-m3u" class="btn-submit">
+                        <span>Send to TV</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M13.25 4.5C13.25 4.08579 12.9142 3.75 12.5 3.75C12.0858 3.75 11.75 4.08579 11.75 4.5V11.25H5C4.58579 11.25 4.25 11.5858 4.25 12C4.25 12.4142 4.58579 12.75 5 12.75H11.75V19.5C11.75 19.9142 12.0858 20.25 12.5 20.25C12.9142 20.25 13.25 19.9142 13.25 19.5V12.75H20C20.4142 12.75 20.75 12.4142 20.75 12C20.75 11.5858 20.4142 11.25 20 11.25H13.25V4.5Z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUCCESS STATE -->
+            <div id="success-box" class="success-box">
+                <div class="success-icon">✓</div>
+                <h2>Sent to TV Screen!</h2>
+                <p>Your playlist credentials have been transmitted to your TV. Look at your TV screen as it connects to
+                    your playlist.</p>
+                <button id="btn-send-another" class="btn-secondary">Send Another Playlist</button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            MI IPTV Player Smart TV Companion · Local Network Pairing
+        </footer>
+    </div>
+
+    <script>
+        // Tab switching
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabXtream = document.getElementById('tab-xtream');
+        const tabM3u = document.getElementById('tab-m3u');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if (btn.dataset.tab === 'xtream') {
+                    tabXtream.classList.add('active');
+                    tabM3u.classList.remove('active');
+                } else {
+                    tabM3u.classList.add('active');
+                    tabXtream.classList.remove('active');
+                }
+            });
+        });
+
+        // Submit Xtream Codes
+        document.getElementById('btn-submit-xtream').addEventListener('click', async () => {
+            const name = document.getElementById('input-name').value.trim();
+            const server = document.getElementById('input-server').value.trim();
+            const username = document.getElementById('input-user').value.trim();
+            const password = document.getElementById('input-pass').value.trim();
+
+            if (!server || !username || !password) {
+                alert('Please enter Server URL, Username, and Password.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-xtream');
+            btn.disabled = true;
+            btn.textContent = 'Sending to TV...';
+
+            try {
+                const resp = await fetch('/api/credentials', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'xtream',
+                        name: name || `${username}@${new URL(server.startsWith('http') ? server : 'http://' + server).hostname}`,
+                        server: server,
+                        username: username,
+                        password: password
+                    })
+                });
+
+                if (!resp.ok) throw new Error('Failed to send credentials to TV.');
+                showSuccess();
+            } catch (err) {
+                alert('Error sending to TV: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = 'Send to TV';
+            }
+        });
+
+        // Submit M3U Playlist
+        document.getElementById('btn-submit-m3u').addEventListener('click', async () => {
+            const name = document.getElementById('input-name').value.trim();
+            const url = document.getElementById('input-url').value.trim();
+
+            if (!url) {
+                alert('Please enter an M3U Playlist URL.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-m3u');
+            btn.disabled = true;
+            btn.textContent = 'Sending to TV...';
+
+            try {
+                const resp = await fetch('/api/credentials', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'm3u',
+                        name: name || 'M3U Playlist',
+                        url: url
+                    })
+                });
+
+                if (!resp.ok) throw new Error('Failed to send credentials to TV.');
+                showSuccess();
+            } catch (err) {
+                alert('Error sending to TV: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = 'Send to TV';
+            }
+        });
+
+        function showSuccess() {
+            document.getElementById('form-container').style.display = 'none';
+            document.getElementById('success-box').style.display = 'block';
+        }
+
+        document.getElementById('btn-send-another').addEventListener('click', () => {
+            document.getElementById('form-container').style.display = 'block';
+            document.getElementById('success-box').style.display = 'none';
+            document.getElementById('btn-submit-xtream').disabled = false;
+            document.getElementById('btn-submit-xtream').textContent = 'Send to TV';
+            document.getElementById('btn-submit-m3u').disabled = false;
+            document.getElementById('btn-submit-m3u').textContent = 'Send to TV';
+        });
+    </script>
+</body>
+
+</html>

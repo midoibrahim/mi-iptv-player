@@ -1,0 +1,16 @@
+{
+  "id": "com.miiptv.player",
+  "version": "1.0.0",
+  "vendor": "MI Solutions",
+  "type": "web",
+  "main": "index.html",
+  "title": "MI IPTV Player",
+  "icon": "icon.png",
+  "largeIcon": "largeicon.png",
+  "iconColor": "#000000",
+  "bgColor": "#000000",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "handlesRcuKey": true,
+  "requiredACG": []
+}

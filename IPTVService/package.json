@@ -1,0 +1,7 @@
+{
+  "name": "com.miiptv.player.service",
+  "version": "1.0.0",
+  "description": "MI IPTV Player on-TV companion server",
+  "main": "service.js"
+}
+

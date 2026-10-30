@@ -1,0 +1,1394 @@
+/* ============================================================
+   IPTV PLAYER — TV DESIGN SYSTEM
+   ============================================================
+   Purpose:
+   - 10-foot TV interface
+   - 4K / Full HD televisions
+   - LG webOS / Android TV / Google TV style interfaces
+   - Remote-control navigation
+   - Dark cinematic UI
+   - Strong focus visibility
+   - OLED-friendly surfaces
+
+   Themes:
+   - midnight  : Default premium blue
+   - oled      : Pure black + cyan
+   - emerald   : Cinematic teal
+   - crimson   : Cinematic indigo
+
+   Usage:
+       <body data-theme="midnight">
+
+   ============================================================ */
+
+
+/* ============================================================
+   GLOBAL ROOT DESIGN TOKENS
+   Universal across all themes
+   ============================================================ */
+
+:root {
+    --nav-w: 104px;
+    --nav-w-exp: 360px;
+
+    --radius-sm: 8px;
+    --radius: 14px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+
+    --transition: 0.16s ease-out;
+    --transition-smooth: 0.22s ease-out;
+}
+
+/* ============================================================
+   MIDNIGHT THEME
+   Midnight Blue
+   ============================================================ */
+
+[data-theme="midnight"] {
+
+    /* --------------------------------------------------------
+       BACKGROUNDS
+       -------------------------------------------------------- */
+
+    --bg-base: #060A12;
+
+    --bg-surface: rgba(17, 27, 45, 0.72);
+    --bg-surface-hover: rgba(27, 42, 65, 0.88);
+    --bg-surface-active: rgba(39, 58, 86, 0.96);
+
+    --bg-card: rgba(15, 24, 40, 0.82);
+    --bg-card-h: rgba(29, 44, 67, 0.96);
+
+    --bg-nav: rgba(5, 9, 17, 0.97);
+    --bg-nav-scrim: rgba(0, 3, 9, 0.74);
+
+    --bg-overlay: rgba(4, 8, 15, 0.95);
+
+    --bg-input: rgba(22, 34, 53, 0.90);
+
+
+    /* --------------------------------------------------------
+       BRAND / ACCENT
+       -------------------------------------------------------- */
+
+    --accent: #4A90FF;
+    --accent-h: #76AEFF;
+
+    --accent-gradient:
+        linear-gradient(135deg,
+            #579BFF 0%,
+            #2869D5 100%);
+
+    --accent-glow:
+        rgba(74, 144, 255, 0.30);
+
+    --accent-subtle:
+        rgba(74, 144, 255, 0.13);
+
+    --accent-border:
+        rgba(74, 144, 255, 0.36);
+
+
+    /* --------------------------------------------------------
+       TEXT
+       -------------------------------------------------------- */
+
+    --text: #E8EDF5;
+    --text-bright: #FFFFFF;
+
+    --text-dim: #A6B1C2;
+    --text-muted: #727F93;
+
+
+    /* --------------------------------------------------------
+       STATUS
+       -------------------------------------------------------- */
+
+    --danger: #FF5F68;
+    --danger-subtle: rgba(255, 95, 104, 0.13);
+
+    --success: #43D98A;
+    --success-subtle: rgba(67, 217, 138, 0.13);
+
+    --warning: #FFC04A;
+
+
+    /* --------------------------------------------------------
+       BORDERS
+       -------------------------------------------------------- */
+
+    --border-subtle:
+        rgba(255, 255, 255, 0.065);
+
+    --border-medium:
+        rgba(255, 255, 255, 0.13);
+
+    --border-focus:
+        var(--accent);
+
+
+    /* --------------------------------------------------------
+       GEOMETRY
+       -------------------------------------------------------- */
+
+    --radius-sm: 7px;
+    --radius: 12px;
+    --radius-lg: 18px;
+    --radius-full: 9999px;
+
+    --nav-w: 88px;
+    --nav-w-exp: 340px;
+
+
+    /* --------------------------------------------------------
+       MOTION
+       -------------------------------------------------------- */
+
+    --transition:
+        0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --transition-smooth:
+        0.32s cubic-bezier(0.16, 1, 0.3, 1);
+
+
+    /* --------------------------------------------------------
+       SHADOWS
+       -------------------------------------------------------- */
+
+    --shadow-focus:
+        0 0 0 3px rgba(74, 144, 255, 0.95),
+        0 0 24px rgba(74, 144, 255, 0.30);
+
+    --shadow-card:
+        0 8px 28px rgba(0, 0, 0, 0.48);
+
+    --shadow-card-hover:
+        0 14px 34px rgba(0, 0, 0, 0.60);
+}
+
+
+/* ============================================================
+   GLOBAL / DEFAULT — OLED THEME
+   Pure black + cinematic cyan
+   ============================================================ */
+
+:root,
+[data-theme="oled"] {
+
+    --bg-base: #000000;
+
+    --bg-surface: #080B10;
+    --bg-surface-hover: #10161E;
+    --bg-surface-active: #18212B;
+
+    --bg-card: #070A0F;
+    --bg-card-h: #111820;
+
+    --bg-nav: rgba(0, 0, 0, 0.98);
+    --bg-nav-scrim: rgba(0, 0, 0, 0.90);
+
+    --bg-overlay: rgba(0, 0, 0, 0.98);
+
+    --bg-input: #0C1117;
+
+
+    --accent: #22C8F2;
+    --accent-h: #62DFFF;
+
+    --accent-gradient:
+        linear-gradient(135deg,
+            #29D2F5 0%,
+            #176ED8 100%);
+
+    --accent-glow:
+        rgba(34, 200, 242, 0.25);
+
+    --accent-subtle:
+        rgba(34, 200, 242, 0.10);
+
+    --accent-border:
+        rgba(34, 200, 242, 0.32);
+
+
+    --text: #E7ECF2;
+    --text-bright: #FFFFFF;
+
+    --text-dim: #A2ACB9;
+    --text-muted: #717C89;
+
+
+    --border-subtle:
+        rgba(255, 255, 255, 0.065);
+
+    --border-medium:
+        rgba(255, 255, 255, 0.13);
+
+    --border-focus:
+        var(--accent);
+
+
+    --shadow-focus:
+        0 0 0 3px rgba(34, 200, 242, 0.95),
+        0 0 22px rgba(34, 200, 242, 0.24);
+
+    --shadow-card:
+        0 8px 28px rgba(0, 0, 0, 0.76);
+
+    --shadow-card-hover:
+        0 14px 34px rgba(0, 0, 0, 0.90);
+}
+
+
+/* ============================================================
+   EMERALD THEME
+   Cinematic teal
+   ============================================================ */
+
+[data-theme="emerald"] {
+
+    --bg-base: #050D0D;
+
+    --bg-surface: rgba(12, 31, 31, 0.82);
+    --bg-surface-hover: rgba(18, 45, 44, 0.94);
+    --bg-surface-active: rgba(25, 59, 57, 0.98);
+
+    --bg-card: rgba(10, 28, 28, 0.88);
+    --bg-card-h: rgba(20, 46, 45, 0.96);
+
+    --bg-nav: rgba(4, 13, 13, 0.97);
+    --bg-nav-scrim: rgba(0, 6, 6, 0.78);
+
+    --bg-overlay: rgba(3, 11, 11, 0.96);
+
+    --bg-input: rgba(15, 36, 36, 0.92);
+
+
+    --accent: #20C7B0;
+    --accent-h: #5BDED0;
+
+    --accent-gradient:
+        linear-gradient(135deg,
+            #29D3BD 0%,
+            #148D82 100%);
+
+    --accent-glow:
+        rgba(32, 199, 176, 0.26);
+
+    --accent-subtle:
+        rgba(32, 199, 176, 0.12);
+
+    --accent-border:
+        rgba(32, 199, 176, 0.33);
+
+
+    --text: #E5F0EE;
+    --text-bright: #FFFFFF;
+
+    --text-dim: #A1B6B3;
+    --text-muted: #708783;
+
+
+    --border-subtle:
+        rgba(255, 255, 255, 0.065);
+
+    --border-medium:
+        rgba(255, 255, 255, 0.13);
+
+    --border-focus:
+        var(--accent);
+
+
+    --shadow-focus:
+        0 0 0 3px rgba(32, 199, 176, 0.95),
+        0 0 23px rgba(32, 199, 176, 0.25);
+
+    --shadow-card:
+        0 8px 28px rgba(0, 0, 0, 0.52);
+
+    --shadow-card-hover:
+        0 14px 34px rgba(0, 0, 0, 0.66);
+}
+
+
+/* ============================================================
+   CRIMSON THEME
+   Deep cinematic indigo
+   ============================================================ */
+
+[data-theme="crimson"] {
+
+    --bg-base: #090711;
+
+    --bg-surface: rgba(25, 20, 40, 0.82);
+    --bg-surface-hover: rgba(37, 29, 57, 0.94);
+    --bg-surface-active: rgba(50, 39, 74, 0.98);
+
+    --bg-card: rgba(22, 18, 35, 0.88);
+    --bg-card-h: rgba(39, 30, 57, 0.96);
+
+    --bg-nav: rgba(8, 6, 14, 0.97);
+    --bg-nav-scrim: rgba(3, 1, 8, 0.78);
+
+    --bg-overlay: rgba(7, 5, 13, 0.96);
+
+    --bg-input: rgba(30, 24, 47, 0.92);
+
+
+    --accent: #8D7CFF;
+    --accent-h: #B09FFF;
+
+    --accent-gradient:
+        linear-gradient(135deg,
+            #9C8BFF 0%,
+            #624DC4 100%);
+
+    --accent-glow:
+        rgba(141, 124, 255, 0.25);
+
+    --accent-subtle:
+        rgba(141, 124, 255, 0.12);
+
+    --accent-border:
+        rgba(141, 124, 255, 0.33);
+
+
+    --text: #ECE8F3;
+    --text-bright: #FFFFFF;
+
+    --text-dim: #ADA6BA;
+    --text-muted: #797185;
+
+
+    --border-subtle:
+        rgba(255, 255, 255, 0.065);
+
+    --border-medium:
+        rgba(255, 255, 255, 0.13);
+
+    --border-focus:
+        var(--accent);
+
+
+    --shadow-focus:
+        0 0 0 3px rgba(141, 124, 255, 0.95),
+        0 0 23px rgba(141, 124, 255, 0.25);
+
+    --shadow-card:
+        0 8px 28px rgba(0, 0, 0, 0.54);
+
+    --shadow-card-hover:
+        0 14px 34px rgba(0, 0, 0, 0.68);
+}
+
+
+/* ============================================================
+   GLOBAL RESET
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    min-height: 100%;
+
+    background: var(--bg-base);
+    color: var(--text);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+
+.app {
+    /* 100% (not 100vh): viewport units ignore body zoom and would overflow */
+    min-height: 100%;
+    background: var(--bg-base);
+    color: var(--text);
+}
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+.nav,
+.sidebar,
+.navigation {
+    background: var(--bg-nav);
+
+    border-right:
+        1px solid var(--border-subtle);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.nav-item,
+.sidebar-item,
+.navigation-item {
+    color: var(--text-dim);
+
+    border-radius: var(--radius);
+
+    transition:
+        background var(--transition),
+        color var(--transition),
+        transform var(--transition),
+        box-shadow var(--transition);
+}
+
+.nav-item:hover,
+.sidebar-item:hover,
+.navigation-item:hover {
+    background: var(--bg-surface-hover);
+    color: var(--text);
+}
+
+.nav-item.active,
+.sidebar-item.active,
+.navigation-item.active {
+    color: var(--text-bright);
+    background: var(--accent-subtle);
+
+    box-shadow:
+        inset 3px 0 0 var(--accent);
+}
+
+
+/* ============================================================
+   TV FOCUS SYSTEM
+   Critical for remote navigation
+   ============================================================ */
+
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline:
+        3px solid var(--accent);
+
+    outline-offset: 3px;
+
+    box-shadow:
+        var(--shadow-focus);
+}
+
+
+/* Explicit TV focus class */
+
+.tv-focus,
+.focused,
+.is-focused {
+    border-color: var(--accent) !important;
+
+    box-shadow:
+        var(--shadow-focus) !important;
+
+    z-index: 5;
+}
+
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.card,
+.channel-card,
+.movie-card,
+.series-card,
+.category-card,
+.content-card {
+    background: var(--bg-card);
+
+    border:
+        1px solid var(--border-subtle);
+
+    border-radius:
+        var(--radius);
+
+    color: var(--text);
+
+    box-shadow:
+        var(--shadow-card);
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition),
+        box-shadow var(--transition);
+}
+
+
+.card:hover,
+.channel-card:hover,
+.movie-card:hover,
+.series-card:hover,
+.category-card:hover,
+.content-card:hover {
+    background: var(--bg-card-h);
+
+    border-color:
+        var(--border-medium);
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        var(--shadow-card-hover);
+}
+
+
+.card:focus-visible,
+.channel-card:focus-visible,
+.movie-card:focus-visible,
+.series-card:focus-visible,
+.category-card:focus-visible,
+.content-card:focus-visible {
+    border-color:
+        var(--accent);
+
+    box-shadow:
+        var(--shadow-focus);
+
+    transform:
+        scale(1.035);
+}
+
+
+/* ============================================================
+   CHANNEL CARDS
+   ============================================================ */
+
+.channel-card {
+    overflow: hidden;
+}
+
+.channel-card img,
+.channel-card .channel-logo {
+    background:
+        var(--bg-surface);
+
+    border-radius:
+        var(--radius-sm);
+}
+
+.channel-card .channel-name {
+    color:
+        var(--text-bright);
+
+    font-weight:
+        600;
+}
+
+.channel-card .channel-meta {
+    color:
+        var(--text-dim);
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+button,
+.btn,
+.button {
+    border: 0;
+
+    border-radius:
+        var(--radius);
+
+    background:
+        var(--bg-surface);
+
+    color:
+        var(--text);
+
+    transition:
+        background var(--transition),
+        color var(--transition),
+        transform var(--transition),
+        box-shadow var(--transition);
+}
+
+button:hover,
+.btn:hover,
+.button:hover {
+    background:
+        var(--bg-surface-hover);
+
+    color:
+        var(--text-bright);
+}
+
+button:active,
+.btn:active,
+.button:active {
+    background:
+        var(--bg-surface-active);
+
+    transform:
+        scale(0.98);
+}
+
+
+/* Primary button */
+
+.btn-primary,
+.button-primary,
+button.primary {
+    background:
+        var(--accent-gradient);
+
+    color:
+        #FFFFFF;
+
+    font-weight:
+        600;
+
+    box-shadow:
+        0 6px 20px var(--accent-glow);
+}
+
+.btn-primary:hover,
+.button-primary:hover,
+button.primary:hover {
+    filter:
+        brightness(1.08);
+
+    box-shadow:
+        0 8px 26px var(--accent-glow);
+}
+
+.btn-primary:focus-visible,
+.button-primary:focus-visible,
+button.primary:focus-visible {
+    box-shadow:
+        var(--shadow-focus),
+        0 8px 26px var(--accent-glow);
+}
+
+
+/* ============================================================
+   INPUTS / SEARCH
+   ============================================================ */
+
+input,
+textarea,
+select,
+.input,
+.search-input {
+    background:
+        var(--bg-input);
+
+    color:
+        var(--text-bright);
+
+    border:
+        1px solid var(--border-medium);
+
+    border-radius:
+        var(--radius);
+
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition),
+        background var(--transition);
+}
+
+input::placeholder,
+textarea::placeholder,
+.search-input::placeholder {
+    color:
+        var(--text-muted);
+}
+
+input:hover,
+textarea:hover,
+select:hover,
+.input:hover,
+.search-input:hover {
+    border-color:
+        var(--border-medium);
+
+    background:
+        var(--bg-surface-hover);
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.input:focus,
+.search-input:focus {
+    border-color:
+        var(--accent);
+
+    background:
+        var(--bg-surface);
+
+    box-shadow:
+        var(--shadow-focus);
+}
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+.search {
+    background:
+        var(--bg-input);
+
+    border:
+        1px solid var(--border-subtle);
+
+    border-radius:
+        var(--radius-full);
+}
+
+.search:focus-within {
+    border-color:
+        var(--accent);
+
+    box-shadow:
+        var(--shadow-focus);
+}
+
+
+/* ============================================================
+   TABS
+   ============================================================ */
+
+.tab {
+    color:
+        var(--text-dim);
+
+    background:
+        transparent;
+
+    border-radius:
+        var(--radius-sm);
+
+    transition:
+        color var(--transition),
+        background var(--transition);
+}
+
+.tab:hover {
+    color:
+        var(--text-bright);
+
+    background:
+        var(--bg-surface-hover);
+}
+
+.tab.active {
+    color:
+        var(--text-bright);
+
+    background:
+        var(--accent-subtle);
+
+    box-shadow:
+        inset 0 -2px 0 var(--accent);
+}
+
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+
+.badge {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius:
+        var(--radius-full);
+
+    background:
+        var(--bg-surface);
+
+    color:
+        var(--text-dim);
+
+    border:
+        1px solid var(--border-subtle);
+}
+
+.badge-live {
+    background:
+        var(--danger-subtle);
+
+    color:
+        var(--danger);
+
+    border-color:
+        rgba(255, 92, 100, 0.30);
+}
+
+.badge-success {
+    background:
+        var(--success-subtle);
+
+    color:
+        var(--success);
+
+    border-color:
+        rgba(66, 216, 131, 0.30);
+}
+
+.badge-warning {
+    background:
+        rgba(255, 190, 69, 0.13);
+
+    color:
+        var(--warning);
+
+    border-color:
+        rgba(255, 190, 69, 0.30);
+}
+
+
+/* ============================================================
+   LIVE INDICATOR
+   ============================================================ */
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--danger);
+
+    box-shadow:
+        0 0 10px rgba(255, 92, 100, 0.55);
+}
+
+
+/* ============================================================
+   PLAYER
+   ============================================================ */
+
+.video-player,
+.player {
+    background:
+        #000000;
+
+    border-radius:
+        var(--radius);
+
+    overflow:
+        hidden;
+}
+
+.player-controls {
+    background:
+        linear-gradient(to top,
+            rgba(0, 0, 0, 0.90),
+            rgba(0, 0, 0, 0.00));
+}
+
+.player-control {
+    color:
+        var(--text-bright);
+
+    background:
+        rgba(0, 0, 0, 0.45);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.10);
+
+    border-radius:
+        var(--radius-full);
+}
+
+.player-control:hover,
+.player-control:focus-visible {
+    background:
+        var(--accent);
+
+    color:
+        #FFFFFF;
+}
+
+
+/* ============================================================
+   MODALS / DIALOGS
+   ============================================================ */
+
+.modal,
+.dialog,
+.popup {
+    background:
+        var(--bg-overlay);
+
+    color:
+        var(--text);
+
+    border:
+        1px solid var(--border-medium);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.70);
+}
+
+.modal-backdrop,
+.dialog-backdrop {
+    background:
+        var(--bg-nav-scrim);
+
+    backdrop-filter:
+        blur(8px);
+
+    -webkit-backdrop-filter:
+        blur(8px);
+}
+
+
+/* ============================================================
+   DROPDOWNS / MENUS
+   ============================================================ */
+
+.menu,
+.dropdown,
+.context-menu {
+    background:
+        var(--bg-overlay);
+
+    border:
+        1px solid var(--border-medium);
+
+    border-radius:
+        var(--radius);
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.60);
+}
+
+.menu-item,
+.dropdown-item {
+    color:
+        var(--text-dim);
+
+    border-radius:
+        var(--radius-sm);
+}
+
+.menu-item:hover,
+.menu-item:focus-visible,
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+    background:
+        var(--accent-subtle);
+
+    color:
+        var(--text-bright);
+}
+
+
+/* ============================================================
+   DIVIDERS
+   ============================================================ */
+
+.divider,
+.separator {
+    background:
+        var(--border-subtle);
+}
+
+
+/* ============================================================
+   HEADINGS
+   ============================================================ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color:
+        var(--text-bright);
+}
+
+h1 {
+    font-weight:
+        700;
+}
+
+h2,
+h3 {
+    font-weight:
+        650;
+}
+
+
+/* ============================================================
+   SECONDARY TEXT
+   ============================================================ */
+
+.text-primary {
+    color:
+        var(--text);
+}
+
+.text-bright {
+    color:
+        var(--text-bright);
+}
+
+.text-secondary,
+.text-dim {
+    color:
+        var(--text-dim);
+}
+
+.text-muted {
+    color:
+        var(--text-muted);
+}
+
+.text-accent {
+    color:
+        var(--accent);
+}
+
+
+/* ============================================================
+   LINKS
+   ============================================================ */
+
+a {
+    color:
+        var(--accent);
+
+    text-decoration:
+        none;
+}
+
+a:hover {
+    color:
+        var(--accent-h);
+}
+
+
+/* ============================================================
+   TOGGLE / SWITCH
+   ============================================================ */
+
+.toggle,
+.switch {
+    background:
+        var(--bg-surface-active);
+
+    border:
+        1px solid var(--border-medium);
+
+    border-radius:
+        var(--radius-full);
+}
+
+.toggle.active,
+.switch.active,
+.toggle[aria-checked="true"],
+.switch[aria-checked="true"] {
+    background:
+        var(--accent);
+}
+
+.toggle-thumb,
+.switch-thumb {
+    background:
+        #FFFFFF;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+
+/* ============================================================
+   PROGRESS / SLIDER
+   ============================================================ */
+
+.progress,
+.progress-bar {
+    background:
+        var(--bg-surface-active);
+
+    border-radius:
+        var(--radius-full);
+}
+
+.progress-value,
+.progress-fill {
+    background:
+        var(--accent-gradient);
+
+    border-radius:
+        var(--radius-full);
+}
+
+input[type="range"] {
+    accent-color:
+        var(--accent);
+}
+
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background:
+        var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+    background:
+        var(--bg-surface-active);
+
+    border-radius:
+        var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background:
+        var(--accent);
+}
+
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+
+::selection {
+    background:
+        var(--accent);
+
+    color:
+        #FFFFFF;
+}
+
+
+/* ============================================================
+   DISABLED
+   ============================================================ */
+
+:disabled,
+.disabled {
+    opacity:
+        0.45;
+
+    cursor:
+        not-allowed;
+}
+
+
+/* ============================================================
+   LOADING / SKELETON
+   ============================================================ */
+
+.skeleton {
+    background:
+        linear-gradient(90deg,
+            var(--bg-surface) 25%,
+            var(--bg-surface-hover) 50%,
+            var(--bg-surface) 75%);
+
+    background-size:
+        200% 100%;
+
+    animation:
+        skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    from {
+        background-position:
+            200% 0;
+    }
+
+    to {
+        background-position:
+            -200% 0;
+    }
+}
+
+
+/* ============================================================
+   TOAST / NOTIFICATIONS
+   ============================================================ */
+
+.toast,
+.notification {
+    background:
+        var(--bg-overlay);
+
+    color:
+        var(--text);
+
+    border:
+        1px solid var(--border-medium);
+
+    border-radius:
+        var(--radius);
+
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.60);
+}
+
+.toast-accent {
+    border-left:
+        3px solid var(--accent);
+}
+
+.toast-success {
+    border-left:
+        3px solid var(--success);
+}
+
+.toast-danger {
+    border-left:
+        3px solid var(--danger);
+}
+
+.toast-warning {
+    border-left:
+        3px solid var(--warning);
+}
+
+
+/* ============================================================
+   EMPTY STATES
+   ============================================================ */
+
+.empty-state {
+    color:
+        var(--text-dim);
+}
+
+.empty-state-icon {
+    color:
+        var(--text-muted);
+}
+
+
+/* ============================================================
+   TV-SPECIFIC FOCUS ENHANCEMENT
+   ============================================================ */
+
+.tv-focus::after,
+.focused::after,
+.is-focused::after {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top: -4px;
+    right: -4px;
+    bottom: -4px;
+    left: -4px;
+    inset:
+        -4px;
+
+    border:
+        1px solid var(--accent);
+
+    border-radius:
+        calc(var(--radius) + 3px);
+
+    pointer-events:
+        none;
+
+    opacity:
+        0.75;
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
+    }
+}
+
+
+/* ============================================================
+   OPTIONAL THEME UTILITY
+   ============================================================ */
+
+.theme-accent {
+    color:
+        var(--accent);
+}
+
+.theme-accent-bg {
+    background:
+        var(--accent);
+}
+
+.theme-accent-gradient {
+    background:
+        var(--accent-gradient);
+}
+
+.theme-surface {
+    background:
+        var(--bg-surface);
+}
+
+.theme-card {
+    background:
+        var(--bg-card);
+}

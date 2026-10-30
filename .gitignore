@@ -19,6 +19,7 @@ node_modules/
 /*.pptx
 /*.pdf
 /*.png
+!/docs/screenshots/*.png
 /LG WEBOS APP  GUIDE.md
 
 # Ignore unreferenced dev/backup folders and unused files inside IPTVPlayer

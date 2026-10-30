@@ -424,23 +424,32 @@ window.IPTV.PlayerService = {
             : null;
 
         if (item.type === 'live') {
-            // For Live TV on Smart TVs (especially LG webOS):
-            // 1. HLS (.m3u8) is the native standard for live streaming on webOS GStreamer & MSE
-            // 2. Proxied HLS (.m3u8) bypasses IPTV provider User-Agent blocks & 302 token redirects
-            // 3. Proxied MPEG-TS (.ts) streams raw TS with VLC User-Agent
-            // 4. Direct MPEG-TS (.ts) & extensionless fallback URLs
+            // For Live TV across all LG webOS versions (webOS 3.x through webOS 5.x/6.x/24+):
+            // 1. Native HLS (.m3u8) (hardware GStreamer decoding on webOS)
+            // 2. Hls.js MSE (.m3u8) (software MSE fallback on webOS 5+ if native HLS rejects CORS/codec)
+            // 3. Proxied HLS (.m3u8) (when local proxy is active)
+            // 4. Direct MPEG-TS (.ts) (native hardware TS decoding)
+            // 5. mpegts.js MSE (.ts) (software MSE TS fallback on webOS 5+ / modern Chromium)
+            // 6. Extensionless fallback URL
             const hlsCandidate = item.hlsUrl || (item.url && item.url.includes('.ts') ? item.url.replace(/\.ts($|\?)/i, '.m3u8$1') : null);
             const tsCandidate = item.url || (item.hlsUrl && item.hlsUrl.includes('.m3u8') ? item.hlsUrl.replace(/\.m3u8($|\?)/i, '.ts$1') : null);
             const rawCandidate = item.fallbackUrl || (item.url ? item.url.replace(/\.(ts|m3u8)($|\?)/i, '$2') : null);
+            const canUseMse = typeof window.MediaSource !== 'undefined';
 
-            // Priority 1: Direct & Proxied HLS (.m3u8)
+            // Priority 1: Direct, MSE, & Proxied HLS (.m3u8)
             if (hlsCandidate) {
                 add(hlsCandidate);
+                if (canUseMse && window.Hls && Hls.isSupported()) {
+                    add(`mse-hls:${hlsCandidate}`);
+                }
                 add(toProxy(hlsCandidate));
             }
-            // Priority 2: Direct & Proxied MPEG-TS (.ts)
+            // Priority 2: Direct, MSE, & Proxied MPEG-TS (.ts)
             if (tsCandidate) {
                 add(tsCandidate);
+                if (canUseMse && window.mpegts && mpegts.isSupported()) {
+                    add(`mse-ts:${tsCandidate}`);
+                }
                 add(toProxy(tsCandidate));
             }
             // Priority 3: Extensionless stream URL
@@ -497,19 +506,25 @@ window.IPTV.PlayerService = {
         }
     },
 
-    _loadStreamCandidate(url, item) {
+    _loadStreamCandidate(rawCandidateUrl, item) {
         this._destroyPlayers();
         if (!this.video) return;
 
         this.video.pause();
         this.video.removeAttribute('src');
 
+        const forceMseHls = rawCandidateUrl.indexOf('mse-hls:') === 0;
+        const forceMseTs = rawCandidateUrl.indexOf('mse-ts:') === 0;
+        const url = forceMseHls
+            ? rawCandidateUrl.slice(8)
+            : (forceMseTs ? rawCandidateUrl.slice(7) : rawCandidateUrl);
+
         const isLive = this.isLiveStream();
         const decodedUrl = decodeURIComponent(url);
-        const isM3u8 = /\.m3u8($|\?)/i.test(decodedUrl);
-        const isTs = !isM3u8 && (/\.(ts|mpegts)($|\?)/i.test(decodedUrl) || (isLive && !/\.(mp4|mkv|avi|mov)($|\?)/i.test(decodedUrl)));
+        const isM3u8 = forceMseHls || /\.m3u8($|\?)/i.test(decodedUrl);
+        const isTs = forceMseTs || (!isM3u8 && (/\.(ts|mpegts)($|\?)/i.test(decodedUrl) || (isLive && !/\.(mp4|mkv|avi|mov)($|\?)/i.test(decodedUrl))));
 
-        console.log(`[PlayerService] Loading stream candidate [${this.currentCandidateIndex + 1}/${this.currentCandidates.length}]: ${url}`);
+        console.log(`[PlayerService] Loading stream candidate [${this.currentCandidateIndex + 1}/${this.currentCandidates.length}]: ${rawCandidateUrl}`);
 
         // Start watchdog timer so if a candidate stalls without firing an error, we try the next one
         this._startCandidateWatchdog(item, isLive ? 8000 : 12000);
@@ -517,10 +532,10 @@ window.IPTV.PlayerService = {
         const isWebOSTV = !!(window.webOS || /Web0S|webOS|SmartTV/i.test(navigator.userAgent));
 
         // 1. HLS (.m3u8) streams:
-        // On LG webOS TVs, native hardware GStreamer HLS playback is far faster and more compatible
-        // than MSE software demuxing (especially on webOS 3.x / Chromium 38).
+        // On LG webOS TVs, try native hardware GStreamer HLS playback first; if forceMseHls is set
+        // (or on browsers without native HLS), use Hls.js MSE (works great on webOS 5+ / Chromium 68+).
         if (isM3u8) {
-            if (isWebOSTV || this.video.canPlayType('application/vnd.apple.mpegurl') || this.video.canPlayType('application/x-mpegURL')) {
+            if (!forceMseHls && (isWebOSTV || this.video.canPlayType('application/vnd.apple.mpegurl') || this.video.canPlayType('application/x-mpegURL'))) {
                 this._playNativeDirect(url, item, 'application/vnd.apple.mpegurl');
                 return;
             }
@@ -556,8 +571,8 @@ window.IPTV.PlayerService = {
         }
 
         // 2. MPEG-TS (.ts) streams:
-        // On real LG webOS TVs, try native hardware MPEG-TS decoding first; on desktop browsers use mpegts.js
-        if (isTs && !isWebOSTV && window.mpegts && mpegts.isSupported()) {
+        // On LG webOS TVs, try native hardware MPEG-TS first; if forceMseTs is set (or on desktop browsers), use mpegts.js MSE
+        if (isTs && (forceMseTs || !isWebOSTV) && window.mpegts && mpegts.isSupported()) {
             try {
                 const player = mpegts.createPlayer({
                     type: 'mse',

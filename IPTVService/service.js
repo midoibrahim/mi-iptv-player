@@ -149,7 +149,7 @@ function proxy(req, res, target, redirects) {
                         var absUrl = urlLib.resolve(target, trimmed);
                         return proxyOrigin + '/api/proxy?url=' + encodeURIComponent(absUrl);
                     }).join('\n');
-                    var buf = new Buffer(rewritten, 'utf8');
+                    var buf = typeof Buffer.from === 'function' ? Buffer.from(rewritten, 'utf8') : new Buffer(rewritten, 'utf8');
                     out['Content-Type'] = 'application/vnd.apple.mpegurl';
                     out['Content-Length'] = buf.length;
                     res.writeHead(up.statusCode, out);

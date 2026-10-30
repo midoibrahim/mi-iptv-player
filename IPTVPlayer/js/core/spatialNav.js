@@ -16,7 +16,7 @@ window.IPTV.SpatialNav = {
         this._boundSideNav = true;
 
         // Explicit .expanded class management so Chromium < 60 (no :focus-within)
-        // expands and collapses the side drawer reliably.
+        // expands and collapses the side drawer reliably, and Magic Remote cursor works smoothly.
         nav.addEventListener('focusin', () => {
             nav.classList.add('expanded');
         });
@@ -26,6 +26,32 @@ window.IPTV.SpatialNav = {
                 nav.classList.remove('expanded');
             }
         });
+        nav.addEventListener('mouseenter', () => {
+            nav.classList.add('expanded');
+        });
+        nav.addEventListener('mouseleave', () => {
+            if (!nav.contains(document.activeElement)) {
+                nav.classList.remove('expanded');
+            }
+        });
+        let passiveOpt = false;
+        try {
+            const opts = Object.defineProperty({}, 'passive', {
+                get: function() { passiveOpt = { passive: true }; return true; }
+            });
+            window.addEventListener('testPassive', null, opts);
+            window.removeEventListener('testPassive', null, opts);
+        } catch (e) {}
+
+        window.addEventListener('wheel', (e) => {
+            // Support LG Magic Remote scroll wheel on any scrollable container under the cursor or active focus
+            const target = e.target && e.target.nodeType === 1 ? e.target : document.activeElement;
+            if (!target) return;
+            const scroller = target.closest('.browse-content, .category-list, #series-detail-screen, .content-area');
+            if (scroller && scroller.scrollHeight > scroller.clientHeight) {
+                scroller.scrollTop += (e.deltaY > 0 ? 180 : -180);
+            }
+        }, passiveOpt);
     },
 
     getActiveRoot() {

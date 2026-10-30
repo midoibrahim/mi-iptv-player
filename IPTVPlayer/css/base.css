@@ -37,15 +37,15 @@ html, body {
     background: var(--bg-base);
 }
 
-/* ---- 10-foot TV Remote Focus Ring ---- */
+/* ---- 10-foot TV Remote Focus Ring (Follows exact element border-radius, NO square outline box) ---- */
 *:focus {
-    outline: 4px solid var(--accent) !important;
-    outline-offset: 3px !important;
+    outline: none !important;
+    border-color: var(--accent) !important;
     box-shadow: var(--shadow-focus) !important;
     z-index: 10;
 }
 
-/* Disable focus outline on containers that aren't action targets */
+/* Disable focus ring on non-interactive root containers */
 body:focus, #app:focus, main:focus {
     outline: none !important;
     box-shadow: none !important;

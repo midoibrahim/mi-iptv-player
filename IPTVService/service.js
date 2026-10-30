@@ -30,6 +30,9 @@ var server = null;
 var serverError = null;
 var pendingCredentials = null;
 var keepAliveActivity = null;
+var activeSockets = [];
+var lastPollTime = 0;
+var pollWatchdogTimer = null;
 
 function log(msg) {
     try { console.log('[miiptv-service] ' + msg); } catch (e) { /* ignore */ }
@@ -192,6 +195,7 @@ function handle(req, res) {
     if (req.method === 'OPTIONS') { sendJson(res, 200, {}); return; }
 
     if (p === '/api/info' && req.method === 'GET') {
+        lastPollTime = Date.now();
         var ip = getLanIp();
         sendJson(res, 200, { ip: ip, port: PORT, setupUrl: 'http://' + ip + ':' + PORT + '/setup.html', host: 'tv' });
         return;
@@ -199,6 +203,7 @@ function handle(req, res) {
 
     if (p === '/api/credentials') {
         if (req.method === 'GET') {
+            lastPollTime = Date.now();
             if (pendingCredentials) {
                 var creds = pendingCredentials;
                 pendingCredentials = null; // consume once
@@ -237,7 +242,15 @@ function handle(req, res) {
 function ensureServer(cb) {
     if (server && server.listening !== false && !serverError) { cb(null); return; }
     serverError = null;
+    activeSockets = [];
     server = http.createServer(handle);
+    server.on('connection', function (socket) {
+        activeSockets.push(socket);
+        socket.on('close', function () {
+            var idx = activeSockets.indexOf(socket);
+            if (idx >= 0) activeSockets.splice(idx, 1);
+        });
+    });
     server.on('error', function (e) {
         serverError = e;
         log('server error: ' + e.message);
@@ -245,6 +258,19 @@ function ensureServer(cb) {
         cb = function () {};
     });
     server.listen(PORT, '0.0.0.0', function () {
+        lastPollTime = Date.now();
+        if (pollWatchdogTimer) clearInterval(pollWatchdogTimer);
+        pollWatchdogTimer = setInterval(function () {
+            // The QR setup screen polls /api/credentials every 1.5s.
+            // If no poll arrives for 6 seconds, the user left the QR setup screen -> shut down immediately!
+            if (Date.now() - lastPollTime > 6000) {
+                log('No QR poll for 6s -> shutting down setup server');
+                shutdownServer();
+                setTimeout(function () {
+                    try { process.exit(0); } catch (e) { /* ignore */ }
+                }, 100);
+            }
+        }, 2000);
         log('listening on ' + getLanIp() + ':' + PORT);
         cb(null);
         cb = function () {};
@@ -263,6 +289,16 @@ function keepAlive() {
 }
 
 function shutdownServer() {
+    if (pollWatchdogTimer) {
+        clearInterval(pollWatchdogTimer);
+        pollWatchdogTimer = null;
+    }
+    if (activeSockets && activeSockets.length) {
+        for (var i = 0; i < activeSockets.length; i++) {
+            try { activeSockets[i].destroy(); } catch (e) { /* ignore */ }
+        }
+        activeSockets = [];
+    }
     if (server) {
         try { server.close(); } catch (e) { /* ignore */ }
         server = null;
@@ -305,5 +341,8 @@ service.register('start', function (message) {
 service.register('stop', function (message) {
     shutdownServer();
     message.respond({ returnValue: true });
+    setTimeout(function () {
+        try { process.exit(0); } catch (e) { /* ignore */ }
+    }, 120);
 });
 

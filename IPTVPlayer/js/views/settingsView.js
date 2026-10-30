@@ -69,6 +69,9 @@ window.IPTV.SettingsView = {
                 this.app.series = [];
                 document.getElementById('main-shell').classList.remove('active');
                 document.getElementById('login-screen').classList.add('active');
+                if (this.app.loginView) {
+                    this.app.loginView.renderProfiles();
+                }
                 this.app.toast('Disconnected from server');
             });
         }

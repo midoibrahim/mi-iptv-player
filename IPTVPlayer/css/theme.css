@@ -483,15 +483,12 @@ body {
    ============================================================ */
 
 :focus {
-    outline: none;
+    outline: none !important;
 }
 
 :focus-visible {
-    outline:
-        3px solid var(--accent);
-
-    outline-offset: 3px;
-
+    outline: none !important;
+    border-color: var(--accent);
     box-shadow:
         var(--shadow-focus);
 }
@@ -1310,37 +1307,8 @@ input[type="range"] {
 
 
 /* ============================================================
-   TV-SPECIFIC FOCUS ENHANCEMENT
+   TV-SPECIFIC FOCUS ENHANCEMENT (Handled via border-color & box-shadow)
    ============================================================ */
-
-.tv-focus::after,
-.focused::after,
-.is-focused::after {
-    content:
-        "";
-
-    position:
-        absolute;
-
-    top: -4px;
-    right: -4px;
-    bottom: -4px;
-    left: -4px;
-    inset:
-        -4px;
-
-    border:
-        1px solid var(--accent);
-
-    border-radius:
-        calc(var(--radius) + 3px);
-
-    pointer-events:
-        none;
-
-    opacity:
-        0.75;
-}
 
 
 /* ============================================================

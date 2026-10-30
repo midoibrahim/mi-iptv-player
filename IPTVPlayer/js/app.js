@@ -71,6 +71,9 @@ class IPTVApp {
         window.IPTV.KeyHandler.init(this);
 
         // 5. Initialize Login/Profiles View
+        if (window.IPTV.TvServer) {
+            window.IPTV.TvServer.stop();
+        }
         this.loginView.init(this);
     }
 

@@ -229,12 +229,28 @@ window.IPTV.LoginView = {
         }
     },
 
+    isQrScreenActive() {
+        const loginScreen = document.getElementById('login-screen');
+        return !!(
+            loginScreen &&
+            loginScreen.classList.contains('active') &&
+            this.formPage &&
+            this.formPage.classList.contains('active') &&
+            !this.formPage.classList.contains('hidden')
+        );
+    },
+
     async _getApiBase() {
+        if (!this.isQrScreenActive()) return null;
         if (this._apiBase) return this._apiBase;
 
-        // On a real TV: start the bundled on-TV server (webOS JS service) first.
+        // On a real TV: start the bundled on-TV server (webOS JS service) ONLY while on the QR screen.
         if (window.IPTV.TvServer) {
             await window.IPTV.TvServer.ensureStarted();
+            if (!this.isQrScreenActive()) {
+                window.IPTV.TvServer.stop();
+                return null;
+            }
         }
 
         const candidates = [];
@@ -260,6 +276,7 @@ window.IPTV.LoginView = {
     },
 
     async initRemoteSetup() {
+        if (!this.isQrScreenActive()) return;
         const qrContainer = document.getElementById('qrcode-box');
         const urlText = document.getElementById('remote-url-text');
         const statusText = document.getElementById('remote-poll-status');
@@ -268,6 +285,10 @@ window.IPTV.LoginView = {
         try {
             // 1. Fetch real local LAN IP and setup URL from local server API (works under file:// and http://)
             const apiBase = await this._getApiBase();
+            if (!this.isQrScreenActive()) {
+                this.stopRemotePolling();
+                return;
+            }
             let setupUrl = null;
 
             if (apiBase) {
@@ -323,8 +344,13 @@ window.IPTV.LoginView = {
         if (statusText) statusText.textContent = 'Waiting for credentials from phone...';
 
         this._pollTimer = setInterval(async () => {
+            if (!this.isQrScreenActive()) {
+                this.stopRemotePolling();
+                return;
+            }
             try {
                 const apiBase = (await this._getApiBase()) || (window.location.protocol.startsWith('http') ? '' : 'http://127.0.0.1:8089');
+                if (!this.isQrScreenActive()) return;
                 const res = await fetch(`${apiBase}/api/credentials`);
                 if (!res.ok) return;
                 const data = await res.json();

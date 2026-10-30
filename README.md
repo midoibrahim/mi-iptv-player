@@ -23,6 +23,99 @@ A high-performance, 10-foot Smart TV IPTV player engineered for **LG webOS TVs**
 
 ---
 
+## Prerequisites & Step-by-Step `.ipk` Installation Guide
+
+Follow these steps to install `dist/com.miiptv.player_1.0.0_all.ipk` (or the `.ipk` downloaded from **GitHub Releases**) onto any LG webOS Smart TV.
+
+### Step 1: Prerequisites on Your PC
+1. **Install Node.js** (v16 or newer): [https://nodejs.org](https://nodejs.org)
+2. **Install the Official LG webOS CLI (`@webos-tools/cli`)**:
+   ```bash
+   npm install -g @webos-tools/cli
+   ```
+3. Verify the CLI tools are available:
+   ```bash
+   ares -V
+   ```
+
+### Step 2: Prepare Your LG Smart TV (Developer Mode)
+1. Create a free LG Developer account at [https://webostv.developer.lge.com](https://webostv.developer.lge.com).
+2. On your LG TV, open the **LG Content Store** (or Apps), search for **Developer Mode**, and install it.
+3. Launch the **Developer Mode** app on the TV and sign in with your LG Developer account.
+4. Toggle **Dev Mode Status** to **ON** (the TV will reboot).
+5. After the TV reboots, open the **Developer Mode** app again and toggle **Key Server** to **ON**.
+6. Note the **TV IP Address** and the **6-character Passphrase** shown on the Developer Mode screen.
+
+### Step 3: Connect Your PC to the LG TV (One-Time Setup)
+1. Ensure your PC and LG TV are on the same local network (Wi-Fi or Ethernet).
+2. Register your TV with `ares-setup-device` (replace `<TV_IP>` with your TV's IP address, e.g., `192.168.1.107`):
+   ```bash
+   ares-setup-device --add lgtv --info "{'host':'<TV_IP>','port':'9922','username':'prisoner','description':'LG webOS TV'}"
+   ```
+   *(Or run `ares-setup-device` interactively and follow the prompts: Device Name `lgtv`, IP `<TV_IP>`, Port `9922`, User `prisoner`).*
+3. Fetch the SSH Developer Key from the TV and enter the **6-character Passphrase** displayed on the TV screen when prompted:
+   ```bash
+   ares-novacom --device lgtv --getkey
+   ```
+4. Verify connectivity to your TV:
+   ```bash
+   ares-device -i --device lgtv
+   ```
+
+### Step 4: Install & Launch the `.ipk` Package
+
+#### Option A: One-Click Windows Script (`install-webos.bat`)
+Make sure your TV is turned on, then run:
+```cmd
+install-webos.bat
+```
+*(If your device name is not `lgtv`, pass it as an argument: `install-webos.bat myTV`).*
+
+#### Option B: Direct CLI Commands
+1. **Install the `.ipk` onto the TV**:
+   ```bash
+   ares-install --device lgtv dist/com.miiptv.player_1.0.0_all.ipk
+   ```
+2. **Launch MI IPTV Player on the TV**:
+   ```bash
+   ares-launch --device lgtv com.miiptv.player
+   ```
+
+#### Useful Management Commands
+- **List installed apps on TV**:
+  ```bash
+  ares-install --device lgtv --list
+  ```
+- **Close the running app**:
+  ```bash
+  ares-launch --device lgtv --close com.miiptv.player
+  ```
+- **Open Chrome Web Inspector for live debugging**:
+  ```bash
+  ares-inspect --device lgtv --app com.miiptv.player --open
+  ```
+
+---
+
+## Building the `.ipk` from Source
+
+Run the packaging script from the repository root:
+```cmd
+package-webos.bat
+```
+Or run the steps manually:
+```bash
+npm --prefix webos-build install
+npm --prefix webos-build run build
+ares-package build/IPTVPlayer build/IPTVService -o dist
+```
+This outputs the ready-to-install package at:
+```text
+dist/com.miiptv.player_1.0.0_all.ipk
+```
+
+---
+
 ## Repository Structure
 
 ```text
@@ -63,55 +156,9 @@ A high-performance, 10-foot Smart TV IPTV player engineered for **LG webOS TVs**
 ├── dist/                        # Packaged LG webOS Installers (.ipk)
 │   └── com.miiptv.player_1.0.0_all.ipk
 │
-└── package-webos.bat            # One-click Windows build & ares-package script
+├── package-webos.bat            # One-click Windows build & ares-package script
+└── install-webos.bat            # One-click Windows TV installer & launcher script
 ```
-
----
-
-## Building the `.ipk` Package
-
-### Prerequisites
-1. **Node.js** (v18+ recommended on your development machine)
-2. **LG webOS CLI (`@webos-tools/cli`)**:
-   ```bash
-   npm install -g @webos-tools/cli
-   ```
-
-### Build Command
-Run the packaging script from the repository root:
-```cmd
-package-webos.bat
-```
-Or manually:
-```bash
-npm --prefix webos-build install
-npm --prefix webos-build run build
-ares-package build/IPTVPlayer build/IPTVService -o dist
-```
-This outputs the ready-to-install package at:
-```text
-dist/com.miiptv.player_1.0.0_all.ipk
-```
-
----
-
-## Installing & Running on an LG Smart TV
-
-1. **Enable Developer Mode on the TV**:
-   - Install the **Developer Mode** app from the LG Content Store, sign in, turn **Dev Mode Status** ON, and enable **Key Server**.
-2. **Register the TV with `ares-setup-device`**:
-   ```bash
-   ares-setup-device
-   ares-novacom --device <device_name> --getkey
-   ```
-3. **Install the `.ipk` Package**:
-   ```bash
-   ares-install --device <device_name> dist/com.miiptv.player_1.0.0_all.ipk
-   ```
-4. **Launch the App**:
-   ```bash
-   ares-launch --device <device_name> com.miiptv.player
-   ```
 
 ---
 

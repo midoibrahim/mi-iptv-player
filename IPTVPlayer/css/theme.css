@@ -38,34 +38,54 @@
 
     --transition: 0.16s ease-out;
     --transition-smooth: 0.22s ease-out;
+
+    /* Semantic Status & Badge Tokens (Dark Surfaces + Crisp Colored Borders) */
+    --danger: #FF5A65;
+    --danger-subtle: rgba(255, 90, 101, 0.15);
+    --danger-surface: #261015;
+    --danger-border: #FF5A65;
+
+    --success: #3CE38D;
+    --success-subtle: rgba(60, 227, 141, 0.15);
+    --success-surface: #0E2419;
+    --success-border: #3CE38D;
+
+    --warning: #F5B041;
+    --warning-subtle: rgba(245, 176, 65, 0.15);
+    --warning-surface: #1F190D;
+    --warning-border: #F5B041;
+
+    --hd-surface: #141E2E;
+    --hd-border: #58A6FF;
+    --hd-text: #82BFFF;
 }
 
 /* ============================================================
    MIDNIGHT THEME
-   Midnight Blue
+   Midnight Blue (Calibrated for 10-Foot TV Panels)
    ============================================================ */
 
 [data-theme="midnight"] {
 
     /* --------------------------------------------------------
-       BACKGROUNDS
+       BACKGROUNDS (Explicit Dark Elevation Steps)
        -------------------------------------------------------- */
 
     --bg-base: #060A12;
 
-    --bg-surface: rgba(17, 27, 45, 0.72);
-    --bg-surface-hover: rgba(27, 42, 65, 0.88);
-    --bg-surface-active: rgba(39, 58, 86, 0.96);
+    --bg-surface: #0E1626;
+    --bg-surface-hover: #17243B;
+    --bg-surface-active: #1F304D;
 
-    --bg-card: rgba(15, 24, 40, 0.82);
-    --bg-card-h: rgba(29, 44, 67, 0.96);
+    --bg-card: #121C2E;
+    --bg-card-h: #1B2942;
 
-    --bg-nav: rgba(5, 9, 17, 0.97);
-    --bg-nav-scrim: rgba(0, 3, 9, 0.74);
+    --bg-nav: rgba(5, 9, 17, 0.98);
+    --bg-nav-scrim: rgba(2, 5, 12, 0.82);
 
-    --bg-overlay: rgba(4, 8, 15, 0.95);
+    --bg-overlay: rgba(5, 9, 17, 0.96);
 
-    --bg-input: rgba(22, 34, 53, 0.90);
+    --bg-input: #101A2B;
 
 
     /* --------------------------------------------------------
@@ -73,7 +93,7 @@
        -------------------------------------------------------- */
 
     --accent: #4A90FF;
-    --accent-h: #76AEFF;
+    --accent-h: #7EB3FF;
 
     --accent-gradient:
         linear-gradient(135deg,
@@ -81,37 +101,24 @@
             #2869D5 100%);
 
     --accent-glow:
-        rgba(74, 144, 255, 0.30);
+        rgba(74, 144, 255, 0.28);
 
     --accent-subtle:
-        rgba(74, 144, 255, 0.13);
+        rgba(74, 144, 255, 0.14);
 
     --accent-border:
-        rgba(74, 144, 255, 0.36);
+        rgba(74, 144, 255, 0.42);
 
 
     /* --------------------------------------------------------
-       TEXT
+       TEXT (Hue-Tinted High-Contrast 10-Foot Hierarchy)
        -------------------------------------------------------- */
 
-    --text: #E8EDF5;
+    --text: #ECF1F8;
     --text-bright: #FFFFFF;
 
-    --text-dim: #A6B1C2;
-    --text-muted: #727F93;
-
-
-    /* --------------------------------------------------------
-       STATUS
-       -------------------------------------------------------- */
-
-    --danger: #FF5F68;
-    --danger-subtle: rgba(255, 95, 104, 0.13);
-
-    --success: #43D98A;
-    --success-subtle: rgba(67, 217, 138, 0.13);
-
-    --warning: #FFC04A;
+    --text-dim: #B8C5D9;
+    --text-muted: #8A9AB2;
 
 
     /* --------------------------------------------------------
@@ -119,82 +126,59 @@
        -------------------------------------------------------- */
 
     --border-subtle:
-        rgba(255, 255, 255, 0.065);
+        rgba(255, 255, 255, 0.085);
 
     --border-medium:
-        rgba(255, 255, 255, 0.13);
+        rgba(255, 255, 255, 0.16);
 
     --border-focus:
         var(--accent);
 
 
     /* --------------------------------------------------------
-       GEOMETRY
-       -------------------------------------------------------- */
-
-    --radius-sm: 7px;
-    --radius: 12px;
-    --radius-lg: 18px;
-    --radius-full: 9999px;
-
-    --nav-w: 88px;
-    --nav-w-exp: 340px;
-
-
-    /* --------------------------------------------------------
-       MOTION
-       -------------------------------------------------------- */
-
-    --transition:
-        0.22s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --transition-smooth:
-        0.32s cubic-bezier(0.16, 1, 0.3, 1);
-
-
-    /* --------------------------------------------------------
-       SHADOWS
+       SHADOWS (Directional Lift + Crisp Ring, Zero Bloom)
        -------------------------------------------------------- */
 
     --shadow-focus:
-        0 0 0 3px rgba(74, 144, 255, 0.95),
-        0 0 24px rgba(74, 144, 255, 0.30);
+        0 0 0 2px var(--accent),
+        0 14px 30px rgba(0, 0, 0, 0.85),
+        0 0 12px var(--accent-glow);
 
     --shadow-card:
-        0 8px 28px rgba(0, 0, 0, 0.48);
+        0 8px 24px rgba(0, 0, 0, 0.55);
 
     --shadow-card-hover:
-        0 14px 34px rgba(0, 0, 0, 0.60);
+        0 14px 32px rgba(0, 0, 0, 0.72);
 }
 
 
 /* ============================================================
    GLOBAL / DEFAULT — OLED THEME
-   Pure black + cinematic cyan
+   Deep Cinema Slate + Crisp Cyan (Calibrated for OLED & IPS LED TVs)
    ============================================================ */
 
 :root,
 [data-theme="oled"] {
 
-    --bg-base: #000000;
+    --bg-base: #05070B;
 
-    --bg-surface: #080B10;
-    --bg-surface-hover: #10161E;
-    --bg-surface-active: #18212B;
+    --bg-surface: #0C111B;
+    --bg-surface-hover: #172133;
+    --bg-surface-active: #1D2A40;
 
-    --bg-card: #070A0F;
-    --bg-card-h: #111820;
+    --bg-card: #111826;
+    --bg-card-h: #192438;
 
-    --bg-nav: rgba(0, 0, 0, 0.98);
-    --bg-nav-scrim: rgba(0, 0, 0, 0.90);
+    --bg-nav: rgba(4, 6, 10, 0.98);
+    --bg-nav-scrim: rgba(2, 4, 8, 0.88);
 
-    --bg-overlay: rgba(0, 0, 0, 0.98);
+    --bg-overlay: rgba(4, 6, 10, 0.97);
 
-    --bg-input: #0C1117;
+    --bg-input: #0E1522;
 
 
     --accent: #22C8F2;
-    --accent-h: #62DFFF;
+    --accent-h: #68E1FF;
 
     --accent-gradient:
         linear-gradient(135deg,
@@ -202,70 +186,71 @@
             #176ED8 100%);
 
     --accent-glow:
-        rgba(34, 200, 242, 0.25);
+        rgba(34, 200, 242, 0.24);
 
     --accent-subtle:
-        rgba(34, 200, 242, 0.10);
+        rgba(34, 200, 242, 0.12);
 
     --accent-border:
-        rgba(34, 200, 242, 0.32);
+        rgba(34, 200, 242, 0.40);
 
 
-    --text: #E7ECF2;
+    --text: #ECF1F8;
     --text-bright: #FFFFFF;
 
-    --text-dim: #A2ACB9;
-    --text-muted: #717C89;
+    --text-dim: #B8C4D4;
+    --text-muted: #8A99AD;
 
 
     --border-subtle:
-        rgba(255, 255, 255, 0.065);
+        rgba(255, 255, 255, 0.085);
 
     --border-medium:
-        rgba(255, 255, 255, 0.13);
+        rgba(255, 255, 255, 0.16);
 
     --border-focus:
         var(--accent);
 
 
     --shadow-focus:
-        0 0 0 3px rgba(34, 200, 242, 0.95),
-        0 0 22px rgba(34, 200, 242, 0.24);
+        0 0 0 2px var(--accent),
+        0 14px 30px rgba(0, 0, 0, 0.88),
+        0 0 12px var(--accent-glow);
 
     --shadow-card:
-        0 8px 28px rgba(0, 0, 0, 0.76);
+        0 8px 24px rgba(0, 0, 0, 0.72);
 
     --shadow-card-hover:
-        0 14px 34px rgba(0, 0, 0, 0.90);
+        0 14px 32px rgba(0, 0, 0, 0.88);
 }
 
 
 /* ============================================================
    EMERALD THEME
-   Cinematic teal
+   Cinematic Teal
    ============================================================ */
 
 [data-theme="emerald"] {
 
-    --bg-base: #050D0D;
+    --bg-base: #050C0C;
 
-    --bg-surface: rgba(12, 31, 31, 0.82);
-    --bg-surface-hover: rgba(18, 45, 44, 0.94);
-    --bg-surface-active: rgba(25, 59, 57, 0.98);
+    --bg-surface: #0B1A1A;
+    --bg-surface-hover: #132A29;
+    --bg-surface-active: #1A3836;
 
-    --bg-card: rgba(10, 28, 28, 0.88);
-    --bg-card-h: rgba(20, 46, 45, 0.96);
+    --bg-card: #0E2121;
+    --bg-card-h: #16302F;
 
-    --bg-nav: rgba(4, 13, 13, 0.97);
-    --bg-nav-scrim: rgba(0, 6, 6, 0.78);
+    --bg-nav: rgba(4, 11, 11, 0.98);
+    --bg-nav-scrim: rgba(1, 6, 6, 0.84);
 
-    --bg-overlay: rgba(3, 11, 11, 0.96);
+    --bg-overlay: rgba(4, 11, 11, 0.96);
 
-    --bg-input: rgba(15, 36, 36, 0.92);
+    --bg-input: #0D1E1E;
 
 
     --accent: #20C7B0;
-    --accent-h: #5BDED0;
+    --accent-h: #62E3D4;
 
     --accent-gradient:
         linear-gradient(135deg,
@@ -273,70 +258,71 @@
             #148D82 100%);
 
     --accent-glow:
-        rgba(32, 199, 176, 0.26);
+        rgba(32, 199, 176, 0.25);
 
     --accent-subtle:
-        rgba(32, 199, 176, 0.12);
+        rgba(32, 199, 176, 0.13);
 
     --accent-border:
-        rgba(32, 199, 176, 0.33);
+        rgba(32, 199, 176, 0.40);
 
 
-    --text: #E5F0EE;
+    --text: #EAF4F2;
     --text-bright: #FFFFFF;
 
-    --text-dim: #A1B6B3;
-    --text-muted: #708783;
+    --text-dim: #B4CAC7;
+    --text-muted: #849E9A;
 
 
     --border-subtle:
-        rgba(255, 255, 255, 0.065);
+        rgba(255, 255, 255, 0.085);
 
     --border-medium:
-        rgba(255, 255, 255, 0.13);
+        rgba(255, 255, 255, 0.16);
 
     --border-focus:
         var(--accent);
 
 
     --shadow-focus:
-        0 0 0 3px rgba(32, 199, 176, 0.95),
-        0 0 23px rgba(32, 199, 176, 0.25);
+        0 0 0 2px var(--accent),
+        0 14px 30px rgba(0, 0, 0, 0.85),
+        0 0 12px var(--accent-glow);
 
     --shadow-card:
-        0 8px 28px rgba(0, 0, 0, 0.52);
+        0 8px 24px rgba(0, 0, 0, 0.60);
 
     --shadow-card-hover:
-        0 14px 34px rgba(0, 0, 0, 0.66);
+        0 14px 32px rgba(0, 0, 0, 0.76);
 }
 
 
 /* ============================================================
    CRIMSON THEME
-   Deep cinematic indigo
+   Deep Cinematic Indigo
    ============================================================ */
 
 [data-theme="crimson"] {
 
-    --bg-base: #090711;
+    --bg-base: #080610;
 
-    --bg-surface: rgba(25, 20, 40, 0.82);
-    --bg-surface-hover: rgba(37, 29, 57, 0.94);
-    --bg-surface-active: rgba(50, 39, 74, 0.98);
+    --bg-surface: #130F22;
+    --bg-surface-hover: #1E1836;
+    --bg-surface-active: #282047;
 
-    --bg-card: rgba(22, 18, 35, 0.88);
-    --bg-card-h: rgba(39, 30, 57, 0.96);
+    --bg-card: #171229;
+    --bg-card-h: #231C3D;
 
-    --bg-nav: rgba(8, 6, 14, 0.97);
-    --bg-nav-scrim: rgba(3, 1, 8, 0.78);
+    --bg-nav: rgba(7, 5, 13, 0.98);
+    --bg-nav-scrim: rgba(3, 1, 8, 0.84);
 
     --bg-overlay: rgba(7, 5, 13, 0.96);
 
-    --bg-input: rgba(30, 24, 47, 0.92);
+    --bg-input: #151026;
 
 
     --accent: #8D7CFF;
-    --accent-h: #B09FFF;
+    --accent-h: #B4A6FF;
 
     --accent-gradient:
         linear-gradient(135deg,
@@ -347,38 +333,39 @@
         rgba(141, 124, 255, 0.25);
 
     --accent-subtle:
-        rgba(141, 124, 255, 0.12);
+        rgba(141, 124, 255, 0.13);
 
     --accent-border:
-        rgba(141, 124, 255, 0.33);
+        rgba(141, 124, 255, 0.40);
 
 
-    --text: #ECE8F3;
+    --text: #EFEBF7;
     --text-bright: #FFFFFF;
 
-    --text-dim: #ADA6BA;
-    --text-muted: #797185;
+    --text-dim: #C0B8D1;
+    --text-muted: #9187A6;
 
 
     --border-subtle:
-        rgba(255, 255, 255, 0.065);
+        rgba(255, 255, 255, 0.085);
 
     --border-medium:
-        rgba(255, 255, 255, 0.13);
+        rgba(255, 255, 255, 0.16);
 
     --border-focus:
         var(--accent);
 
 
     --shadow-focus:
-        0 0 0 3px rgba(141, 124, 255, 0.95),
-        0 0 23px rgba(141, 124, 255, 0.25);
+        0 0 0 2px var(--accent),
+        0 14px 30px rgba(0, 0, 0, 0.85),
+        0 0 12px var(--accent-glow);
 
     --shadow-card:
-        0 8px 28px rgba(0, 0, 0, 0.54);
+        0 8px 24px rgba(0, 0, 0, 0.62);
 
     --shadow-card-hover:
-        0 14px 34px rgba(0, 0, 0, 0.68);
+        0 14px 32px rgba(0, 0, 0, 0.78);
 }
 
 

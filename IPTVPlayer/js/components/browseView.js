@@ -66,8 +66,8 @@ window.IPTV.BrowseView = class {
                     </div>
                     <div class="section-controls">
                         <div class="view-toggle">
-                            <button class="view-btn ${this.viewMode === 'grid' ? 'active' : ''}" data-view="grid" tabindex="0" title="Grid View">⊞</button>
-                            <button class="view-btn ${this.viewMode === 'rows' ? 'active' : ''}" data-view="rows" tabindex="0" title="Row View">☰</button>
+                            <button class="view-btn ${this.viewMode === 'grid' ? 'active' : ''}" data-view="grid" tabindex="0" title="Grid View">${window.IPTV.Icons ? window.IPTV.Icons.get('grid', 'view-btn-svg') : 'Grid'}</button>
+                            <button class="view-btn ${this.viewMode === 'rows' ? 'active' : ''}" data-view="rows" tabindex="0" title="Row View">${window.IPTV.Icons ? window.IPTV.Icons.get('list', 'view-btn-svg') : 'Rows'}</button>
                         </div>
                     </div>
                 </div>

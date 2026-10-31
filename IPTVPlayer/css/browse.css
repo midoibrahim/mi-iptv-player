@@ -61,6 +61,7 @@
     border-radius: 14px;
     font-size: 16px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
 .category-search {
@@ -147,8 +148,9 @@
 }
 .category-item-count {
     font-size: 16px;
-    opacity: 0.85;
+    opacity: 0.90;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     background: rgba(0, 0, 0, 0.35);
     padding: 3px 10px;
     border-radius: 10px;
@@ -184,9 +186,10 @@
     font-size: 20px;
     color: var(--text-dim);
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 .browse-main-content .browse-content {
-    padding: 8px 4px 48px;
+    padding: 10px 8px 48px;
     flex: 1;
     min-width: 0;
     width: 100%;
@@ -204,12 +207,21 @@
 .view-btn {
     width: 48px;
     height: 44px;
-    border: none;
+    border: 2px solid transparent;
     background: none;
     color: var(--text-dim);
     font-size: 22px;
     border-radius: 6px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.view-btn-svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    fill: currentColor;
 }
 .view-btn + .view-btn {
     margin-left: 4px;
@@ -240,14 +252,14 @@
 .browse-content.grid-view .card {
     width: 230px;
     height: 392px;
-    margin: 0 22px 26px 0;
+    margin: 0 24px 28px 0;
     box-sizing: border-box;
 }
 .browse-content.grid-view .card-live,
 #live-content.grid-view .card {
     width: 285px;
     height: 232px;
-    margin: 0 22px 22px 0;
+    margin: 0 24px 24px 0;
 }
 
 .browse-content.rows-view {
@@ -257,12 +269,13 @@
 .browse-row {
     display: flex;
     flex-direction: column;
-    margin-bottom: 36px;
+    margin-bottom: 40px;
     flex-shrink: 0;
 }
 .browse-row h3 {
     font-size: 26px;
     font-weight: 700;
+    letter-spacing: -0.015em;
     color: var(--text-bright);
     margin-bottom: 14px;
 }
@@ -271,11 +284,11 @@
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 6px 4px 14px;
+    padding: 10px 8px 18px;
     align-items: flex-start;
 }
 .browse-row .row-scroll > .card + .card {
-    margin-left: 22px;
+    margin-left: 24px;
 }
 .browse-content.rows-view .card {
     flex: 0 0 230px;

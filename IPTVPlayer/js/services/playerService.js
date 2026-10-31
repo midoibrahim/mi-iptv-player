@@ -74,7 +74,7 @@ window.IPTV.PlayerService = {
                 const targetTime = ratio * this.video.duration;
                 this._updateProgressUI(targetTime, this.video.duration);
                 this.showSeekHUD(
-                    '📍',
+                    'seekPin',
                     this._fmtTime(targetTime),
                     `${this._fmtTime(targetTime)} / ${this._fmtTime(this.video.duration)}`
                 );
@@ -909,7 +909,11 @@ window.IPTV.PlayerService = {
             if (fill) fill.style.width = '100%';
             if (thumb) thumb.style.left = '100%';
             if (cur) cur.textContent = 'LIVE';
-            if (dur) dur.textContent = '🔴';
+            if (dur) {
+                dur.innerHTML = (window.IPTV && window.IPTV.Icons)
+                    ? window.IPTV.Icons.get('liveDot', 'osd-live-svg') + '<span>LIVE</span>'
+                    : 'LIVE';
+            }
             if (bar) {
                 bar.setAttribute('aria-valuenow', '100');
                 bar.removeAttribute('tabindex');

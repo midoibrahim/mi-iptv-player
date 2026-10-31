@@ -59,6 +59,7 @@ body.player-active #login-screen {
     font-size: 24px;
     color: var(--text-dim);
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 
 .osd-bottom {
@@ -73,8 +74,22 @@ body.player-active #login-screen {
     align-items: center;
     font-size: 20px;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: var(--text-dim);
     margin-bottom: 18px;
+}
+#osd-time-current,
+#osd-time-duration {
+    display: inline-flex;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+}
+.osd-live-svg {
+    width: 14px;
+    height: 14px;
+    fill: var(--danger, #FF5A65);
+    margin-right: 6px;
+    display: inline-block;
 }
 .progress-bar {
     position: relative;
@@ -257,10 +272,12 @@ body.player-active #login-screen {
 .seek-hud-text {
     font-size: 24px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     color: var(--text-bright);
 }
 .seek-hud-time {
     font-size: 18px;
+    font-variant-numeric: tabular-nums;
     color: var(--text-dim);
 }
 

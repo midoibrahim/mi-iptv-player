@@ -96,8 +96,14 @@ window.IPTV.SeriesDetailView = {
         yearEl.style.display = seriesInfo.year ? 'inline-flex' : 'none';
 
         const ratingEl = document.getElementById('series-rating');
-        ratingEl.textContent = seriesInfo.rating ? `★ ${seriesInfo.rating}` : '';
-        ratingEl.style.display = seriesInfo.rating ? 'inline-flex' : 'none';
+        if (seriesInfo.rating) {
+            const starIcon = window.IPTV.Icons ? window.IPTV.Icons.get('star', 'badge-star-svg') : '';
+            ratingEl.innerHTML = starIcon + '<span>' + String(seriesInfo.rating) + '</span>';
+            ratingEl.style.display = 'inline-flex';
+        } else {
+            ratingEl.innerHTML = '';
+            ratingEl.style.display = 'none';
+        }
 
         const catEl = document.getElementById('series-category');
         catEl.textContent = seriesInfo.category || '';
@@ -148,6 +154,32 @@ window.IPTV.SeriesDetailView = {
         }, 60);
     },
 
+    _formatEpisodeTitle(rawTitle, seriesName, seasonNum, epNum) {
+        const fallback = `Episode ${epNum || ''}`.trim();
+        if (!rawTitle) return fallback;
+        let t = String(rawTitle).trim();
+
+        // Strip leading series name if prefixed (e.g., "Lupin - S04E01" or "Lupin: S04E01 - Pilot")
+        if (seriesName) {
+            const baseSeries = String(seriesName).replace(/\s*\(.*?\)\s*$/, '').trim();
+            if (baseSeries && t.toLowerCase().indexOf(baseSeries.toLowerCase()) === 0) {
+                t = t.slice(baseSeries.length).replace(/^[\s\-_:|.]+/, '').trim();
+            }
+        }
+
+        // If title starts with SxxExx followed by a separator and a real episode name, keep the real name
+        const prefixMatch = t.match(/^S0*\d+\s*[._\-]?\s*E0*\d+\s*[\-_:|\s]+(.+)$/i);
+        if (prefixMatch && prefixMatch[1]) {
+            t = prefixMatch[1].trim();
+        }
+
+        // If the remaining title is just a raw season/episode code (e.g. "S04E01", "S4 E1", "E01"), use clean "Episode X"
+        if (!t || /^S0*\d+\s*[._\-]?\s*E0*\d+$/i.test(t) || /^E0*\d+$/i.test(t) || /^Episode\s*0*\d+$/i.test(t)) {
+            return fallback;
+        }
+        return t;
+    },
+
     renderEpisodesList(seriesInfo, episodes, seasonNum) {
         const grid = document.getElementById('series-episodes-list');
         grid.innerHTML = '';
@@ -172,9 +204,10 @@ window.IPTV.SeriesDetailView = {
                 streamUrl = `${base}/series/${this.app.connection.user}/${this.app.connection.pass}/${ep.id}.${ext}`;
             }
 
+            const epNum = ep.episode_num || ep.episode || '';
             const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
-            const epTitle = ep.title || `Episode ${ep.episode_num || ''}`;
-            const epNumStr = `S${seasonNum} E${ep.episode_num || ep.episode || ''}`;
+            const epTitle = this._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum);
+            const epNumStr = `S${seasonNum} E${epNum}`;
 
             card.innerHTML = `
                 <div class="episode-thumb-container">

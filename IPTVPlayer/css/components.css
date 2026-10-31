@@ -135,12 +135,13 @@
     font-size: 44px;
     font-weight: 800;
     color: var(--text-bright);
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
     line-height: 1.15;
 }
 .login-subtitle {
     color: var(--text-dim);
     font-size: 22px;
+    letter-spacing: 0.015em;
     margin-top: 6px;
 }
 
@@ -208,16 +209,18 @@
 
 .remote-card-header h3 {
     font-size: 28px;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.015em;
     color: var(--text-bright);
-    margin-top: 10px;
-    margin-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 10px;
 }
 
 .remote-card-header p {
     font-size: 19px;
     color: var(--text-dim);
-    line-height: 1.4;
+    line-height: 1.45;
+    letter-spacing: 0.015em;
 }
 
 .remote-pill {
@@ -458,6 +461,8 @@
 .profile-sub {
     font-size: 18px;
     color: var(--text-dim);
+    letter-spacing: 0.015em;
+    font-variant-numeric: tabular-nums;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -587,6 +592,8 @@
     font-size: 15px;
     line-height: 1.25;
     color: var(--text-dim);
+    letter-spacing: 0.015em;
+    font-variant-numeric: tabular-nums;
     margin-top: 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -621,32 +628,33 @@
     padding: 10px 14px;
 }
 
-/* Card Badges */
+/* Card Badges (Semantic Dark Surface + Crisp Border) */
 .card-live-badge {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(12, 16, 26, 0.92);
-    border: 1px solid var(--danger);
-    color: var(--danger);
+    background: var(--danger-surface, #261015);
+    border: 1.5px solid var(--danger, #FF5A65);
+    color: #FFFFFF;
     font-size: 14px;
     font-weight: 800;
     padding: 4px 10px;
     border-radius: 6px;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     z-index: 2;
 }
 .card-hd-badge {
     position: absolute;
     top: 10px;
     left: 10px;
-    background: rgba(12, 16, 26, 0.92);
-    border: 1px solid var(--accent);
-    color: var(--accent-h);
+    background: var(--hd-surface, #141E2E);
+    border: 1.5px solid var(--hd-border, #58A6FF);
+    color: var(--hd-text, #82BFFF);
     font-size: 14px;
     font-weight: 800;
     padding: 4px 10px;
     border-radius: 6px;
+    letter-spacing: 0.5px;
     z-index: 2;
 }
 /* Card Favorite Star Button */
@@ -731,8 +739,9 @@
     bottom: 0;
     left: 0;
     inset: 0;
-    background: linear-gradient(to right, var(--bg-base) 0%, rgba(8, 8, 14, 0.68) 55%, transparent 100%),
-                linear-gradient(to top, var(--bg-base) 0%, transparent 45%);
+    background:
+        linear-gradient(90deg, var(--bg-base) 0%, rgba(5, 7, 11, 0.90) 38%, rgba(5, 7, 11, 0.44) 68%, transparent 100%),
+        linear-gradient(0deg, var(--bg-base) 0%, rgba(5, 7, 11, 0.74) 28%, transparent 65%);
 }
 .hero-content {
     position: absolute;
@@ -744,15 +753,17 @@
 .hero-title {
     font-size: 48px;
     font-weight: 800;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
     margin-bottom: 14px;
     line-height: 1.15;
     color: var(--text-bright);
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
 }
 .hero-desc {
     font-size: 21px;
     color: var(--text-dim);
-    line-height: 1.45;
+    line-height: 1.48;
+    letter-spacing: 0.015em;
     margin-bottom: 28px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -776,24 +787,25 @@
 .content-row {
     display: flex;
     flex-direction: column;
-    margin-bottom: 42px;
+    margin-bottom: 44px;
     flex-shrink: 0;
 }
 .content-row h3 {
     font-size: 28px;
     font-weight: 700;
+    letter-spacing: -0.015em;
     color: var(--text-bright);
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 .row-scroll {
     display: flex;
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 8px 4px 16px;
+    padding: 12px 8px 22px;
 }
 .row-scroll > .card + .card {
-    margin-left: 22px;
+    margin-left: 24px;
 }
 .row-scroll::-webkit-scrollbar {
     height: 6px;

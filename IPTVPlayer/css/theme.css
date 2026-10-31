@@ -658,7 +658,10 @@ button:active,
 .button-primary,
 button.primary {
     background:
-        var(--accent-gradient);
+        var(--bg-surface-active);
+
+    border:
+        2px solid var(--accent);
 
     color:
         #FFFFFF;
@@ -673,8 +676,11 @@ button.primary {
 .btn-primary:hover,
 .button-primary:hover,
 button.primary:hover {
-    filter:
-        brightness(1.08);
+    background:
+        var(--bg-card-h);
+
+    border-color:
+        var(--accent-h);
 
     box-shadow:
         0 8px 26px var(--accent-glow);
@@ -930,6 +936,9 @@ select:focus,
 .player-control:hover,
 .player-control:focus-visible {
     background:
+        var(--bg-surface-active);
+
+    border-color:
         var(--accent);
 
     color:
@@ -1121,6 +1130,8 @@ a:hover {
 .toggle[aria-checked="true"],
 .switch[aria-checked="true"] {
     background:
+        var(--bg-surface-active);
+    border-color:
         var(--accent);
 }
 

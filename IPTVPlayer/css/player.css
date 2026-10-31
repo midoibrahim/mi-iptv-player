@@ -145,7 +145,7 @@ body.player-active #login-screen {
     align-items: center;
 }
 .osd-btn {
-    background: rgba(22, 28, 42, 0.88);
+    background: rgba(14, 18, 28, 0.92);
     border: 2px solid rgba(255, 255, 255, 0.25);
     color: #fff;
     width: 74px;
@@ -153,15 +153,15 @@ body.player-active #login-screen {
     border-radius: 50%;
     font-size: 30px;
     cursor: pointer;
-    transition: transform 0.15s ease-out, background 0.15s ease-out;
+    transition: transform 0.15s ease-out, background 0.15s ease-out, border-color 0.15s ease-out;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .osd-btn:hover,
 .osd-btn:focus {
-    background: rgba(255, 255, 255, 0.35);
-    border-color: #ffffff;
+    background: var(--bg-surface-active);
+    border-color: var(--accent);
     transform: scale(1.12);
     outline: none;
 }
@@ -169,11 +169,13 @@ body.player-active #login-screen {
     width: 96px;
     height: 96px;
     font-size: 42px;
-    background: var(--accent-gradient);
-    border: 2px solid rgba(255, 255, 255, 0.4);
+    background: var(--bg-surface-active);
+    border: 3px solid var(--accent);
 }
 .osd-btn-lg:hover,
 .osd-btn-lg:focus {
+    background: var(--bg-card-h);
+    border-color: var(--accent-h);
     transform: scale(1.14);
 }
 .osd-btn-sm {

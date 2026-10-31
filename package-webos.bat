@@ -22,11 +22,15 @@ cd /d "%~dp0\build"
 echo [2/3] Packaging MI IPTV Player (app + on-TV service) into webOS .ipk...
 rem Dev-only files are already excluded by webos-build\build.mjs
 cmd /c ares-package IPTVPlayer IPTVService -o ../dist
+set PKG_ERR=%ERRORLEVEL%
 
-if %ERRORLEVEL% EQU 0 (
+cd /d "%~dp0"
+if exist "build" rmdir /s /q "build"
+
+if %PKG_ERR% EQU 0 (
     echo.
     echo [3/3] SUCCESS! Package created in dist\
-    dir "..\dist\*.ipk"
+    dir "dist\*.ipk"
     echo.
     echo Next steps:
     echo 1. Connect to TV:

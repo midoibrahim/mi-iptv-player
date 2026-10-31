@@ -1,6 +1,7 @@
 /* ============================================================
    IPTV Player — Login & Profile View
-   Manages Saved Profiles grid & Xtream/M3U input form
+   Manages Saved Profiles grid, Delete Confirmation Modal,
+   Xtream/M3U input form with inline validation & QR setup
    ============================================================ */
 
 window.IPTV = window.IPTV || {};
@@ -12,14 +13,105 @@ window.IPTV.LoginView = {
         this.formPage = document.getElementById('login-form-page');
         this.profilesGrid = document.getElementById('profiles-grid');
         this.backBtn = document.getElementById('btn-back-to-profiles');
+        this.errorEl = document.getElementById('login-form-error');
+        this.deleteModal = document.getElementById('profile-delete-modal');
+        this._pendingDeleteProfile = null;
+        this._deleteTriggerEl = null;
 
         this._bindUI();
         this.renderProfiles();
     },
 
+    showFormError(msg) {
+        if (!this.errorEl) this.errorEl = document.getElementById('login-form-error');
+        if (this.errorEl) {
+            this.errorEl.textContent = msg;
+            this.errorEl.classList.remove('hidden');
+        }
+        if (this.app && typeof this.app.toast === 'function') {
+            this.app.toast(msg);
+        }
+    },
+
+    clearFormError() {
+        if (!this.errorEl) this.errorEl = document.getElementById('login-form-error');
+        if (this.errorEl) {
+            this.errorEl.textContent = '';
+            this.errorEl.classList.add('hidden');
+        }
+    },
+
+    openDeleteModal(prof, triggerEl) {
+        if (!prof) return;
+        this._pendingDeleteProfile = prof;
+        this._deleteTriggerEl = triggerEl || document.activeElement;
+
+        if (!this.deleteModal) {
+            // Fallback if modal element is absent
+            window.IPTV.Storage.deleteProfile(prof.id);
+            this.renderProfiles();
+            if (this.app && typeof this.app.toast === 'function') {
+                this.app.toast('Profile removed');
+            }
+            return;
+        }
+
+        const descEl = document.getElementById('confirm-delete-desc');
+        if (descEl) {
+            descEl.textContent = `Are you sure you want to remove "${prof.name || 'IPTV Profile'}"?`;
+        }
+        this.deleteModal.classList.remove('hidden');
+
+        setTimeout(() => {
+            const cancelBtn = document.getElementById('btn-cancel-delete-profile');
+            if (cancelBtn) {
+                if (window.IPTV.SpatialNav) window.IPTV.SpatialNav.focusElement(cancelBtn);
+                else cancelBtn.focus();
+            }
+        }, 50);
+    },
+
+    closeDeleteModal() {
+        if (this.deleteModal) {
+            this.deleteModal.classList.add('hidden');
+        }
+        const prev = this._deleteTriggerEl;
+        this._pendingDeleteProfile = null;
+        this._deleteTriggerEl = null;
+
+        if (prev && document.contains(prev)) {
+            setTimeout(() => {
+                if (window.IPTV.SpatialNav) window.IPTV.SpatialNav.focusElement(prev);
+                else prev.focus();
+            }, 50);
+        }
+    },
+
     _bindUI() {
         if (this.backBtn) {
             this.backBtn.addEventListener('click', () => this.showProfilesPage());
+        }
+
+        // Bind Delete Confirmation Modal buttons
+        const cancelDelBtn = document.getElementById('btn-cancel-delete-profile');
+        const confirmDelBtn = document.getElementById('btn-confirm-delete-profile');
+        if (cancelDelBtn) {
+            cancelDelBtn.addEventListener('click', () => this.closeDeleteModal());
+        }
+        if (confirmDelBtn) {
+            confirmDelBtn.addEventListener('click', () => {
+                const prof = this._pendingDeleteProfile;
+                if (this.deleteModal) this.deleteModal.classList.add('hidden');
+                this._pendingDeleteProfile = null;
+                this._deleteTriggerEl = null;
+                if (prof) {
+                    window.IPTV.Storage.deleteProfile(prof.id);
+                    this.renderProfiles();
+                    if (this.app && typeof this.app.toast === 'function') {
+                        this.app.toast('Profile removed');
+                    }
+                }
+            });
         }
 
         // Form inputs in 10-foot TV mode: keep readOnly until user presses OK/Enter
@@ -36,11 +128,13 @@ window.IPTV.LoginView = {
             };
             inp.addEventListener('click', activateInput);
             inp.addEventListener('blur', () => { inp.readOnly = true; });
+            inp.addEventListener('input', () => this.clearFormError());
         });
 
         // Tabs
         document.querySelectorAll('.login-tab').forEach(tab => {
             tab.addEventListener('click', () => {
+                this.clearFormError();
                 document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
                 tab.classList.add('active');
@@ -59,10 +153,11 @@ window.IPTV.LoginView = {
                 const nameInput = document.getElementById('profile-name').value.trim();
 
                 if (!server || !user || !pass) {
-                    this.app.toast('Please fill all required fields');
+                    this.showFormError('Please enter Server URL, Username, and Password to connect.');
                     return;
                 }
 
+                this.clearFormError();
                 const defaultName = server.replace(/^https?:\/\//i, '').split('/')[0] || 'Xtream Service';
                 const profile = {
                     id: 'prof_' + Date.now(),
@@ -85,10 +180,11 @@ window.IPTV.LoginView = {
                 const nameInput = document.getElementById('profile-name').value.trim();
 
                 if (!url) {
-                    this.app.toast('Please enter a valid M3U URL');
+                    this.showFormError('Please enter a valid M3U / M3U8 playlist URL.');
                     return;
                 }
 
+                this.clearFormError();
                 const profile = {
                     id: 'prof_' + Date.now(),
                     name: nameInput || 'M3U Playlist',
@@ -136,22 +232,18 @@ window.IPTV.LoginView = {
             const subEl = card.querySelector('.profile-sub');
             if (subEl) subEl.textContent = sub || '';
 
-            // Delete profile
+            // Delete profile (opens confirmation dialog)
             const delBtn = card.querySelector('.btn-delete-profile');
             if (delBtn) {
-                const performDelete = (e) => {
+                const requestDelete = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    window.IPTV.Storage.deleteProfile(prof.id);
-                    this.renderProfiles();
-                    if (this.app && typeof this.app.toast === 'function') {
-                        this.app.toast('Profile removed');
-                    }
+                    this.openDeleteModal(prof, delBtn);
                 };
-                delBtn.addEventListener('click', performDelete);
+                delBtn.addEventListener('click', requestDelete);
                 delBtn.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' || e.key === 'OK' || e.keyCode === 13) {
-                        performDelete(e);
+                        requestDelete(e);
                     }
                 });
             }
@@ -162,11 +254,7 @@ window.IPTV.LoginView = {
                 if (code === 403 || code === 46 || e.key === 'Delete') {
                     e.preventDefault();
                     e.stopPropagation();
-                    window.IPTV.Storage.deleteProfile(prof.id);
-                    this.renderProfiles();
-                    if (this.app && typeof this.app.toast === 'function') {
-                        this.app.toast('Profile removed');
-                    }
+                    this.openDeleteModal(prof, card);
                 }
             });
 
@@ -201,6 +289,7 @@ window.IPTV.LoginView = {
     },
 
     showAddProfileForm() {
+        this.clearFormError();
         const profiles = window.IPTV.Storage.getProfiles();
         if (this.profilesPage && this.formPage) {
             this.profilesPage.classList.remove('active');
@@ -222,6 +311,7 @@ window.IPTV.LoginView = {
 
     showProfilesPage() {
         this.stopRemotePolling();
+        this.clearFormError();
         if (this.profilesPage && this.formPage) {
             this.formPage.classList.remove('active');
             this.formPage.classList.add('hidden');
@@ -329,10 +419,10 @@ window.IPTV.LoginView = {
                     width: 240,
                     height: 240,
                     colorDark: '#ffffff',
-                    colorLight: '#181d30'
+                    colorLight: '#131C2E'
                 });
             } else {
-                qrContainer.innerHTML = `<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">Open on phone:<br><strong style="color:#fff;">${setupUrl}</strong></div>`;
+                qrContainer.innerHTML = `<div style="padding:20px;text-align:center;color:#94a3b8;font-size:20px;">Open on phone:<br><strong style="color:#fff;">${setupUrl}</strong></div>`;
             }
 
             // 3. Start polling for credentials sent from phone
@@ -380,6 +470,7 @@ window.IPTV.LoginView = {
 
     handleRemoteCredentials(creds) {
         this.stopRemotePolling();
+        this.clearFormError();
         const statusText = document.getElementById('remote-poll-status');
         if (statusText) statusText.textContent = 'Credentials received! Connecting...';
 

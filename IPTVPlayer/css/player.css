@@ -1,11 +1,11 @@
 /* ============================================================
    IPTV Player — Video Player, OSD & Channel Banner
    Follows TV Navigation Architecture Media Player OSD specs
-   10-Foot UI Standards (1920x1080 Native Canvas)
+   10-Foot UI Standards (1920x1080 Native Canvas, Always-Dark Video Overlay)
    ============================================================ */
 
 #player-screen {
-    background: #000;
+    background: #000000;
     z-index: 200;
 }
 
@@ -19,7 +19,7 @@ body.player-active #login-screen {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    background: #000;
+    background: #000000;
 }
 
 .player-osd {
@@ -33,7 +33,7 @@ body.player-active #login-screen {
     flex-direction: column;
     justify-content: space-between;
     z-index: 10;
-    transition: opacity 0.22s ease-out;
+    transition: opacity 0.20s ease-out;
 }
 .player-osd.hidden {
     opacity: 0;
@@ -43,27 +43,28 @@ body.player-active #login-screen {
 .osd-top {
     display: flex;
     align-items: center;
-    padding: 32px 48px;
+    padding: 40px 56px;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.90), transparent);
 }
 .osd-top > * + * {
-    margin-left: 22px;
+    margin-left: 24px;
 }
 .osd-title {
-    font-size: 30px;
-    font-weight: 700;
+    font-size: 32px;
+    font-weight: 800;
     flex: 1;
-    color: var(--text-bright);
+    color: #FFFFFF;
+    letter-spacing: -0.015em;
 }
 .osd-clock {
-    font-size: 24px;
-    color: var(--text-dim);
-    font-weight: 600;
+    font-size: 26px;
+    color: #D0D8E8;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
 
 .osd-bottom {
-    padding: 0 48px 40px;
+    padding: 0 56px 48px;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.92), transparent);
     display: flex;
     flex-direction: column;
@@ -72,11 +73,11 @@ body.player-active #login-screen {
 .osd-progress {
     display: flex;
     align-items: center;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 22px;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: var(--text-dim);
-    margin-bottom: 18px;
+    color: #D0D8E8;
+    margin-bottom: 22px;
 }
 #osd-time-current,
 #osd-time-duration {
@@ -85,19 +86,19 @@ body.player-active #login-screen {
     font-variant-numeric: tabular-nums;
 }
 .osd-live-svg {
-    width: 14px;
-    height: 14px;
-    fill: var(--danger, #FF5A65);
-    margin-right: 6px;
+    width: 16px;
+    height: 16px;
+    fill: #FF5D5D;
+    margin-right: 8px;
     display: inline-block;
 }
 .progress-bar {
     position: relative;
     flex: 1;
-    height: 12px;
-    margin: 0 20px;
-    background: rgba(255, 255, 255, 0.22);
-    border-radius: 6px;
+    height: 14px;
+    margin: 0 24px;
+    background: rgba(255, 255, 255, 0.24);
+    border-radius: 7px;
     cursor: pointer;
     touch-action: none;
     user-select: none;
@@ -105,15 +106,15 @@ body.player-active #login-screen {
 }
 .progress-bar:hover,
 .progress-bar:focus {
-    height: 16px;
-    background: rgba(255, 255, 255, 0.34);
+    height: 18px;
+    background: rgba(255, 255, 255, 0.36);
     outline: none;
-    box-shadow: 0 0 0 3px var(--accent);
+    box-shadow: 0 0 0 3px var(--border-focus);
 }
 .progress-fill {
     height: 100%;
     background: var(--accent-gradient);
-    border-radius: 6px;
+    border-radius: 7px;
     width: 0%;
     pointer-events: none;
 }
@@ -122,11 +123,11 @@ body.player-active #login-screen {
     top: 50%;
     left: 0%;
     transform: translate(-50%, -50%);
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    background: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
     opacity: 0;
     pointer-events: none;
 }
@@ -143,7 +144,7 @@ body.player-active #login-screen {
     justify-content: center;
     width: 100%;
     padding: 10px 0;
-    min-height: 104px;
+    min-height: 108px;
 }
 .osd-center-group {
     display: flex;
@@ -151,7 +152,7 @@ body.player-active #login-screen {
     justify-content: center;
 }
 .osd-center-group > button + button {
-    margin-left: 28px;
+    margin-left: 30px;
 }
 .osd-side-group {
     position: absolute;
@@ -160,11 +161,11 @@ body.player-active #login-screen {
     align-items: center;
 }
 .osd-btn {
-    background: rgba(14, 18, 28, 0.92);
-    border: 2px solid rgba(255, 255, 255, 0.25);
-    color: #fff;
-    width: 74px;
-    height: 74px;
+    background: rgba(11, 18, 32, 0.90);
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    color: #FFFFFF;
+    width: 78px;
+    height: 78px;
     border-radius: 50%;
     font-size: 30px;
     cursor: pointer;
@@ -175,44 +176,47 @@ body.player-active #login-screen {
 }
 .osd-btn:hover,
 .osd-btn:focus {
-    background: var(--bg-surface-active);
-    border-color: var(--accent);
-    transform: scale(1.12);
+    background: var(--accent);
+    border-color: #FFFFFF;
+    color: var(--text-on-accent);
+    transform: scale(1.10);
     outline: none;
 }
 .osd-btn-lg {
-    width: 96px;
-    height: 96px;
+    width: 100px;
+    height: 100px;
     font-size: 42px;
-    background: var(--bg-surface-active);
-    border: 3px solid var(--accent);
+    background: var(--accent);
+    border: 3px solid var(--border-focus);
+    color: var(--text-on-accent);
 }
 .osd-btn-lg:hover,
 .osd-btn-lg:focus {
-    background: var(--bg-card-h);
-    border-color: var(--accent-h);
-    transform: scale(1.14);
+    background: var(--accent-h);
+    border-color: #FFFFFF;
+    color: var(--text-on-accent);
+    transform: scale(1.12);
 }
 .osd-btn-sm {
-    width: 58px;
-    height: 58px;
+    width: 64px;
+    height: 64px;
     font-size: 24px;
 }
 
-/* Channel Switch Banner */
+/* Channel Switch Banner (Always Dark Overlay, Positioned Above Progress Timeline) */
 .channel-banner {
     position: absolute;
-    bottom: 140px;
-    left: 48px;
+    bottom: 214px;
+    left: 56px;
     display: flex;
     align-items: center;
-    background: rgba(10, 14, 22, 0.94);
-    border: 2px solid var(--border-medium);
-    padding: 20px 34px;
+    background: rgba(10, 14, 24, 0.94);
+    border: 2px solid var(--accent-border);
+    padding: 22px 36px;
     border-radius: var(--radius-lg);
-    transition: opacity 0.22s ease-out, transform 0.22s ease-out;
+    transition: opacity 0.20s ease-out, transform 0.20s ease-out;
     z-index: 15;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.80);
 }
 .channel-banner.hidden {
     opacity: 0;
@@ -220,22 +224,22 @@ body.player-active #login-screen {
     pointer-events: none;
 }
 .banner-logo {
-    width: 68px;
-    height: 68px;
-    margin-right: 20px;
+    width: 72px;
+    height: 72px;
+    margin-right: 22px;
     border-radius: var(--radius-sm);
     object-fit: contain;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
 }
 .banner-name {
-    font-size: 26px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 800;
     display: block;
-    color: var(--text-bright);
+    color: #FFFFFF;
 }
 .banner-program {
-    font-size: 19px;
-    color: var(--text-dim);
+    font-size: 20px;
+    color: #D0D8E8;
     display: block;
     margin-top: 4px;
 }
@@ -248,12 +252,12 @@ body.player-active #login-screen {
     transform: translate(-50%, -50%);
     display: flex;
     align-items: center;
-    background: rgba(12, 16, 26, 0.94);
-    border: 2px solid var(--border-medium);
-    padding: 22px 38px;
+    background: rgba(10, 14, 24, 0.94);
+    border: 2px solid var(--accent-border);
+    padding: 24px 42px;
     border-radius: 9999px;
     z-index: 120;
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.80);
     transition: opacity 0.16s ease-out;
     pointer-events: none;
 }
@@ -261,30 +265,31 @@ body.player-active #login-screen {
     opacity: 0;
 }
 .seek-hud-icon {
-    font-size: 34px;
+    font-size: 36px;
     line-height: 1;
     margin-right: 18px;
+    color: var(--accent);
 }
 .seek-hud-content {
     display: flex;
     flex-direction: column;
 }
 .seek-hud-text {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 800;
     font-variant-numeric: tabular-nums;
-    color: var(--text-bright);
+    color: #FFFFFF;
 }
 .seek-hud-time {
-    font-size: 18px;
+    font-size: 20px;
     font-variant-numeric: tabular-nums;
-    color: var(--text-dim);
+    color: #D0D8E8;
 }
 
 /* Lineicons SVG sizing in Player */
 .osd-svg-icon {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     display: block;
     fill: currentColor;
 }
@@ -293,8 +298,8 @@ body.player-active #login-screen {
     height: 44px;
 }
 .hud-svg-icon {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     display: block;
     fill: currentColor;
 }

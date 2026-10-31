@@ -1,6 +1,7 @@
 /* ============================================================
    IPTV Player — Base Styles, Viewport & 10-ft TV Focus
    Native 1920x1080 Full HD 10-Foot Design (Zero Zoom Hack)
+   Minimum font size >= 20px, Focusable targets >= 64px
    ============================================================ */
 
 *, *::before, *::after {
@@ -21,7 +22,7 @@ html, body {
     background: var(--bg-base);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 20px;
+    font-size: 24px;
     line-height: 1.45;
     letter-spacing: 0.01em;
     overflow: hidden;
@@ -39,10 +40,10 @@ html, body {
     background: var(--bg-base);
 }
 
-/* ---- 10-foot TV Remote Focus Ring (Follows exact element border-radius, NO square outline box) ---- */
+/* ---- 10-foot TV Remote Focus Ring (Single Active Focus Only) ---- */
 *:focus {
     outline: none !important;
-    border-color: var(--accent) !important;
+    border-color: var(--border-focus) !important;
     box-shadow: var(--shadow-focus) !important;
     z-index: 10;
 }
@@ -84,9 +85,9 @@ body:focus, #app:focus, main:focus {
 
 /* ---- Content Area ---- */
 .content-area {
-    margin-left: var(--nav-w, 104px);
-    width: 1816px;
-    width: calc(100% - var(--nav-w, 104px));
+    margin-left: var(--nav-w, 108px);
+    width: 1812px;
+    width: calc(100% - var(--nav-w, 108px));
     height: 1080px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -112,35 +113,36 @@ body:focus, #app:focus, main:focus {
     display: flex;
 }
 
-/* ---- Section Header ---- */
+/* ---- Section Header (5% TV Safe Margins) ---- */
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 32px 48px 0;
+    padding: 44px 56px 0;
     flex-shrink: 0;
 }
 .section-header h2 {
-    font-size: 38px;
+    font-size: 42px;
     font-weight: 800;
     color: var(--text-bright);
     letter-spacing: -0.02em;
+    line-height: 1.15;
 }
 .section-controls {
     display: flex;
     align-items: center;
-    gap: 16px;
 }
 .section-controls > * + * {
     margin-left: 16px;
 }
 .section-controls select {
-    padding: 12px 20px;
+    min-height: 64px;
+    padding: 14px 24px;
     background: var(--bg-input);
     border: 2px solid var(--border-medium);
     border-radius: var(--radius-sm);
     color: var(--text);
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
 }
 
@@ -149,8 +151,9 @@ body:focus, #app:focus, main:focus {
     width: 100%;
     text-align: center;
     color: var(--text-muted);
-    padding: 100px 32px;
-    font-size: 24px;
+    padding: 100px 36px;
+    font-size: 26px;
+    font-weight: 500;
 }
 
 .sr-only {

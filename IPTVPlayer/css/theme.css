@@ -1,472 +1,269 @@
 /* ============================================================
-   IPTV PLAYER — TV DESIGN SYSTEM
+   IPTV PLAYER — TV DESIGN SYSTEM & THEME TOKENS
    ============================================================
    Purpose:
-   - 10-foot TV interface
-   - 4K / Full HD televisions
-   - LG webOS / Android TV / Google TV style interfaces
-   - Remote-control navigation
-   - Dark cinematic UI
-   - Strong focus visibility
-   - OLED-friendly surfaces
+   - 10-foot Smart TV interface (1920x1080 native)
+   - LG webOS 3.x (Chromium 38) through Modern CTV
+   - Remote-control D-pad & Magic Remote navigation
+   - High-contrast 3px focus ring & distinct active vs. focus states
+   - Zero GPU-heavy backdrop-filter blurs for 60fps performance
 
    Themes:
-   - midnight  : Default premium blue
-   - oled      : Pure black + cyan
-   - emerald   : Cinematic teal
-   - crimson   : Cinematic indigo
+   - midnight-signal : Default Deep Navy & Electric Blue
+   - graphite-amber  : Warm Cinema Charcoal & Amber Gold
+   - oled-mint       : True Black (#000000) & Emerald Mint
+   - daylight-slate  : Bright-Room Cool Slate & Cobalt Blue
 
    Usage:
-       <body data-theme="midnight">
-
+       <html data-theme="midnight-signal">
    ============================================================ */
-
 
 /* ============================================================
-   GLOBAL ROOT DESIGN TOKENS
-   Universal across all themes
+   GLOBAL ROOT DESIGN TOKENS & DEFAULT THEME (MIDNIGHT SIGNAL)
    ============================================================ */
 
-:root {
-    --nav-w: 104px;
+:root,
+[data-theme="midnight-signal"] {
+    --nav-w: 108px;
     --nav-w-exp: 360px;
 
-    --radius-sm: 8px;
+    --radius-sm: 10px;
     --radius: 14px;
     --radius-lg: 20px;
     --radius-full: 9999px;
 
-    --transition: 0.16s ease-out;
-    --transition-smooth: 0.22s ease-out;
+    --transition: 0.15s ease-out;
+    --transition-smooth: 0.20s ease-out;
 
-    /* Semantic Status & Badge Tokens (Dark Surfaces + Crisp Colored Borders) */
-    --danger: #FF5A65;
-    --danger-subtle: rgba(255, 90, 101, 0.15);
-    --danger-surface: #261015;
-    --danger-border: #FF5A65;
+    /* Semantic Status & Badge Tokens */
+    --danger: #FF5D5D;
+    --danger-subtle: rgba(255, 93, 93, 0.15);
+    --danger-surface: #281116;
+    --danger-border: #FF5D5D;
 
-    --success: #3CE38D;
-    --success-subtle: rgba(60, 227, 141, 0.15);
-    --success-surface: #0E2419;
-    --success-border: #3CE38D;
+    --success: #2EE59D;
+    --success-subtle: rgba(46, 229, 157, 0.15);
+    --success-surface: #0E261C;
+    --success-border: #2EE59D;
 
-    --warning: #F5B041;
-    --warning-subtle: rgba(245, 176, 65, 0.15);
-    --warning-surface: #1F190D;
-    --warning-border: #F5B041;
+    --warning: #FFB020;
+    --warning-subtle: rgba(255, 176, 32, 0.15);
+    --warning-surface: #241B0B;
+    --warning-border: #FFB020;
 
-    --hd-surface: #141E2E;
-    --hd-border: #58A6FF;
-    --hd-text: #82BFFF;
-}
+    --hd-surface: #142238;
+    --hd-border: #4F8CFF;
+    --hd-text: #8BB4FF;
 
-/* ============================================================
-   MIDNIGHT THEME
-   Midnight Blue (Calibrated for 10-Foot TV Panels)
-   ============================================================ */
+    /* Backgrounds (Midnight Signal) */
+    --bg-base: #0B1220;
+    --bg-surface: #131C2E;
+    --bg-surface-hover: #1C2942;
+    --bg-surface-active: #243456;
+    --bg-hero: #1A2A4A;
 
-[data-theme="midnight"] {
+    --bg-card: #1C2942;
+    --bg-card-h: #243456;
 
-    /* --------------------------------------------------------
-       BACKGROUNDS (Explicit Dark Elevation Steps)
-       -------------------------------------------------------- */
+    --bg-nav: rgba(11, 18, 32, 0.98);
+    --bg-nav-scrim: rgba(6, 10, 20, 0.86);
+    --bg-overlay: rgba(11, 18, 32, 0.96);
+    --bg-input: #131C2E;
 
-    --bg-base: #060A12;
+    /* Brand / Accent */
+    --accent: #4F8CFF;
+    --accent-h: #8BB4FF;
+    --text-on-accent: #FFFFFF;
 
-    --bg-surface: #0E1626;
-    --bg-surface-hover: #17243B;
-    --bg-surface-active: #1F304D;
+    --accent-gradient: linear-gradient(135deg, #4F8CFF 0%, #2C67DB 100%);
+    --accent-glow: rgba(79, 140, 255, 0.28);
+    --accent-subtle: rgba(79, 140, 255, 0.14);
+    --accent-border: rgba(79, 140, 255, 0.44);
 
-    --bg-card: #121C2E;
-    --bg-card-h: #1B2942;
-
-    --bg-nav: rgba(5, 9, 17, 0.98);
-    --bg-nav-scrim: rgba(2, 5, 12, 0.82);
-
-    --bg-overlay: rgba(5, 9, 17, 0.96);
-
-    --bg-input: #101A2B;
-
-
-    /* --------------------------------------------------------
-       BRAND / ACCENT
-       -------------------------------------------------------- */
-
-    --accent: #4A90FF;
-    --accent-h: #7EB3FF;
-
-    --accent-gradient:
-        linear-gradient(135deg,
-            #579BFF 0%,
-            #2869D5 100%);
-
-    --accent-glow:
-        rgba(74, 144, 255, 0.28);
-
-    --accent-subtle:
-        rgba(74, 144, 255, 0.14);
-
-    --accent-border:
-        rgba(74, 144, 255, 0.42);
-
-
-    /* --------------------------------------------------------
-       TEXT (Hue-Tinted High-Contrast 10-Foot Hierarchy)
-       -------------------------------------------------------- */
-
-    --text: #ECF1F8;
+    /* Text (10-Foot High Contrast) */
+    --text: #F2F6FF;
     --text-bright: #FFFFFF;
+    --text-dim: #B7C4DB;
+    --text-muted: #93A0B8;
 
-    --text-dim: #B8C5D9;
-    --text-muted: #8A9AB2;
+    /* Borders */
+    --border-subtle: rgba(255, 255, 255, 0.085);
+    --border-medium: rgba(255, 255, 255, 0.16);
+    --border-focus: #8BB4FF;
 
+    /* Shadows (3px Crisp Ring + Directional Lift) */
+    --shadow-focus: 0 0 0 3px #8BB4FF, 0 14px 32px rgba(0, 0, 0, 0.85), 0 0 16px rgba(79, 140, 255, 0.32);
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.55);
+    --shadow-card-hover: 0 14px 32px rgba(0, 0, 0, 0.75);
 
-    /* --------------------------------------------------------
-       BORDERS
-       -------------------------------------------------------- */
-
-    --border-subtle:
-        rgba(255, 255, 255, 0.085);
-
-    --border-medium:
-        rgba(255, 255, 255, 0.16);
-
-    --border-focus:
-        var(--accent);
-
-
-    /* --------------------------------------------------------
-       SHADOWS (Directional Lift + Crisp Ring, Zero Bloom)
-       -------------------------------------------------------- */
-
-    --shadow-focus:
-        0 0 0 2px var(--accent),
-        0 14px 30px rgba(0, 0, 0, 0.85),
-        0 0 12px var(--accent-glow);
-
-    --shadow-card:
-        0 8px 24px rgba(0, 0, 0, 0.55);
-
-    --shadow-card-hover:
-        0 14px 32px rgba(0, 0, 0, 0.72);
+    /* Hero Scrims */
+    --hero-scrim-h: linear-gradient(90deg, #0B1220 0%, rgba(11, 18, 32, 0.92) 40%, rgba(11, 18, 32, 0.45) 70%, transparent 100%);
+    --hero-scrim-v: linear-gradient(0deg, #0B1220 0%, rgba(11, 18, 32, 0.78) 30%, transparent 68%);
 }
 
 
 /* ============================================================
-   GLOBAL / DEFAULT — OLED THEME
-   Deep Cinema Slate + Crisp Cyan (Calibrated for OLED & IPS LED TVs)
+   GRAPHITE AMBER THEME
+   Warm Cinema Charcoal & Amber Gold
    ============================================================ */
 
-:root,
-[data-theme="oled"] {
+[data-theme="graphite-amber"] {
+    --bg-base: #121214;
+    --bg-surface: #1C1C1F;
+    --bg-surface-hover: #28282D;
+    --bg-surface-active: #34343B;
+    --bg-hero: #242220;
 
-    --bg-base: #05070B;
+    --bg-card: #28282D;
+    --bg-card-h: #34343B;
 
-    --bg-surface: #0C111B;
-    --bg-surface-hover: #172133;
-    --bg-surface-active: #1D2A40;
+    --bg-nav: rgba(18, 18, 20, 0.98);
+    --bg-nav-scrim: rgba(10, 10, 12, 0.86);
+    --bg-overlay: rgba(18, 18, 20, 0.96);
+    --bg-input: #1C1C1F;
 
-    --bg-card: #111826;
-    --bg-card-h: #192438;
+    --accent: #FFB020;
+    --accent-h: #FFC85C;
+    --text-on-accent: #121214;
 
-    --bg-nav: rgba(4, 6, 10, 0.98);
-    --bg-nav-scrim: rgba(2, 4, 8, 0.88);
+    --accent-gradient: linear-gradient(135deg, #FFB020 0%, #D98200 100%);
+    --accent-glow: rgba(255, 176, 32, 0.26);
+    --accent-subtle: rgba(255, 176, 32, 0.14);
+    --accent-border: rgba(255, 176, 32, 0.44);
 
-    --bg-overlay: rgba(4, 6, 10, 0.97);
-
-    --bg-input: #0E1522;
-
-
-    --accent: #22C8F2;
-    --accent-h: #68E1FF;
-
-    --accent-gradient:
-        linear-gradient(135deg,
-            #29D2F5 0%,
-            #176ED8 100%);
-
-    --accent-glow:
-        rgba(34, 200, 242, 0.24);
-
-    --accent-subtle:
-        rgba(34, 200, 242, 0.12);
-
-    --accent-border:
-        rgba(34, 200, 242, 0.40);
-
-
-    --text: #ECF1F8;
+    --text: #F7F4EE;
     --text-bright: #FFFFFF;
+    --text-dim: #CBC6BC;
+    --text-muted: #A8A49C;
 
-    --text-dim: #B8C4D4;
-    --text-muted: #8A99AD;
+    --border-subtle: rgba(255, 255, 255, 0.085);
+    --border-medium: rgba(255, 255, 255, 0.16);
+    --border-focus: #FFC85C;
 
+    --shadow-focus: 0 0 0 3px #FFC85C, 0 14px 32px rgba(0, 0, 0, 0.86), 0 0 16px rgba(255, 176, 32, 0.30);
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.62);
+    --shadow-card-hover: 0 14px 32px rgba(0, 0, 0, 0.80);
 
-    --border-subtle:
-        rgba(255, 255, 255, 0.085);
-
-    --border-medium:
-        rgba(255, 255, 255, 0.16);
-
-    --border-focus:
-        var(--accent);
-
-
-    --shadow-focus:
-        0 0 0 2px var(--accent),
-        0 14px 30px rgba(0, 0, 0, 0.88),
-        0 0 12px var(--accent-glow);
-
-    --shadow-card:
-        0 8px 24px rgba(0, 0, 0, 0.72);
-
-    --shadow-card-hover:
-        0 14px 32px rgba(0, 0, 0, 0.88);
+    --hero-scrim-h: linear-gradient(90deg, #121214 0%, rgba(18, 18, 20, 0.92) 40%, rgba(18, 18, 20, 0.45) 70%, transparent 100%);
+    --hero-scrim-v: linear-gradient(0deg, #121214 0%, rgba(18, 18, 20, 0.78) 30%, transparent 68%);
 }
 
 
 /* ============================================================
-   EMERALD THEME
-   Cinematic Teal
+   OLED MINT THEME
+   True Black (#000000) & Emerald Mint
    ============================================================ */
 
-[data-theme="emerald"] {
+[data-theme="oled-mint"] {
+    --bg-base: #000000;
+    --bg-surface: #0D1512;
+    --bg-surface-hover: #152019;
+    --bg-surface-active: #1E2F26;
+    --bg-hero: #0E1B16;
 
-    --bg-base: #050C0C;
+    --bg-card: #152019;
+    --bg-card-h: #1E2F26;
 
-    --bg-surface: #0B1A1A;
-    --bg-surface-hover: #132A29;
-    --bg-surface-active: #1A3836;
+    --bg-nav: rgba(0, 0, 0, 0.98);
+    --bg-nav-scrim: rgba(0, 0, 0, 0.88);
+    --bg-overlay: rgba(0, 0, 0, 0.96);
+    --bg-input: #0D1512;
 
-    --bg-card: #0E2121;
-    --bg-card-h: #16302F;
+    --accent: #2EE6A8;
+    --accent-h: #63F0C4;
+    --text-on-accent: #04140E;
 
-    --bg-nav: rgba(4, 11, 11, 0.98);
-    --bg-nav-scrim: rgba(1, 6, 6, 0.84);
+    --accent-gradient: linear-gradient(135deg, #2EE6A8 0%, #14A876 100%);
+    --accent-glow: rgba(46, 230, 168, 0.25);
+    --accent-subtle: rgba(46, 230, 168, 0.13);
+    --accent-border: rgba(46, 230, 168, 0.42);
 
-    --bg-overlay: rgba(4, 11, 11, 0.96);
-
-    --bg-input: #0D1E1E;
-
-
-    --accent: #20C7B0;
-    --accent-h: #62E3D4;
-
-    --accent-gradient:
-        linear-gradient(135deg,
-            #29D3BD 0%,
-            #148D82 100%);
-
-    --accent-glow:
-        rgba(32, 199, 176, 0.25);
-
-    --accent-subtle:
-        rgba(32, 199, 176, 0.13);
-
-    --accent-border:
-        rgba(32, 199, 176, 0.40);
-
-
-    --text: #EAF4F2;
+    --text: #EDFFF7;
     --text-bright: #FFFFFF;
+    --text-dim: #B8D6CA;
+    --text-muted: #8FA9A0;
 
-    --text-dim: #B4CAC7;
-    --text-muted: #849E9A;
+    --border-subtle: rgba(255, 255, 255, 0.085);
+    --border-medium: rgba(255, 255, 255, 0.16);
+    --border-focus: #63F0C4;
 
+    --shadow-focus: 0 0 0 3px #63F0C4, 0 14px 32px rgba(0, 0, 0, 0.90), 0 0 16px rgba(46, 230, 168, 0.28);
+    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.76);
+    --shadow-card-hover: 0 14px 32px rgba(0, 0, 0, 0.90);
 
-    --border-subtle:
-        rgba(255, 255, 255, 0.085);
-
-    --border-medium:
-        rgba(255, 255, 255, 0.16);
-
-    --border-focus:
-        var(--accent);
-
-
-    --shadow-focus:
-        0 0 0 2px var(--accent),
-        0 14px 30px rgba(0, 0, 0, 0.85),
-        0 0 12px var(--accent-glow);
-
-    --shadow-card:
-        0 8px 24px rgba(0, 0, 0, 0.60);
-
-    --shadow-card-hover:
-        0 14px 32px rgba(0, 0, 0, 0.76);
+    --hero-scrim-h: linear-gradient(90deg, #000000 0%, rgba(0, 0, 0, 0.92) 40%, rgba(0, 0, 0, 0.48) 70%, transparent 100%);
+    --hero-scrim-v: linear-gradient(0deg, #000000 0%, rgba(0, 0, 0, 0.82) 30%, transparent 68%);
 }
 
 
 /* ============================================================
-   CRIMSON THEME
-   Deep Cinematic Indigo
+   DAYLIGHT SLATE THEME
+   High-Contrast Bright-Room Light Theme
    ============================================================ */
 
-[data-theme="crimson"] {
+[data-theme="daylight-slate"] {
+    --danger: #D92D20;
+    --danger-subtle: rgba(217, 45, 32, 0.12);
+    --danger-surface: #FEE4E2;
+    --danger-border: #F04438;
 
-    --bg-base: #080610;
+    --success: #1F9D68;
+    --success-subtle: rgba(31, 157, 104, 0.12);
+    --success-surface: #DCFAE6;
+    --success-border: #17B26A;
 
-    --bg-surface: #130F22;
-    --bg-surface-hover: #1E1836;
-    --bg-surface-active: #282047;
+    --warning: #D97706;
+    --warning-subtle: rgba(217, 119, 6, 0.14);
+    --warning-surface: #FEF0C7;
+    --warning-border: #F79009;
 
-    --bg-card: #171229;
-    --bg-card-h: #231C3D;
+    --hd-surface: #E0EAFF;
+    --hd-border: #3D5AFE;
+    --hd-text: #1E40AF;
 
-    --bg-nav: rgba(7, 5, 13, 0.98);
-    --bg-nav-scrim: rgba(3, 1, 8, 0.84);
+    --bg-base: #E9EEF5;
+    --bg-surface: #FFFFFF;
+    --bg-surface-hover: #EEF3FA;
+    --bg-surface-active: #E3E9F2;
+    --bg-hero: #D9E2F0;
 
-    --bg-overlay: rgba(7, 5, 13, 0.96);
+    --bg-card: #FFFFFF;
+    --bg-card-h: #E3E9F2;
 
-    --bg-input: #151026;
+    --bg-nav: rgba(255, 255, 255, 0.98);
+    --bg-nav-scrim: rgba(22, 27, 38, 0.36);
+    --bg-overlay: rgba(233, 238, 245, 0.97);
+    --bg-input: #F5F7FB;
 
+    --accent: #3D5AFE;
+    --accent-h: #637BFF;
+    --text-on-accent: #FFFFFF;
 
-    --accent: #8D7CFF;
-    --accent-h: #B4A6FF;
+    --accent-gradient: linear-gradient(135deg, #3D5AFE 0%, #253EDB 100%);
+    --accent-glow: rgba(61, 90, 254, 0.24);
+    --accent-subtle: rgba(61, 90, 254, 0.11);
+    --accent-border: rgba(61, 90, 254, 0.38);
 
-    --accent-gradient:
-        linear-gradient(135deg,
-            #9C8BFF 0%,
-            #624DC4 100%);
+    --text: #161B26;
+    --text-bright: #0C1017;
+    --text-dim: #3A4354;
+    --text-muted: #5A6172;
 
-    --accent-glow:
-        rgba(141, 124, 255, 0.25);
+    --border-subtle: rgba(22, 27, 38, 0.11);
+    --border-medium: rgba(22, 27, 38, 0.20);
+    --border-focus: #3D5AFE;
 
-    --accent-subtle:
-        rgba(141, 124, 255, 0.13);
+    --shadow-focus: 0 0 0 3px #3D5AFE, 0 14px 32px rgba(22, 27, 38, 0.22), 0 0 16px rgba(61, 90, 254, 0.28);
+    --shadow-card: 0 8px 24px rgba(22, 27, 38, 0.10);
+    --shadow-card-hover: 0 14px 32px rgba(22, 27, 38, 0.18);
 
-    --accent-border:
-        rgba(141, 124, 255, 0.40);
-
-
-    --text: #EFEBF7;
-    --text-bright: #FFFFFF;
-
-    --text-dim: #C0B8D1;
-    --text-muted: #9187A6;
-
-
-    --border-subtle:
-        rgba(255, 255, 255, 0.085);
-
-    --border-medium:
-        rgba(255, 255, 255, 0.16);
-
-    --border-focus:
-        var(--accent);
-
-
-    --shadow-focus:
-        0 0 0 2px var(--accent),
-        0 14px 30px rgba(0, 0, 0, 0.85),
-        0 0 12px var(--accent-glow);
-
-    --shadow-card:
-        0 8px 24px rgba(0, 0, 0, 0.62);
-
-    --shadow-card-hover:
-        0 14px 32px rgba(0, 0, 0, 0.78);
+    --hero-scrim-h: linear-gradient(90deg, #E9EEF5 0%, rgba(233, 238, 245, 0.94) 42%, rgba(233, 238, 245, 0.50) 72%, transparent 100%);
+    --hero-scrim-v: linear-gradient(0deg, #E9EEF5 0%, rgba(233, 238, 245, 0.84) 30%, transparent 68%);
 }
 
 
 /* ============================================================
-   GLOBAL RESET
-   ============================================================ */
-
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-
-    width: 100%;
-    min-height: 100%;
-
-    background: var(--bg-base);
-    color: var(--text);
-
-    font-family:
-        Inter,
-        "Segoe UI",
-        Roboto,
-        Arial,
-        sans-serif;
-
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-}
-
-body {
-    overflow-x: hidden;
-}
-
-
-/* ============================================================
-   MAIN APP
-   ============================================================ */
-
-.app {
-    /* 100% (not 100vh): viewport units ignore body zoom and would overflow */
-    min-height: 100%;
-    background: var(--bg-base);
-    color: var(--text);
-}
-
-
-/* ============================================================
-   NAVIGATION
-   ============================================================ */
-
-.nav,
-.sidebar,
-.navigation {
-    background: var(--bg-nav);
-
-    border-right:
-        1px solid var(--border-subtle);
-
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-}
-
-.nav-item,
-.sidebar-item,
-.navigation-item {
-    color: var(--text-dim);
-
-    border-radius: var(--radius);
-
-    transition:
-        background var(--transition),
-        color var(--transition),
-        transform var(--transition),
-        box-shadow var(--transition);
-}
-
-.nav-item:hover,
-.sidebar-item:hover,
-.navigation-item:hover {
-    background: var(--bg-surface-hover);
-    color: var(--text);
-}
-
-.nav-item.active,
-.sidebar-item.active,
-.navigation-item.active {
-    color: var(--text-bright);
-    background: var(--accent-subtle);
-
-    box-shadow:
-        inset 3px 0 0 var(--accent);
-}
-
-
-/* ============================================================
-   TV FOCUS SYSTEM
-   Critical for remote navigation
+   TV FOCUS & UTILITY SYSTEM
    ============================================================ */
 
 :focus {
@@ -475,886 +272,26 @@ body {
 
 :focus-visible {
     outline: none !important;
-    border-color: var(--accent);
-    box-shadow:
-        var(--shadow-focus);
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
 }
-
-
-/* Explicit TV focus class */
 
 .tv-focus,
 .focused,
 .is-focused {
-    border-color: var(--accent) !important;
-
-    box-shadow:
-        var(--shadow-focus) !important;
-
-    z-index: 5;
-}
-
-
-/* ============================================================
-   CARDS
-   ============================================================ */
-
-.card,
-.channel-card,
-.movie-card,
-.series-card,
-.category-card,
-.content-card {
-    background: var(--bg-card);
-
-    border:
-        1px solid var(--border-subtle);
-
-    border-radius:
-        var(--radius);
-
-    color: var(--text);
-
-    box-shadow:
-        var(--shadow-card);
-
-    transition:
-        background var(--transition),
-        border-color var(--transition),
-        transform var(--transition),
-        box-shadow var(--transition);
-}
-
-
-.card:hover,
-.channel-card:hover,
-.movie-card:hover,
-.series-card:hover,
-.category-card:hover,
-.content-card:hover {
-    background: var(--bg-card-h);
-
-    border-color:
-        var(--border-medium);
-
-    transform:
-        translateY(-2px);
-
-    box-shadow:
-        var(--shadow-card-hover);
-}
-
-
-.card:focus-visible,
-.channel-card:focus-visible,
-.movie-card:focus-visible,
-.series-card:focus-visible,
-.category-card:focus-visible,
-.content-card:focus-visible {
-    border-color:
-        var(--accent);
-
-    box-shadow:
-        var(--shadow-focus);
-
-    transform:
-        scale(1.035);
-}
-
-
-/* ============================================================
-   CHANNEL CARDS
-   ============================================================ */
-
-.channel-card {
-    overflow: hidden;
-}
-
-.channel-card img,
-.channel-card .channel-logo {
-    background:
-        var(--bg-surface);
-
-    border-radius:
-        var(--radius-sm);
-}
-
-.channel-card .channel-name {
-    color:
-        var(--text-bright);
-
-    font-weight:
-        600;
-}
-
-.channel-card .channel-meta {
-    color:
-        var(--text-dim);
-}
-
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-
-button,
-.btn,
-.button {
-    border: 0;
-
-    border-radius:
-        var(--radius);
-
-    background:
-        var(--bg-surface);
-
-    color:
-        var(--text);
-
-    transition:
-        background var(--transition),
-        color var(--transition),
-        transform var(--transition),
-        box-shadow var(--transition);
-}
-
-button:hover,
-.btn:hover,
-.button:hover {
-    background:
-        var(--bg-surface-hover);
-
-    color:
-        var(--text-bright);
-}
-
-button:active,
-.btn:active,
-.button:active {
-    background:
-        var(--bg-surface-active);
-
-    transform:
-        scale(0.98);
-}
-
-
-/* Primary button */
-
-.btn-primary,
-.button-primary,
-button.primary {
-    background:
-        var(--bg-surface-active);
-
-    border:
-        2px solid var(--accent);
-
-    color:
-        #FFFFFF;
-
-    font-weight:
-        600;
-
-    box-shadow:
-        0 6px 20px var(--accent-glow);
-}
-
-.btn-primary:hover,
-.button-primary:hover,
-button.primary:hover {
-    background:
-        var(--bg-card-h);
-
-    border-color:
-        var(--accent-h);
-
-    box-shadow:
-        0 8px 26px var(--accent-glow);
-}
-
-.btn-primary:focus-visible,
-.button-primary:focus-visible,
-button.primary:focus-visible {
-    box-shadow:
-        var(--shadow-focus),
-        0 8px 26px var(--accent-glow);
-}
-
-
-/* ============================================================
-   INPUTS / SEARCH
-   ============================================================ */
-
-input,
-textarea,
-select,
-.input,
-.search-input {
-    background:
-        var(--bg-input);
-
-    color:
-        var(--text-bright);
-
-    border:
-        1px solid var(--border-medium);
-
-    border-radius:
-        var(--radius);
-
-    transition:
-        border-color var(--transition),
-        box-shadow var(--transition),
-        background var(--transition);
-}
-
-input::placeholder,
-textarea::placeholder,
-.search-input::placeholder {
-    color:
-        var(--text-muted);
-}
-
-input:hover,
-textarea:hover,
-select:hover,
-.input:hover,
-.search-input:hover {
-    border-color:
-        var(--border-medium);
-
-    background:
-        var(--bg-surface-hover);
-}
-
-input:focus,
-textarea:focus,
-select:focus,
-.input:focus,
-.search-input:focus {
-    border-color:
-        var(--accent);
-
-    background:
-        var(--bg-surface);
-
-    box-shadow:
-        var(--shadow-focus);
-}
-
-
-/* ============================================================
-   SEARCH
-   ============================================================ */
-
-.search {
-    background:
-        var(--bg-input);
-
-    border:
-        1px solid var(--border-subtle);
-
-    border-radius:
-        var(--radius-full);
-}
-
-.search:focus-within {
-    border-color:
-        var(--accent);
-
-    box-shadow:
-        var(--shadow-focus);
-}
-
-
-/* ============================================================
-   TABS
-   ============================================================ */
-
-.tab {
-    color:
-        var(--text-dim);
-
-    background:
-        transparent;
-
-    border-radius:
-        var(--radius-sm);
-
-    transition:
-        color var(--transition),
-        background var(--transition);
-}
-
-.tab:hover {
-    color:
-        var(--text-bright);
-
-    background:
-        var(--bg-surface-hover);
-}
-
-.tab.active {
-    color:
-        var(--text-bright);
-
-    background:
-        var(--accent-subtle);
-
-    box-shadow:
-        inset 0 -2px 0 var(--accent);
-}
-
-
-/* ============================================================
-   BADGES
-   ============================================================ */
-
-.badge {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    border-radius:
-        var(--radius-full);
-
-    background:
-        var(--bg-surface);
-
-    color:
-        var(--text-dim);
-
-    border:
-        1px solid var(--border-subtle);
-}
-
-.badge-live {
-    background:
-        var(--danger-subtle);
-
-    color:
-        var(--danger);
-
-    border-color:
-        rgba(255, 92, 100, 0.30);
-}
-
-.badge-success {
-    background:
-        var(--success-subtle);
-
-    color:
-        var(--success);
-
-    border-color:
-        rgba(66, 216, 131, 0.30);
-}
-
-.badge-warning {
-    background:
-        rgba(255, 190, 69, 0.13);
-
-    color:
-        var(--warning);
-
-    border-color:
-        rgba(255, 190, 69, 0.30);
-}
-
-
-/* ============================================================
-   LIVE INDICATOR
-   ============================================================ */
-
-.live-dot {
-    width: 8px;
-    height: 8px;
-
-    border-radius:
-        50%;
-
-    background:
-        var(--danger);
-
-    box-shadow:
-        0 0 10px rgba(255, 92, 100, 0.55);
-}
-
-
-/* ============================================================
-   PLAYER
-   ============================================================ */
-
-.video-player,
-.player {
-    background:
-        #000000;
-
-    border-radius:
-        var(--radius);
-
-    overflow:
-        hidden;
-}
-
-.player-controls {
-    background:
-        linear-gradient(to top,
-            rgba(0, 0, 0, 0.90),
-            rgba(0, 0, 0, 0.00));
-}
-
-.player-control {
-    color:
-        var(--text-bright);
-
-    background:
-        rgba(0, 0, 0, 0.45);
-
-    border:
-        1px solid rgba(255, 255, 255, 0.10);
-
-    border-radius:
-        var(--radius-full);
-}
-
-.player-control:hover,
-.player-control:focus-visible {
-    background:
-        var(--bg-surface-active);
-
-    border-color:
-        var(--accent);
-
-    color:
-        #FFFFFF;
-}
-
-
-/* ============================================================
-   MODALS / DIALOGS
-   ============================================================ */
-
-.modal,
-.dialog,
-.popup {
-    background:
-        var(--bg-overlay);
-
-    color:
-        var(--text);
-
-    border:
-        1px solid var(--border-medium);
-
-    border-radius:
-        var(--radius-lg);
-
-    box-shadow:
-        0 24px 70px rgba(0, 0, 0, 0.70);
-}
-
-.modal-backdrop,
-.dialog-backdrop {
-    background:
-        var(--bg-nav-scrim);
-
-    backdrop-filter:
-        blur(8px);
-
-    -webkit-backdrop-filter:
-        blur(8px);
-}
-
-
-/* ============================================================
-   DROPDOWNS / MENUS
-   ============================================================ */
-
-.menu,
-.dropdown,
-.context-menu {
-    background:
-        var(--bg-overlay);
-
-    border:
-        1px solid var(--border-medium);
-
-    border-radius:
-        var(--radius);
-
-    box-shadow:
-        0 18px 50px rgba(0, 0, 0, 0.60);
-}
-
-.menu-item,
-.dropdown-item {
-    color:
-        var(--text-dim);
-
-    border-radius:
-        var(--radius-sm);
-}
-
-.menu-item:hover,
-.menu-item:focus-visible,
-.dropdown-item:hover,
-.dropdown-item:focus-visible {
-    background:
-        var(--accent-subtle);
-
-    color:
-        var(--text-bright);
-}
-
-
-/* ============================================================
-   DIVIDERS
-   ============================================================ */
-
-.divider,
-.separator {
-    background:
-        var(--border-subtle);
-}
-
-
-/* ============================================================
-   HEADINGS
-   ============================================================ */
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    color:
-        var(--text-bright);
-}
-
-h1 {
-    font-weight:
-        700;
-}
-
-h2,
-h3 {
-    font-weight:
-        650;
-}
-
-
-/* ============================================================
-   SECONDARY TEXT
-   ============================================================ */
-
-.text-primary {
-    color:
-        var(--text);
-}
-
-.text-bright {
-    color:
-        var(--text-bright);
-}
-
-.text-secondary,
-.text-dim {
-    color:
-        var(--text-dim);
-}
-
-.text-muted {
-    color:
-        var(--text-muted);
-}
-
-.text-accent {
-    color:
-        var(--accent);
-}
-
-
-/* ============================================================
-   LINKS
-   ============================================================ */
-
-a {
-    color:
-        var(--accent);
-
-    text-decoration:
-        none;
-}
-
-a:hover {
-    color:
-        var(--accent-h);
-}
-
-
-/* ============================================================
-   TOGGLE / SWITCH
-   ============================================================ */
-
-.toggle,
-.switch {
-    background:
-        var(--bg-surface-active);
-
-    border:
-        1px solid var(--border-medium);
-
-    border-radius:
-        var(--radius-full);
-}
-
-.toggle.active,
-.switch.active,
-.toggle[aria-checked="true"],
-.switch[aria-checked="true"] {
-    background:
-        var(--bg-surface-active);
-    border-color:
-        var(--accent);
-}
-
-.toggle-thumb,
-.switch-thumb {
-    background:
-        #FFFFFF;
-
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-
-/* ============================================================
-   PROGRESS / SLIDER
-   ============================================================ */
-
-.progress,
-.progress-bar {
-    background:
-        var(--bg-surface-active);
-
-    border-radius:
-        var(--radius-full);
-}
-
-.progress-value,
-.progress-fill {
-    background:
-        var(--accent-gradient);
-
-    border-radius:
-        var(--radius-full);
-}
-
-input[type="range"] {
-    accent-color:
-        var(--accent);
-}
-
-
-/* ============================================================
-   SCROLLBAR
-   ============================================================ */
-
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background:
-        var(--bg-base);
-}
-
-::-webkit-scrollbar-thumb {
-    background:
-        var(--bg-surface-active);
-
-    border-radius:
-        var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background:
-        var(--accent);
-}
-
-
-/* ============================================================
-   SELECTION
-   ============================================================ */
-
-::selection {
-    background:
-        var(--accent);
-
-    color:
-        #FFFFFF;
-}
-
-
-/* ============================================================
-   DISABLED
-   ============================================================ */
-
-:disabled,
-.disabled {
-    opacity:
-        0.45;
-
-    cursor:
-        not-allowed;
+    border-color: var(--border-focus) !important;
+    box-shadow: var(--shadow-focus) !important;
+    z-index: 10;
 }
-
-
-/* ============================================================
-   LOADING / SKELETON
-   ============================================================ */
-
-.skeleton {
-    background:
-        linear-gradient(90deg,
-            var(--bg-surface) 25%,
-            var(--bg-surface-hover) 50%,
-            var(--bg-surface) 75%);
-
-    background-size:
-        200% 100%;
-
-    animation:
-        skeleton-loading 1.5s infinite;
-}
-
-@keyframes skeleton-loading {
-    from {
-        background-position:
-            200% 0;
-    }
-
-    to {
-        background-position:
-            -200% 0;
-    }
-}
-
-
-/* ============================================================
-   TOAST / NOTIFICATIONS
-   ============================================================ */
-
-.toast,
-.notification {
-    background:
-        var(--bg-overlay);
-
-    color:
-        var(--text);
-
-    border:
-        1px solid var(--border-medium);
-
-    border-radius:
-        var(--radius);
-
-    box-shadow:
-        0 14px 40px rgba(0, 0, 0, 0.60);
-}
-
-.toast-accent {
-    border-left:
-        3px solid var(--accent);
-}
-
-.toast-success {
-    border-left:
-        3px solid var(--success);
-}
-
-.toast-danger {
-    border-left:
-        3px solid var(--danger);
-}
-
-.toast-warning {
-    border-left:
-        3px solid var(--warning);
-}
-
-
-/* ============================================================
-   EMPTY STATES
-   ============================================================ */
-
-.empty-state {
-    color:
-        var(--text-dim);
-}
-
-.empty-state-icon {
-    color:
-        var(--text-muted);
-}
-
-
-/* ============================================================
-   TV-SPECIFIC FOCUS ENHANCEMENT (Handled via border-color & box-shadow)
-   ============================================================ */
-
-
-/* ============================================================
-   REDUCED MOTION
-   ============================================================ */
 
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
 
     *,
     *::before,
     *::after {
-        animation-duration:
-            0.01ms !important;
-
-        animation-iteration-count:
-            1 !important;
-
-        transition-duration:
-            0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
-}
-
-
-/* ============================================================
-   OPTIONAL THEME UTILITY
-   ============================================================ */
-
-.theme-accent {
-    color:
-        var(--accent);
-}
-
-.theme-accent-bg {
-    background:
-        var(--accent);
-}
-
-.theme-accent-gradient {
-    background:
-        var(--accent-gradient);
-}
-
-.theme-surface {
-    background:
-        var(--bg-surface);
-}
-
-.theme-card {
-    background:
-        var(--bg-card);
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="oled">
+<html lang="en" data-theme="midnight-signal">
 
 <head>
     <meta charset="UTF-8">
@@ -35,6 +35,18 @@
                 <div id="profiles-grid" class="profiles-grid">
                     <!-- Dynamic profile cards + Add New Playlist card rendered here -->
                 </div>
+
+                <!-- Profile Delete Confirmation Modal -->
+                <div id="profile-delete-modal" class="confirm-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-delete-title">
+                    <div class="confirm-modal-card">
+                        <h3 id="confirm-delete-title" class="confirm-modal-title">Remove Saved Playlist?</h3>
+                        <p id="confirm-delete-desc" class="confirm-modal-desc">Are you sure you want to delete this playlist profile?</p>
+                        <div class="confirm-modal-actions">
+                            <button id="btn-cancel-delete-profile" class="btn-ghost" tabindex="0">Cancel</button>
+                            <button id="btn-confirm-delete-profile" class="btn-danger" tabindex="0">Delete Playlist</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- PAGE 2: FULL LOGIN FORM PAGE -->
@@ -56,6 +68,8 @@
                 <div class="login-columns-wrapper">
                     <!-- Left Column: Credentials Form -->
                     <div class="login-card-container">
+                        <div id="login-form-error" class="form-error-msg hidden" role="alert"></div>
+
                         <div class="form-group" style="margin-bottom: 14px;">
                             <label for="profile-name">Playlist Profile Name (Optional)</label>
                             <input type="text" id="profile-name" placeholder="e.g. Living Room Cable / Sports Server"

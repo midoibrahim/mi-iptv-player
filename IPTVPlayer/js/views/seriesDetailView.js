@@ -145,12 +145,13 @@ window.IPTV.SeriesDetailView = {
         this.screen.scrollTop = 0;
 
         setTimeout(() => {
-            const firstTarget = this.screen.querySelector('.episode-card, .season-tab-btn.active, #series-fav-btn, #series-back-btn');
+            const firstTarget = this.screen.querySelector('.season-tab-btn.active, .episode-card, #series-fav-btn, #series-back-btn');
             if (firstTarget && window.IPTV.SpatialNav) {
                 window.IPTV.SpatialNav.focusElement(firstTarget);
             } else if (firstTarget) {
                 firstTarget.focus();
             }
+            this.screen.scrollTop = 0;
         }, 60);
     },
 

@@ -262,6 +262,10 @@ window.IPTV.BrowseView = class {
             const li = e.target.closest('.category-item');
             if (!li) return;
             this.selectedCategory = li.dataset.cat || 'all';
+            if (this.sectionEl) {
+                this.sectionEl._lastFocusedCard = null;
+                this.sectionEl._lastFocusedCategory = li;
+            }
             const prev = list.querySelector('.category-item.active');
             if (prev) prev.classList.remove('active');
             li.classList.add('active');

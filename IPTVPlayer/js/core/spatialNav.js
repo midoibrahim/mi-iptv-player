@@ -1,6 +1,7 @@
 /* ============================================================
    IPTV Player — 2D Cartesian Spatial Navigation Engine
    Adheres to TV Navigation Architecture Standards
+   Includes Rail/Grid/Section Focus Memory & Modal Focus Containment
    Optimized for 60fps on LG webOS 3.x (Chromium 38) through Modern CTV
    ============================================================ */
 
@@ -47,7 +48,7 @@ window.IPTV.SpatialNav = {
             // Support LG Magic Remote scroll wheel on any scrollable container under the cursor or active focus
             const target = e.target && e.target.nodeType === 1 ? e.target : document.activeElement;
             if (!target) return;
-            const scroller = target.closest('.browse-content, .category-list, #series-detail-screen, .content-area');
+            const scroller = target.closest('.browse-content, .category-list, #series-detail-screen, .content-area, .login-page-view');
             if (scroller && scroller.scrollHeight > scroller.clientHeight) {
                 scroller.scrollTop += (e.deltaY > 0 ? 180 : -180);
             }
@@ -57,6 +58,11 @@ window.IPTV.SpatialNav = {
     getActiveRoot() {
         if (document.body.classList.contains('player-active')) {
             return document.getElementById('player-screen');
+        }
+        // Modal focus trap for profile delete confirmation
+        const confirmModal = document.getElementById('profile-delete-modal');
+        if (confirmModal && !confirmModal.classList.contains('hidden')) {
+            return confirmModal;
         }
         const seriesScreen = document.getElementById('series-detail-screen');
         if (seriesScreen && seriesScreen.classList.contains('active')) {
@@ -109,6 +115,18 @@ window.IPTV.SpatialNav = {
             window.IPTV.Card.eagerLoad(el);
             if (el.nextElementSibling) window.IPTV.Card.eagerLoad(el.nextElementSibling);
         }
+
+        // Record focus memory on parent section / containers (never memorize <input> to avoid auto-OSK)
+        const sec = el.closest && el.closest('.section');
+        if (sec && el.tagName !== 'INPUT') {
+            sec._lastFocusedEl = el;
+            if (el.closest('.browse-content') && el.classList.contains('card')) {
+                sec._lastFocusedCard = el;
+            } else if (el.closest('.category-sidebar') && el.classList.contains('category-item')) {
+                sec._lastFocusedCategory = el;
+            }
+        }
+
         el.focus();
         this.ensureVisible(el);
         return true;
@@ -158,7 +176,10 @@ window.IPTV.SpatialNav = {
             } else if (dir === 'right') {
                 const activeSec = document.querySelector('#main-shell .section.active');
                 if (activeSec) {
-                    const target = activeSec.querySelector('.category-item.active, .category-item, .card, .btn-primary, button:not([disabled]), select, [tabindex="0"]');
+                    if (activeSec._lastFocusedEl && document.contains(activeSec._lastFocusedEl) && this.isFocusable(activeSec._lastFocusedEl, activeRoot)) {
+                        return this.focusElement(activeSec._lastFocusedEl);
+                    }
+                    const target = activeSec.querySelector('.category-item.active, .category-item, .card, .theme-swatch-card.active, .theme-swatch-card, .btn-primary, button:not([disabled]), select, [tabindex="0"]');
                     if (target && this.isFocusable(target, activeRoot)) {
                         return this.focusElement(target);
                     }
@@ -200,6 +221,9 @@ window.IPTV.SpatialNav = {
                 } else if (dir === 'right') {
                     const sec = catSidebar.closest('.section');
                     if (sec) {
+                        if (sec._lastFocusedCard && document.contains(sec._lastFocusedCard) && this.isFocusable(sec._lastFocusedCard, activeRoot)) {
+                            return this.focusElement(sec._lastFocusedCard);
+                        }
                         const firstCard = sec.querySelector('.browse-content .card, .view-btn.active, .view-btn');
                         if (firstCard && this.isFocusable(firstCard, activeRoot)) {
                             return this.focusElement(firstCard);
@@ -223,12 +247,46 @@ window.IPTV.SpatialNav = {
                     const activeNav = nav && (nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item'));
                     if (activeNav) return this.focusElement(activeNav);
                     return true;
+                } else if (dir === 'right') {
+                    const sec = catSidebar.closest('.section');
+                    if (sec) {
+                        const firstCard = sec.querySelector('.browse-content .card, .view-btn.active, .view-btn');
+                        if (firstCard && this.isFocusable(firstCard, activeRoot)) {
+                            return this.focusElement(firstCard);
+                        }
+                    }
                 }
             }
         }
 
-        // ---- 3. Horizontal Rail (.row-scroll / .seasons-tabs-container) 1D Left/Right Traversal ----
-        const horizRail = current.closest('.row-scroll, .seasons-tabs-container');
+        // ---- 2b. Series Detail Predictable Focus Order (Back -> Favorite -> Season Tabs -> Episodes) ----
+        if (activeRoot && activeRoot.id === 'series-detail-screen') {
+            if (current.id === 'series-back-btn' || current.id === 'series-fav-btn') {
+                if (dir === 'right' && current.id === 'series-back-btn') {
+                    const favBtn = document.getElementById('series-fav-btn');
+                    if (favBtn && this.isFocusable(favBtn, activeRoot)) return this.focusElement(favBtn);
+                } else if (dir === 'left' && current.id === 'series-fav-btn') {
+                    const backBtn = document.getElementById('series-back-btn');
+                    if (backBtn && this.isFocusable(backBtn, activeRoot)) return this.focusElement(backBtn);
+                } else if (dir === 'down') {
+                    const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
+                    if (activeSeason && this.isFocusable(activeSeason, activeRoot)) return this.focusElement(activeSeason);
+                    const firstEp = activeRoot.querySelector('.episode-card');
+                    if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
+                }
+            } else if (current.classList.contains('season-tab-btn')) {
+                if (dir === 'up') {
+                    const backBtn = document.getElementById('series-back-btn');
+                    if (backBtn && this.isFocusable(backBtn, activeRoot)) return this.focusElement(backBtn);
+                } else if (dir === 'down') {
+                    const firstEp = activeRoot.querySelector('.episode-card');
+                    if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
+                }
+            }
+        }
+
+        // ---- 3. Horizontal Rail (.row-scroll / .seasons-tabs-container / .theme-swatch-grid) 1D Left/Right Traversal ----
+        const horizRail = current.closest('.row-scroll, .seasons-tabs-container, .theme-swatch-grid');
         if (horizRail && (dir === 'left' || dir === 'right')) {
             const items = Array.from(horizRail.children).filter(el => this.isFocusable(el, activeRoot));
             const idx = items.indexOf(current);
@@ -273,9 +331,17 @@ window.IPTV.SpatialNav = {
             ? (activeRoot.querySelector('.section.active') || activeRoot)
             : activeRoot;
 
-        const selector = 'button, input, select, [tabindex="0"], .card, .category-item, .season-tab-btn, .episode-card, .profile-card, .add-profile-card';
+        const inBrowseMain = current.closest('.browse-main-content');
+
+        const selector = 'button, input, select, [tabindex="0"], .card, .category-item, .season-tab-btn, .episode-card, .profile-card, .add-profile-card, .theme-swatch-card';
         const candidates = Array.from(queryScope.querySelectorAll(selector))
-            .filter(el => el !== current && this.isFocusable(el, activeRoot));
+            .filter(el => {
+                if (el === current || !this.isFocusable(el, activeRoot)) return false;
+                // When navigating left inside .browse-main-content, do not pick arbitrary off-row category items via 2D math;
+                // if there is no card to the left in .browse-main-content, we will cleanly jump to .category-item.active!
+                if (inBrowseMain && dir === 'left' && el.closest('.category-sidebar')) return false;
+                return true;
+            });
 
         let bestCandidate = null;
         let bestScore = Infinity;
@@ -322,14 +388,35 @@ window.IPTV.SpatialNav = {
             }
         }
 
-        // Edge Escape to Left Navigation Rail when moving left from leftmost content
+        // Edge Escape from Browse Content Grid -> Active Category in Category Sidebar -> Left Navigation Rail
         if (!bestCandidate && dir === 'left') {
+            if (inBrowseMain) {
+                const sec = inBrowseMain.closest('.section');
+                const sidebar = sec && sec.querySelector('.category-sidebar');
+                if (sidebar) {
+                    const targetCat = (sec._lastFocusedCategory && document.contains(sec._lastFocusedCategory) && this.isFocusable(sec._lastFocusedCategory, activeRoot))
+                        ? sec._lastFocusedCategory
+                        : (sidebar.querySelector('.category-item.active') || sidebar.querySelector('.category-item'));
+                    if (targetCat && this.isFocusable(targetCat, activeRoot)) {
+                        return this.focusElement(targetCat);
+                    }
+                }
+            }
+
             const nav = document.getElementById('side-nav');
             if (nav && !nav.contains(current) && activeRoot.contains(nav)) {
                 const activeNav = nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item');
                 if (activeNav && this.isFocusable(activeNav, activeRoot)) {
                     bestCandidate = activeNav;
                 }
+            }
+        }
+
+        // In Series Detail: if pressing Up from top row of episode cards, jump cleanly to active Season Tab
+        if (!bestCandidate && dir === 'up' && current.classList.contains('episode-card') && activeRoot.id === 'series-detail-screen') {
+            const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
+            if (activeSeason && this.isFocusable(activeSeason, activeRoot)) {
+                bestCandidate = activeSeason;
             }
         }
 
@@ -345,7 +432,7 @@ window.IPTV.SpatialNav = {
         const scope = (root.id === 'main-shell')
             ? (root.querySelector('.section.active') || root)
             : root;
-        const preferred = scope.querySelector('.profile-card, .add-profile-card, .category-item.active, .card, .btn-primary, button:not([disabled]), input, [tabindex="0"]');
+        const preferred = scope.querySelector('.profile-card, .add-profile-card, .category-item.active, .card, .theme-swatch-card.active, .btn-primary, button:not([disabled]), input, [tabindex="0"]');
         if (preferred && this.isFocusable(preferred, root)) return preferred;
 
         const all = scope.querySelectorAll('[tabindex="0"], button, input, select');
@@ -358,8 +445,8 @@ window.IPTV.SpatialNav = {
     ensureVisible(el) {
         if (!el) return;
 
-        // 1. Horizontal scroll containers (.row-scroll, .seasons-tabs-container)
-        const rowScroll = el.closest('.row-scroll, .seasons-tabs-container');
+        // 1. Horizontal scroll containers (.row-scroll, .seasons-tabs-container, .theme-swatch-grid)
+        const rowScroll = el.closest('.row-scroll, .seasons-tabs-container, .theme-swatch-grid');
         if (rowScroll) {
             const rRect = rowScroll.getBoundingClientRect();
             const eRect = el.getBoundingClientRect();

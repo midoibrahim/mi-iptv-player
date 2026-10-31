@@ -97,6 +97,12 @@ class IPTVApp {
     }
 
     navigateTo(section, pushHistory = true) {
+        const contentArea = document.getElementById('content-area');
+        const prevSec = this.currentSection ? document.getElementById(`section-${this.currentSection}`) : null;
+        if (prevSec && contentArea) {
+            prevSec._savedScrollTop = contentArea.scrollTop;
+        }
+
         if (pushHistory && this.currentSection && this.currentSection !== section) {
             // Push previous section to history stack
             this.sectionHistory.push(this.currentSection);
@@ -125,15 +131,24 @@ class IPTVApp {
                 this.renderFavorites();
             }
 
-            // Reset content-area scroll to top on section switch
-            const contentArea = document.getElementById('content-area');
-            if (contentArea) contentArea.scrollTop = 0;
+            // Restore section scroll position (or default to top)
+            if (contentArea) {
+                contentArea.scrollTop = typeof sec._savedScrollTop === 'number' ? sec._savedScrollTop : 0;
+            }
 
-            // Focus first non-input focusable item (e.g. active category, card, button)
+            // Restore last focused item in section or focus first non-input focusable item
             // NEVER auto-focus input elements so the TV virtual keyboard never pops up automatically
             setTimeout(() => {
-                const target = sec.querySelector('.category-item.active, .category-item, .card, .btn-primary, button:not([disabled])')
-                    || Array.from(sec.querySelectorAll('[tabindex="0"], button, select')).find(el => el.tagName !== 'INPUT');
+                const activeRoot = window.IPTV.SpatialNav ? window.IPTV.SpatialNav.getActiveRoot() : document.body;
+                let target = null;
+                if (sec._lastFocusedEl && document.contains(sec._lastFocusedEl) && sec._lastFocusedEl.tagName !== 'INPUT' &&
+                    (!window.IPTV.SpatialNav || window.IPTV.SpatialNav.isFocusable(sec._lastFocusedEl, activeRoot))) {
+                    target = sec._lastFocusedEl;
+                }
+                if (!target) {
+                    target = sec.querySelector('.category-item.active, .category-item, .card, .theme-swatch-card.active, .btn-primary, button:not([disabled])')
+                        || Array.from(sec.querySelectorAll('[tabindex="0"], button, select')).find(el => el.tagName !== 'INPUT');
+                }
                 if (target) {
                     if (window.IPTV.SpatialNav) {
                         window.IPTV.SpatialNav.focusElement(target);
@@ -146,6 +161,17 @@ class IPTVApp {
     }
 
     goBack() {
+        // 0. If profile delete confirmation modal is open, close it and restore focus
+        const confirmModal = document.getElementById('profile-delete-modal');
+        if (confirmModal && !confirmModal.classList.contains('hidden')) {
+            if (this.loginView && typeof this.loginView.closeDeleteModal === 'function') {
+                this.loginView.closeDeleteModal();
+            } else {
+                confirmModal.classList.add('hidden');
+            }
+            return true;
+        }
+
         // 1. If video player is visible, exit player back to the originating screen
         const playerScreen = document.getElementById('player-screen');
         const isPlayerOpen = (this.playerService && this.playerService.isVisible()) ||

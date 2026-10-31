@@ -1,6 +1,7 @@
 /* ============================================================
    IPTV Player — Search View Component
    Debounced multi-category live search engine
+   Groups results by type: Live Channels, Movies, Series
    ============================================================ */
 
 window.IPTV = window.IPTV || {};
@@ -55,40 +56,44 @@ window.IPTV.SearchView = {
         }
     },
 
+    _collectPoolMatches(arr, q, maxPerGroup) {
+        const matches = [];
+        if (!arr || !arr.length) return matches;
+        for (let i = 0; i < arr.length && matches.length < maxPerGroup; i++) {
+            const item = arr[i];
+            const hit = item._q
+                ? item._q.indexOf(q) !== -1
+                : ((item.name && item.name.toLowerCase().indexOf(q) !== -1) ||
+                   (item.category && item.category.toLowerCase().indexOf(q) !== -1));
+            if (hit) {
+                matches.push(item);
+            }
+        }
+        return matches;
+    },
+
     search(query) {
         if (!this.resultsContainer) return;
 
         if (!query) {
+            this.resultsContainer.className = 'browse-content grid-view';
             this.resultsContainer.innerHTML = '<p class="empty-state">Type to search across channels, movies, and series.</p>';
             return;
         }
 
         const q = query.toLowerCase();
-        const pools = [
-            this.app.liveChannels || [],
-            this.app.movies || [],
-            this.app.series || []
-        ];
+        const maxPerGroup = 36;
 
-        const matches = [];
-        const maxResults = 100;
-
-        for (let p = 0; p < pools.length && matches.length < maxResults; p++) {
-            const arr = pools[p];
-            for (let i = 0; i < arr.length && matches.length < maxResults; i++) {
-                const item = arr[i];
-                const hit = item._q
-                    ? item._q.indexOf(q) !== -1
-                    : ((item.name && item.name.toLowerCase().indexOf(q) !== -1) ||
-                       (item.category && item.category.toLowerCase().indexOf(q) !== -1));
-                if (hit) {
-                    matches.push(item);
-                }
-            }
-        }
+        const groups = [
+            { title: 'Live Channels', type: 'live', items: this._collectPoolMatches(this.app.liveChannels, q, maxPerGroup) },
+            { title: 'Movies',        type: 'movie', items: this._collectPoolMatches(this.app.movies, q, maxPerGroup) },
+            { title: 'Series',        type: 'series', items: this._collectPoolMatches(this.app.series, q, maxPerGroup) }
+        ].filter(g => g.items.length > 0);
 
         this.resultsContainer.innerHTML = '';
-        if (matches.length === 0) {
+
+        if (groups.length === 0) {
+            this.resultsContainer.className = 'browse-content grid-view';
             const emptyP = document.createElement('p');
             emptyP.className = 'empty-state';
             emptyP.textContent = `No results found for "${query}".`;
@@ -96,16 +101,46 @@ window.IPTV.SearchView = {
             return;
         }
 
+        this.resultsContainer.className = 'browse-content search-groups-wrapper';
         const frag = document.createDocumentFragment();
-        for (let i = 0; i < matches.length; i++) {
-            const item = matches[i];
-            const type = item.type || 'live';
-            const card = window.IPTV.Card.create(item, type, {
-                isFavorite: this.app.isFavorite(item),
-                onClick: (selectedItem, itemType) => this.app.onItemClick(selectedItem, itemType)
-            });
-            frag.appendChild(card);
+
+        for (let g = 0; g < groups.length; g++) {
+            const grp = groups[g];
+            const sectionEl = document.createElement('div');
+            sectionEl.className = 'search-group';
+            sectionEl.dataset.groupType = grp.type;
+
+            const headerEl = document.createElement('div');
+            headerEl.className = 'search-group-header';
+
+            const titleEl = document.createElement('h3');
+            titleEl.className = 'search-group-title';
+            titleEl.textContent = grp.title;
+
+            const countEl = document.createElement('span');
+            countEl.className = 'search-group-count';
+            countEl.textContent = String(grp.items.length);
+
+            headerEl.appendChild(titleEl);
+            headerEl.appendChild(countEl);
+            sectionEl.appendChild(headerEl);
+
+            const gridEl = document.createElement('div');
+            gridEl.className = 'search-group-grid';
+
+            for (let i = 0; i < grp.items.length; i++) {
+                const item = grp.items[i];
+                const card = window.IPTV.Card.create(item, grp.type, {
+                    isFavorite: this.app.isFavorite(item),
+                    onClick: (selectedItem, itemType) => this.app.onItemClick(selectedItem, itemType)
+                });
+                gridEl.appendChild(card);
+            }
+
+            sectionEl.appendChild(gridEl);
+            frag.appendChild(sectionEl);
         }
+
         this.resultsContainer.appendChild(frag);
     }
 };

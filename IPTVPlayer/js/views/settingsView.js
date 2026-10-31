@@ -1,6 +1,6 @@
 /* ============================================================
    IPTV Player — Settings View Component
-   Server info, Theme Selector, Quality & Buffer controls
+   Server info, Theme Swatch Selector, Quality & Buffer controls
    ============================================================ */
 
 window.IPTV = window.IPTV || {};
@@ -21,7 +21,6 @@ window.IPTV.SettingsView = {
     },
 
     _setupThemeSelector() {
-        // Find or create Theme selection row in Settings
         const panel = document.querySelector('.settings-panel');
         if (!panel) return;
 
@@ -30,33 +29,87 @@ window.IPTV.SettingsView = {
             themeGroup = document.createElement('div');
             themeGroup.id = 'settings-theme-group';
             themeGroup.className = 'settings-group';
-
-            const themes = window.IPTV.ThemeManager.getThemes();
-            const currentTheme = window.IPTV.ThemeManager.getSavedTheme();
-
-            let optionsHtml = themes.map(t =>
-                `<option value="${t.id}" ${t.id === currentTheme ? 'selected' : ''}>${t.name}</option>`
-            ).join('');
-
-            themeGroup.innerHTML = `
-                <h3>Appearance & Theme</h3>
-                <div class="setting-row">
-                    <span>Color Palette</span>
-                    <select id="setting-theme" tabindex="0">
-                        ${optionsHtml}
-                    </select>
-                </div>
-            `;
-
             panel.insertBefore(themeGroup, panel.firstChild);
+        }
+
+        const themes = window.IPTV.ThemeManager.getThemes();
+        const currentTheme = window.IPTV.ThemeManager.getSavedTheme();
+
+        const swatchesHtml = themes.map(t => {
+            const isActive = t.id === currentTheme;
+            return `
+                <button type="button"
+                    class="theme-swatch-card ${isActive ? 'active' : ''}"
+                    data-theme-id="${t.id}"
+                    tabindex="0"
+                    aria-pressed="${isActive ? 'true' : 'false'}">
+                    <div class="theme-swatch-preview" style="background:${t.bg}; border-color:${t.focus};">
+                        <span class="swatch-rail" style="background:${t.surface};"></span>
+                        <span class="swatch-body">
+                            <span class="swatch-hero" style="background:${t.card};"></span>
+                            <span class="swatch-Accent-row">
+                                <span class="swatch-pill" style="background:${t.accent};"></span>
+                                <span class="swatch-dot" style="background:${t.text};"></span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="theme-swatch-meta">
+                        <div class="theme-swatch-title-row">
+                            <span class="theme-swatch-name">${t.name}</span>
+                            <span class="theme-swatch-badge">${isActive ? 'Active' : ''}</span>
+                        </div>
+                        <span class="theme-swatch-sub">${t.subtitle || ''}</span>
+                    </div>
+                </button>
+            `;
+        }).join('');
+
+        const optionsHtml = themes.map(t =>
+            `<option value="${t.id}" ${t.id === currentTheme ? 'selected' : ''}>${t.name}</option>`
+        ).join('');
+
+        themeGroup.innerHTML = `
+            <h3>Appearance & Theme</h3>
+            <p class="settings-group-desc">Select a 10-foot TV color palette. Changes apply immediately and persist across restarts.</p>
+            <div class="theme-swatch-grid" role="radiogroup" aria-label="Color Theme">
+                ${swatchesHtml}
+            </div>
+            <select id="setting-theme" class="sr-only" tabindex="-1" aria-hidden="true">
+                ${optionsHtml}
+            </select>
+        `;
+
+        const selectTheme = (themeId) => {
+            const applied = window.IPTV.ThemeManager.applyTheme(themeId);
+            const activeObj = themes.find(t => t.id === applied) || { name: applied };
+
+            themeGroup.querySelectorAll('.theme-swatch-card').forEach(btn => {
+                const match = btn.dataset.themeId === applied;
+                btn.classList.toggle('active', match);
+                btn.setAttribute('aria-pressed', match ? 'true' : 'false');
+                const badge = btn.querySelector('.theme-swatch-badge');
+                if (badge) badge.textContent = match ? 'Active' : '';
+            });
 
             const themeSelect = document.getElementById('setting-theme');
-            if (themeSelect) {
-                themeSelect.addEventListener('change', (e) => {
-                    window.IPTV.ThemeManager.applyTheme(e.target.value);
-                    this.app.toast(`Theme updated: ${e.target.selectedOptions[0].text}`);
-                });
+            if (themeSelect) themeSelect.value = applied;
+
+            if (this.app && typeof this.app.toast === 'function') {
+                this.app.toast(`Theme applied: ${activeObj.name}`);
             }
+        };
+
+        themeGroup.querySelectorAll('.theme-swatch-card').forEach(card => {
+            card.addEventListener('click', () => {
+                selectTheme(card.dataset.themeId);
+            });
+        });
+
+        const themeSelect = document.getElementById('setting-theme');
+        if (themeSelect) {
+            themeSelect.addEventListener('change', (e) => {
+                selectTheme(e.target.value);
+            });
         }
     },
 

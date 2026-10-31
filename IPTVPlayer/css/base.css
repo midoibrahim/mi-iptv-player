@@ -88,9 +88,12 @@ body:focus, #app:focus, main:focus {
     margin-left: var(--nav-w, 108px);
     width: 1812px;
     width: calc(100% - var(--nav-w, 108px));
+    flex: 1 0 auto;
+    min-width: 0;
     height: 1080px;
     overflow-y: auto;
     overflow-x: hidden;
+    box-sizing: border-box;
 }
 .content-area::-webkit-scrollbar {
     width: 8px;

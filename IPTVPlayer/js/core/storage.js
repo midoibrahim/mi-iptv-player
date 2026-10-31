@@ -12,7 +12,8 @@ window.IPTV.Storage = {
         FAVORITES: 'iptv_favs',
         SETTINGS: 'iptv_settings',
         VIEW_MODE: 'iptv_view_mode',
-        MIGRATED: 'iptv_profiles_migrated'
+        MIGRATED: 'iptv_profiles_migrated',
+        STREAM_STRATEGIES: 'iptv_stream_strategies'
     },
 
     // ---- Profiles ----
@@ -87,6 +88,9 @@ window.IPTV.Storage = {
         const remaining = allProfiles.filter(p => p.id !== id);
 
         this.saveProfiles(remaining);
+        if (target && window.IPTV.CatalogCache) {
+            window.IPTV.CatalogCache.remove(target);
+        }
 
         // If the deleted profile matches current active connection, clear it
         const current = this.getConnection();
@@ -155,6 +159,133 @@ window.IPTV.Storage = {
     saveSettings(settings) {
         try {
             localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(settings));
+        } catch(e) {}
+    },
+
+    // ---- Stream Strategy Memory (Fast Channel Zapping) ----
+    _serverKey(conn) {
+        if (!conn) return '';
+        return conn.type === 'xtream' ? String(conn.server || '') : String(conn.url || '');
+    },
+
+    getStreamStrategy(conn) {
+        const key = this._serverKey(conn);
+        if (!key) return null;
+        try {
+            const raw = localStorage.getItem(this.KEYS.STREAM_STRATEGIES);
+            const map = raw ? JSON.parse(raw) : {};
+            return map[key] || null;
+        } catch(e) {
+            return null;
+        }
+    },
+
+    saveStreamStrategy(conn, strategy) {
+        const key = this._serverKey(conn);
+        if (!key || !strategy) return;
+        try {
+            const raw = localStorage.getItem(this.KEYS.STREAM_STRATEGIES);
+            const map = raw ? JSON.parse(raw) : {};
+            if (map[key] === strategy) return;
+            map[key] = strategy;
+            localStorage.setItem(this.KEYS.STREAM_STRATEGIES, JSON.stringify(map));
+        } catch(e) {}
+    }
+};
+
+/* ============================================================
+   IPTV Player — IndexedDB Catalog Cache (Stale-While-Revalidate)
+   Provides < 300ms instant startup on repeat launches for 50k+ items
+   ============================================================ */
+window.IPTV.CatalogCache = {
+    DB_NAME: 'mi_iptv_catalog_db',
+    STORE_NAME: 'catalogs',
+    _dbPromise: null,
+
+    _key(conn) {
+        if (!conn) return '';
+        if (conn.type === 'xtream') {
+            return `xtream:${(conn.server || '').replace(/\/+$/, '')}:${conn.user || ''}`;
+        }
+        return `m3u:${conn.url || ''}`;
+    },
+
+    _open() {
+        if (this._dbPromise) return this._dbPromise;
+        this._dbPromise = new Promise((resolve) => {
+            const idb = window.indexedDB || window.webkitIndexedDB;
+            if (!idb) {
+                resolve(null);
+                return;
+            }
+            try {
+                const req = idb.open(this.DB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+                        db.createObjectStore(this.STORE_NAME);
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = () => resolve(null);
+            } catch(e) {
+                resolve(null);
+            }
+        });
+        return this._dbPromise;
+    },
+
+    async get(conn) {
+        const key = this._key(conn);
+        if (!key) return null;
+        const db = await this._open();
+        if (!db) return null;
+        return new Promise((resolve) => {
+            try {
+                const tx = db.transaction(this.STORE_NAME, 'readonly');
+                const store = tx.objectStore(this.STORE_NAME);
+                const req = store.get(key);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => resolve(null);
+            } catch(e) {
+                resolve(null);
+            }
+        });
+    },
+
+    async set(conn, data) {
+        const key = this._key(conn);
+        if (!key || !data) return;
+        const db = await this._open();
+        if (!db) return;
+        return new Promise((resolve) => {
+            try {
+                const tx = db.transaction(this.STORE_NAME, 'readwrite');
+                const store = tx.objectStore(this.STORE_NAME);
+                store.put({
+                    timestamp: Date.now(),
+                    userInfo: data.userInfo || null,
+                    categories: data.categories || { live: [], movies: [], series: [] },
+                    liveChannels: data.liveChannels || [],
+                    movies: data.movies || [],
+                    series: data.series || []
+                }, key);
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+            } catch(e) {
+                resolve(false);
+            }
+        });
+    },
+
+    async remove(conn) {
+        const key = this._key(conn);
+        if (!key) return;
+        const db = await this._open();
+        if (!db) return;
+        try {
+            const tx = db.transaction(this.STORE_NAME, 'readwrite');
+            tx.objectStore(this.STORE_NAME).delete(key);
         } catch(e) {}
     }
 };

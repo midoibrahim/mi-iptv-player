@@ -64,33 +64,48 @@ window.IPTV.SearchView = {
         }
 
         const q = query.toLowerCase();
-        const allItems = [
-            ...(this.app.liveChannels || []),
-            ...(this.app.movies || []),
-            ...(this.app.series || [])
+        const pools = [
+            this.app.liveChannels || [],
+            this.app.movies || [],
+            this.app.series || []
         ];
 
-        const matches = allItems.filter(i =>
-            i.name.toLowerCase().includes(q) ||
-            (i.category && i.category.toLowerCase().includes(q))
-        );
+        const matches = [];
+        const maxResults = 100;
+
+        for (let p = 0; p < pools.length && matches.length < maxResults; p++) {
+            const arr = pools[p];
+            for (let i = 0; i < arr.length && matches.length < maxResults; i++) {
+                const item = arr[i];
+                const hit = item._q
+                    ? item._q.indexOf(q) !== -1
+                    : ((item.name && item.name.toLowerCase().indexOf(q) !== -1) ||
+                       (item.category && item.category.toLowerCase().indexOf(q) !== -1));
+                if (hit) {
+                    matches.push(item);
+                }
+            }
+        }
 
         this.resultsContainer.innerHTML = '';
         if (matches.length === 0) {
-            this.resultsContainer.innerHTML = `<p class="empty-state">No results found for "${query}".</p>`;
+            const emptyP = document.createElement('p');
+            emptyP.className = 'empty-state';
+            emptyP.textContent = `No results found for "${query}".`;
+            this.resultsContainer.appendChild(emptyP);
             return;
         }
 
-        matches.slice(0, 100).forEach(item => {
-            const type = this.app.liveChannels.includes(item)
-                ? 'live'
-                : (this.app.series.includes(item) ? 'series' : 'movie');
-
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < matches.length; i++) {
+            const item = matches[i];
+            const type = item.type || 'live';
             const card = window.IPTV.Card.create(item, type, {
-                isFavorite: this.app.isFavorite(item.id),
+                isFavorite: this.app.isFavorite(item),
                 onClick: (selectedItem, itemType) => this.app.onItemClick(selectedItem, itemType)
             });
-            this.resultsContainer.appendChild(card);
-        });
+            frag.appendChild(card);
+        }
+        this.resultsContainer.appendChild(frag);
     }
 };

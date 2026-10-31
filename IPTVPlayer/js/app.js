@@ -205,6 +205,40 @@ class IPTVApp {
         return false;
     }
 
+    _applyCatalogData(conn, data, navigateHome = true) {
+        this.liveChannels = data.liveChannels || [];
+        this.movies = data.movies || [];
+        this.series = data.series || [];
+        this.categories = data.categories || { live: [], movies: [], series: [] };
+
+        const navUser = document.getElementById('nav-user-info');
+        if (navUser) {
+            navUser.textContent = (data.userInfo && data.userInfo.username) ? data.userInfo.username : (conn.name || '');
+        }
+
+        // Switch to main shell
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('main-shell').classList.add('active');
+
+        // Populate Sub-views
+        this.homeView.render(this.liveChannels, this.movies, this.series);
+        this.browseViews.live.setData(this.liveChannels, this.categories.live);
+        this.browseViews.movies.setData(this.movies, this.categories.movies);
+        this.browseViews.series.setData(this.series, this.categories.series);
+        this.settingsView.updateInfo(conn);
+
+        if (navigateHome) {
+            this.navigateTo('home');
+        }
+    }
+
+    async _fetchCatalogFromNetwork(conn, onProgress) {
+        if (conn.type === 'xtream') {
+            return window.IPTV.XtreamService.loadAll(conn, onProgress);
+        }
+        return window.IPTV.M3UParser.load(conn.url, onProgress);
+    }
+
     async connect(conn) {
         // Leaving the QR setup screen: stop remote polling and terminate the local setup server
         if (this.loginView && typeof this.loginView.stopRemotePolling === 'function') {
@@ -214,40 +248,46 @@ class IPTVApp {
         this.showLoading('Connecting...');
 
         try {
-            if (conn.type === 'xtream') {
-                const data = await window.IPTV.XtreamService.loadAll(conn, (msg) => this.setLoadingText(msg));
-                this.liveChannels = data.liveChannels;
-                this.movies = data.movies;
-                this.series = data.series;
-                this.categories = data.categories;
+            // 1. Check IndexedDB CatalogCache for instant (< 300ms) startup on repeat launches
+            const cached = window.IPTV.CatalogCache ? await window.IPTV.CatalogCache.get(conn) : null;
+            const hasCachedStreams = cached && (
+                (cached.liveChannels && cached.liveChannels.length > 0) ||
+                (cached.movies && cached.movies.length > 0) ||
+                (cached.series && cached.series.length > 0)
+            );
 
-                const navUser = document.getElementById('nav-user-info');
-                if (navUser && data.userInfo) {
-                    navUser.textContent = data.userInfo.username || '';
-                }
-            } else {
-                const data = await window.IPTV.M3UParser.load(conn.url, (msg) => this.setLoadingText(msg));
-                this.liveChannels = data.liveChannels;
-                this.movies = data.movies;
-                this.series = data.series;
-                this.categories = data.categories;
+            if (hasCachedStreams) {
+                window.IPTV.Storage.saveConnection(conn);
+                this.hideLoading();
+                this._applyCatalogData(conn, cached, true);
+
+                // Silently revalidate in the background without blocking UI
+                this._fetchCatalogFromNetwork(conn, null).then((freshData) => {
+                    if (this.connection !== conn || !freshData) return;
+                    if (window.IPTV.CatalogCache) {
+                        window.IPTV.CatalogCache.set(conn, freshData);
+                    }
+                    this.liveChannels = freshData.liveChannels || [];
+                    this.movies = freshData.movies || [];
+                    this.series = freshData.series || [];
+                    this.categories = freshData.categories || { live: [], movies: [], series: [] };
+                    this.browseViews.live.setData(this.liveChannels, this.categories.live);
+                    this.browseViews.movies.setData(this.movies, this.categories.movies);
+                    this.browseViews.series.setData(this.series, this.categories.series);
+                }).catch((bgErr) => {
+                    console.warn('Background catalog refresh skipped:', bgErr);
+                });
+                return;
             }
 
+            // 2. Cold connect: fetch from network and populate cache
+            const data = await this._fetchCatalogFromNetwork(conn, (msg) => this.setLoadingText(msg));
             window.IPTV.Storage.saveConnection(conn);
+            if (window.IPTV.CatalogCache) {
+                window.IPTV.CatalogCache.set(conn, data);
+            }
             this.hideLoading();
-
-            // Switch to main shell
-            document.getElementById('login-screen').classList.remove('active');
-            document.getElementById('main-shell').classList.add('active');
-
-            // Populate Sub-views
-            this.homeView.render(this.liveChannels, this.movies, this.series);
-            this.browseViews.live.setData(this.liveChannels, this.categories.live);
-            this.browseViews.movies.setData(this.movies, this.categories.movies);
-            this.browseViews.series.setData(this.series, this.categories.series);
-            this.settingsView.updateInfo(conn);
-
-            this.navigateTo('home');
+            this._applyCatalogData(conn, data, true);
         } catch(err) {
             this.hideLoading();
             this.toast('Connection failed: ' + (err.message || 'Unknown error'));
@@ -256,25 +296,28 @@ class IPTVApp {
     }
 
     onItemClick(item, type) {
-        // 1. Series check
-        const isSeries = type === 'series' || item.type === 'series' || !!item.series_id || (this.series && this.series.includes(item));
-        if (isSeries) {
+        if (!item) return;
+        const resolvedType = type || item.type || (item.series_id ? 'series' : 'live');
+
+        // 1. Series check (O(1))
+        if (resolvedType === 'series') {
             item.type = 'series';
             this.seriesDetailView.open(item);
             return;
         }
 
-        // 2. Movie check
-        const isMovie = type === 'movies' || type === 'movie' || item.type === 'movie' || (this.movies && this.movies.includes(item));
-        if (isMovie) {
+        // 2. Movie check (O(1))
+        if (resolvedType === 'movies' || resolvedType === 'movie') {
             item.type = 'movie';
             this.playerService.play(item);
             return;
         }
 
-        // 3. Live channel check
+        // 3. Live channel check (O(1) index via item._idx)
         item.type = 'live';
-        if (this.liveChannels && this.liveChannels.length > 0) {
+        if (typeof item._idx === 'number') {
+            this.currentChannelIndex = item._idx;
+        } else if (this.liveChannels && this.liveChannels.length > 0) {
             const idx = this.liveChannels.findIndex(c => c === item || c.id === item.id);
             if (idx >= 0) this.currentChannelIndex = idx;
         }
@@ -288,7 +331,10 @@ class IPTVApp {
             return;
         }
         if (this.currentChannelIndex < 0 && this.playerService && this.playerService.currentItem) {
-            this.currentChannelIndex = this.liveChannels.findIndex(c => c === this.playerService.currentItem || (c.type === 'live' && c.id === this.playerService.currentItem.id));
+            const cur = this.playerService.currentItem;
+            this.currentChannelIndex = (typeof cur._idx === 'number')
+                ? cur._idx
+                : this.liveChannels.findIndex(c => c === cur || (c.type === 'live' && c.id === cur.id));
         }
         if (this.currentChannelIndex <= 0) {
             this.currentChannelIndex = this.liveChannels.length - 1;
@@ -306,7 +352,10 @@ class IPTVApp {
             return;
         }
         if (this.currentChannelIndex < 0 && this.playerService && this.playerService.currentItem) {
-            this.currentChannelIndex = this.liveChannels.findIndex(c => c === this.playerService.currentItem || (c.type === 'live' && c.id === this.playerService.currentItem.id));
+            const cur = this.playerService.currentItem;
+            this.currentChannelIndex = (typeof cur._idx === 'number')
+                ? cur._idx
+                : this.liveChannels.findIndex(c => c === cur || (c.type === 'live' && c.id === cur.id));
         }
         if (this.currentChannelIndex < 0 || this.currentChannelIndex >= this.liveChannels.length - 1) {
             this.currentChannelIndex = 0;
@@ -319,16 +368,31 @@ class IPTVApp {
 
 
     // ---- Favorites Management ----
-    isFavorite(id) {
-        return this.favorites.has(id);
+    _favKey(item) {
+        if (!item) return '';
+        if (typeof item === 'string' || typeof item === 'number') return String(item);
+        const t = item.type || 'live';
+        return `${t}:${item.id}`;
+    }
+
+    isFavorite(itemOrId) {
+        if (!itemOrId) return false;
+        if (typeof itemOrId === 'object') {
+            return this.favorites.has(this._favKey(itemOrId)) || this.favorites.has(String(itemOrId.id));
+        }
+        return this.favorites.has(String(itemOrId));
     }
 
     toggleFavorite(item) {
-        if (this.favorites.has(item.id)) {
-            this.favorites.delete(item.id);
+        if (!item) return;
+        const key = this._favKey(item);
+        const rawId = String(item.id);
+        if (this.favorites.has(key) || this.favorites.has(rawId)) {
+            this.favorites.delete(key);
+            this.favorites.delete(rawId);
             this.toast('Removed from favorites');
         } else {
-            this.favorites.add(item.id);
+            this.favorites.add(key);
             this.toast('Added to favorites');
         }
         window.IPTV.Storage.saveFavorites(this.favorites);
@@ -339,7 +403,7 @@ class IPTVApp {
         if (!container) return;
 
         const allItems = [...this.liveChannels, ...this.movies, ...this.series];
-        const favItems = allItems.filter(i => this.favorites.has(i.id));
+        const favItems = allItems.filter(i => this.isFavorite(i));
 
         container.innerHTML = '';
         if (favItems.length === 0) {
@@ -347,14 +411,16 @@ class IPTVApp {
             return;
         }
 
+        const frag = document.createDocumentFragment();
         favItems.forEach(item => {
-            const type = this.liveChannels.includes(item) ? 'live' : (this.series.includes(item) ? 'series' : 'movie');
+            const type = item.type || 'live';
             const card = window.IPTV.Card.create(item, type, {
                 isFavorite: true,
                 onClick: (selectedItem, itemType) => this.onItemClick(selectedItem, itemType)
             });
-            container.appendChild(card);
+            frag.appendChild(card);
         });
+        container.appendChild(frag);
     }
 
     // ---- UI Helpers ----

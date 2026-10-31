@@ -119,6 +119,7 @@ window.IPTV.BrowseView = class {
 
             if (catList) {
                 searchInput.addEventListener('input', () => {
+                    this._flushRemainingCategories();
                     const q = searchInput.value.toLowerCase().trim();
                     catList.querySelectorAll('.category-item').forEach(li => {
                         const text = li.textContent.toLowerCase();
@@ -152,17 +153,60 @@ window.IPTV.BrowseView = class {
         });
     }
 
+    _createCategoryLi(catName, cnt) {
+        const li = document.createElement('li');
+        li.className = `category-item ${this.selectedCategory === catName ? 'active' : ''}`;
+        li.tabIndex = 0;
+        li.dataset.cat = catName;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = catName;
+        const countSpan = document.createElement('span');
+        countSpan.className = 'category-item-count';
+        countSpan.textContent = String(cnt);
+
+        li.appendChild(nameSpan);
+        li.appendChild(countSpan);
+        return li;
+    }
+
+    _flushRemainingCategories() {
+        if (this._catChunkTimer) {
+            clearTimeout(this._catChunkTimer);
+            this._catChunkTimer = null;
+        }
+        const list = this.sectionEl && this.sectionEl.querySelector('.category-list');
+        if (!list || !this._byCategory || this._renderedCatCount >= this.categories.length) return;
+
+        const frag = document.createDocumentFragment();
+        for (let i = this._renderedCatCount; i < this.categories.length; i++) {
+            const c = this.categories[i];
+            const catName = c.category_name || c.category_id || 'Unknown';
+            const cnt = this._byCategory[catName] ? this._byCategory[catName].length : 0;
+            frag.appendChild(this._createCategoryLi(catName, cnt));
+        }
+        list.appendChild(frag);
+        this._renderedCatCount = this.categories.length;
+    }
+
     _renderCategories() {
         const list = this.sectionEl.querySelector('.category-list');
         if (!list) return;
+        if (this._catChunkTimer) {
+            clearTimeout(this._catChunkTimer);
+            this._catChunkTimer = null;
+        }
         list.innerHTML = '';
 
-        // Calculate count per category
-        const counts = {};
+        // Single pass: pre-bucket items by category for O(1) category switching & row view
+        const byCat = {};
         for (let i = 0; i < this.items.length; i++) {
-            const cat = this.items[i].category || 'Uncategorized';
-            counts[cat] = (counts[cat] || 0) + 1;
+            const item = this.items[i];
+            const cat = item.category || 'Uncategorized';
+            if (!byCat[cat]) byCat[cat] = [];
+            byCat[cat].push(item);
         }
+        this._byCategory = byCat;
 
         const frag = document.createDocumentFragment();
 
@@ -177,28 +221,41 @@ window.IPTV.BrowseView = class {
         `;
         frag.appendChild(allLi);
 
-        // Individual Category Items
-        for (let i = 0; i < this.categories.length; i++) {
+        // Render first 45 categories immediately for instant section paint
+        const initialCap = Math.min(45, this.categories.length);
+        for (let i = 0; i < initialCap; i++) {
             const c = this.categories[i];
             const catName = c.category_name || c.category_id || 'Unknown';
-            const cnt = counts[catName] || 0;
-            const li = document.createElement('li');
-            li.className = `category-item ${this.selectedCategory === catName ? 'active' : ''}`;
-            li.tabIndex = 0;
-            li.dataset.cat = catName;
-
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = catName;
-            const countSpan = document.createElement('span');
-            countSpan.className = 'category-item-count';
-            countSpan.textContent = String(cnt);
-
-            li.appendChild(nameSpan);
-            li.appendChild(countSpan);
-            frag.appendChild(li);
+            const cnt = byCat[catName] ? byCat[catName].length : 0;
+            frag.appendChild(this._createCategoryLi(catName, cnt));
         }
 
         list.appendChild(frag);
+        this._renderedCatCount = initialCap;
+
+        // Progressive background chunking for remaining categories (60 per tick)
+        if (this._renderedCatCount < this.categories.length) {
+            const appendCatChunk = () => {
+                if (!this.sectionEl || !list.parentNode) return;
+                const start = this._renderedCatCount;
+                const end = Math.min(start + 60, this.categories.length);
+                const chunkFrag = document.createDocumentFragment();
+                for (let i = start; i < end; i++) {
+                    const c = this.categories[i];
+                    const catName = c.category_name || c.category_id || 'Unknown';
+                    const cnt = byCat[catName] ? byCat[catName].length : 0;
+                    chunkFrag.appendChild(this._createCategoryLi(catName, cnt));
+                }
+                list.appendChild(chunkFrag);
+                this._renderedCatCount = end;
+                if (this._renderedCatCount < this.categories.length) {
+                    this._catChunkTimer = setTimeout(appendCatChunk, 20);
+                } else {
+                    this._catChunkTimer = null;
+                }
+            };
+            this._catChunkTimer = setTimeout(appendCatChunk, 20);
+        }
 
         // Single delegated click listener on category list
         list.onclick = (e) => {
@@ -217,10 +274,10 @@ window.IPTV.BrowseView = class {
         const countHeader = this.sectionEl.querySelector('.header-count');
         if (!content) return;
 
-        // Filter items
+        // O(1) category lookup via pre-built _byCategory bucket
         this._filteredItems = this.selectedCategory === 'all'
             ? this.items
-            : this.items.filter(i => (i.category || 'Uncategorized') === this.selectedCategory);
+            : ((this._byCategory && this._byCategory[this.selectedCategory]) || []);
 
         if (countHeader) {
             countHeader.textContent = `${this._filteredItems.length} ${this.unitName}`;
@@ -257,7 +314,7 @@ window.IPTV.BrowseView = class {
         for (let i = start; i < end; i++) {
             const item = this._filteredItems[i];
             const card = window.IPTV.Card.create(item, this.cardType, {
-                isFavorite: this.app.isFavorite(item.id),
+                isFavorite: this.app.isFavorite(item),
                 onClick: (selectedItem, type) => this.app.onItemClick(selectedItem, type)
             });
             frag.appendChild(card);
@@ -300,7 +357,7 @@ window.IPTV.BrowseView = class {
             for (let j = 0; j < rowItems.length; j++) {
                 const item = rowItems[j];
                 const card = window.IPTV.Card.create(item, this.cardType, {
-                    isFavorite: this.app.isFavorite(item.id),
+                    isFavorite: this.app.isFavorite(item),
                     onClick: (selectedItem, type) => this.app.onItemClick(selectedItem, type)
                 });
                 scroll.appendChild(card);

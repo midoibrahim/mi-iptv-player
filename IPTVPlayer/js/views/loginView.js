@@ -127,10 +127,14 @@ window.IPTV.LoginView = {
                     <button class="btn-delete-profile" tabindex="0" title="Delete Profile">${trashSvg}</button>
                 </div>
                 <div class="profile-card-info">
-                    <div class="profile-name">${prof.name || 'IPTV Profile'}</div>
-                    <div class="profile-sub">${sub || ''}</div>
+                    <div class="profile-name"></div>
+                    <div class="profile-sub"></div>
                 </div>
             `;
+            const nameEl = card.querySelector('.profile-name');
+            if (nameEl) nameEl.textContent = prof.name || 'IPTV Profile';
+            const subEl = card.querySelector('.profile-sub');
+            if (subEl) subEl.textContent = sub || '';
 
             // Delete profile
             const delBtn = card.querySelector('.btn-delete-profile');

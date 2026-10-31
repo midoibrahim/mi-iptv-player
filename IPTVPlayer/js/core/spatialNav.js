@@ -75,6 +75,7 @@ window.IPTV.SpatialNav = {
 
     isFocusable(el, activeRoot) {
         if (!el || el.disabled || el.getAttribute('tabindex') === '-1') return false;
+        if (el.style && (el.style.display === 'none' || el.style.visibility === 'hidden')) return false;
         if (el.offsetWidth === 0 || el.offsetHeight === 0) return false;
         if (el.closest('.hidden')) return false;
 
@@ -92,9 +93,6 @@ window.IPTV.SpatialNav = {
         const loginForm = el.closest('.login-form');
         if (loginForm && !loginForm.classList.contains('active')) return false;
 
-        const style = window.getComputedStyle(el);
-        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
-
         if (activeRoot && !activeRoot.contains(el)) return false;
         return true;
     },
@@ -106,6 +104,10 @@ window.IPTV.SpatialNav = {
         if (nav) {
             if (nav.contains(el)) nav.classList.add('expanded');
             else nav.classList.remove('expanded');
+        }
+        if (window.IPTV.Card && window.IPTV.Card.eagerLoad && el.classList && el.classList.contains('card')) {
+            window.IPTV.Card.eagerLoad(el);
+            if (el.nextElementSibling) window.IPTV.Card.eagerLoad(el.nextElementSibling);
         }
         el.focus();
         this.ensureVisible(el);
@@ -167,24 +169,26 @@ window.IPTV.SpatialNav = {
             }
         }
 
-        // ---- 2. Dedicated 1D Category Sidebar List Traversal ----
+        // ---- 2. Dedicated 1D Category Sidebar List Traversal (O(1) Sibling Walk) ----
         const catSidebar = current.closest('.category-sidebar');
         if (catSidebar) {
-            const catItems = Array.from(catSidebar.querySelectorAll('.category-item'))
-                .filter(el => this.isFocusable(el, activeRoot));
             const searchInput = catSidebar.querySelector('.cat-search-input');
 
             if (current.classList.contains('category-item')) {
-                const idx = catItems.indexOf(current);
                 if (dir === 'down') {
-                    if (idx >= 0 && idx < catItems.length - 1) {
-                        return this.focusElement(catItems[idx + 1]);
+                    let next = current.nextElementSibling;
+                    while (next && next.style.display === 'none') {
+                        next = next.nextElementSibling;
                     }
+                    if (next) return this.focusElement(next);
                     return true; // Clamp at bottom of category list
                 } else if (dir === 'up') {
-                    if (idx > 0) {
-                        return this.focusElement(catItems[idx - 1]);
-                    } else if (searchInput && this.isFocusable(searchInput, activeRoot)) {
+                    let prev = current.previousElementSibling;
+                    while (prev && prev.style.display === 'none') {
+                        prev = prev.previousElementSibling;
+                    }
+                    if (prev) return this.focusElement(prev);
+                    if (searchInput && this.isFocusable(searchInput, activeRoot)) {
                         return this.focusElement(searchInput);
                     }
                     return true;
@@ -203,9 +207,17 @@ window.IPTV.SpatialNav = {
                     }
                 }
             } else if (current === searchInput) {
-                if (dir === 'down' && catItems.length > 0) {
+                if (dir === 'down') {
                     const activeCat = catSidebar.querySelector('.category-item.active');
-                    return this.focusElement((activeCat && this.isFocusable(activeCat, activeRoot)) ? activeCat : catItems[0]);
+                    if (activeCat && activeCat.style.display !== 'none') {
+                        return this.focusElement(activeCat);
+                    }
+                    const catList = catSidebar.querySelector('.category-list');
+                    let firstVis = catList ? catList.firstElementChild : null;
+                    while (firstVis && firstVis.style.display === 'none') {
+                        firstVis = firstVis.nextElementSibling;
+                    }
+                    if (firstVis) return this.focusElement(firstVis);
                 } else if (dir === 'left') {
                     const nav = document.getElementById('side-nav');
                     const activeNav = nav && (nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item'));

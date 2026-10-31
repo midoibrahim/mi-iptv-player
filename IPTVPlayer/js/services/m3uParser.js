@@ -24,19 +24,24 @@ window.IPTV.M3UParser = {
         const series = [];
 
         for (let i = 0; i < lines.length; i++) {
+            if (i > 0 && (i & 16383) === 0) {
+                await new Promise(r => setTimeout(r, 0));
+            }
             const line = lines[i].trim();
             if (line.startsWith('#EXTINF:')) {
                 currentMeta = this.parseExtinf(line);
             } else if (line && !line.startsWith('#') && currentMeta) {
                 const streamUrl = line;
                 const cat = currentMeta.groupTitle || 'Uncategorized';
+                const name = currentMeta.title || 'Unknown';
                 const item = {
                     id: `m3u_${i}`,
-                    name: currentMeta.title || 'Unknown',
+                    name: name,
+                    _q: (name + ' ' + cat).toLowerCase(),
                     logo: currentMeta.tvgLogo || '',
                     category: cat,
                     url: streamUrl,
-                    hd: /hd|fhd|uhd|4k/i.test(currentMeta.title || '')
+                    hd: /hd|fhd|uhd|4k/i.test(name)
                 };
 
                 // Classify stream type
@@ -46,7 +51,7 @@ window.IPTV.M3UParser = {
                 } else if (/\/series\//.test(lcUrl)) {
                     series.push({ ...item, type: 'series', poster: item.logo, plot: '', rating: '', year: '' });
                 } else {
-                    liveChannels.push({ ...item, type: 'live' });
+                    liveChannels.push({ ...item, type: 'live', _idx: liveChannels.length });
                 }
                 currentMeta = null;
             }

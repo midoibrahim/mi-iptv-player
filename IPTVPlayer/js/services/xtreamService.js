@@ -7,6 +7,10 @@
 window.IPTV = window.IPTV || {};
 
 window.IPTV.XtreamService = {
+    _yieldToMain() {
+        return new Promise((resolve) => setTimeout(resolve, 0));
+    },
+
     async fetchJson(url) {
         const resp = await fetch(url);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -62,20 +66,26 @@ window.IPTV.XtreamService = {
             this.fetchJson(`${base}/player_api.php?${auth}&action=get_series`).catch(() => [])
         ]);
 
-        // Map live channels with O(1) category lookup
+        // Map live channels with O(1) category lookup + periodic UI yield for smooth spinner
         const liveArr = Array.isArray(liveStreams) ? liveStreams : [];
+        if (onProgress && liveArr.length > 0) onProgress(`Indexing ${liveArr.length} live channels...`);
+        await this._yieldToMain();
         const liveChannels = new Array(liveArr.length);
         for (let i = 0; i < liveArr.length; i++) {
+            if (i > 0 && (i & 8191) === 0) await this._yieldToMain();
             const ch = liveArr[i];
             const sid = ch.stream_id;
             const cid = String(ch.category_id);
             const name = ch.name || 'Unknown';
+            const catName = liveCatMap[cid] || 'Uncategorized';
             liveChannels[i] = {
                 id: String(sid),
                 name: name,
                 type: 'live',
+                _idx: i,
+                _q: (name + ' ' + catName).toLowerCase(),
                 logo: ch.stream_icon || '',
-                category: liveCatMap[cid] || 'Uncategorized',
+                category: catName,
                 categoryId: ch.category_id,
                 url: `${base}/live/${conn.user}/${conn.pass}/${sid}.ts`,
                 hlsUrl: `${base}/live/${conn.user}/${conn.pass}/${sid}.m3u8`,
@@ -86,17 +96,23 @@ window.IPTV.XtreamService = {
 
         // Map movies (VOD)
         const vodArr = Array.isArray(vodStreams) ? vodStreams : [];
+        if (onProgress && vodArr.length > 0) onProgress(`Indexing ${vodArr.length} movies...`);
+        await this._yieldToMain();
         const movies = new Array(vodArr.length);
         for (let i = 0; i < vodArr.length; i++) {
+            if (i > 0 && (i & 8191) === 0) await this._yieldToMain();
             const m = vodArr[i];
             const sid = m.stream_id;
             const cid = String(m.category_id);
+            const name = m.name || 'Unknown';
+            const catName = movieCatMap[cid] || 'Uncategorized';
             movies[i] = {
                 id: String(sid),
-                name: m.name || 'Unknown',
+                name: name,
                 type: 'movie',
+                _q: (name + ' ' + catName).toLowerCase(),
                 poster: m.stream_icon || '',
-                category: movieCatMap[cid] || 'Uncategorized',
+                category: catName,
                 categoryId: m.category_id,
                 url: `${base}/movie/${conn.user}/${conn.pass}/${sid}.${m.container_extension || 'mp4'}`,
                 plot: m.plot || '',
@@ -107,16 +123,22 @@ window.IPTV.XtreamService = {
 
         // Map series
         const serArr = Array.isArray(serStreams) ? serStreams : [];
+        if (onProgress && serArr.length > 0) onProgress(`Indexing ${serArr.length} series...`);
+        await this._yieldToMain();
         const series = new Array(serArr.length);
         for (let i = 0; i < serArr.length; i++) {
+            if (i > 0 && (i & 8191) === 0) await this._yieldToMain();
             const s = serArr[i];
             const cid = String(s.category_id);
+            const name = s.name || 'Unknown';
+            const catName = seriesCatMap[cid] || 'Uncategorized';
             series[i] = {
                 id: String(s.series_id),
-                name: s.name || 'Unknown',
+                name: name,
                 type: 'series',
+                _q: (name + ' ' + catName).toLowerCase(),
                 poster: s.cover || '',
-                category: seriesCatMap[cid] || 'Uncategorized',
+                category: catName,
                 categoryId: s.category_id,
                 plot: s.plot || '',
                 rating: s.rating || '',

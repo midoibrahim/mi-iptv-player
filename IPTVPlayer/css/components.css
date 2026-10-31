@@ -528,6 +528,7 @@
 .card:hover,
 .card:focus {
     transform: scale(1.04);
+    will-change: transform;
     background: var(--bg-card-h);
     border-color: var(--accent);
     z-index: 5;

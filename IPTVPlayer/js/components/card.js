@@ -8,6 +8,11 @@ window.IPTV = window.IPTV || {};
 
 window.IPTV.Card = {
     _iconCache: {},
+    _io: null,
+    _lazyQueue: [],
+    _lazyTimer: null,
+    _immediateQuota: 16,
+    _quotaResetTimer: null,
 
     _getIcon(key, cls) {
         const cacheKey = key + ':' + cls;
@@ -15,6 +20,73 @@ window.IPTV.Card = {
             this._iconCache[cacheKey] = window.IPTV.Icons ? window.IPTV.Icons.get(key, cls) : '★';
         }
         return this._iconCache[cacheKey];
+    },
+
+    _scheduleLazyImg(img, src) {
+        if (!img || !src) return;
+
+        // First 16 cards in any render burst load immediately (above-the-fold)
+        if (this._immediateQuota > 0) {
+            this._immediateQuota--;
+            clearTimeout(this._quotaResetTimer);
+            this._quotaResetTimer = setTimeout(() => { this._immediateQuota = 16; }, 180);
+            img.src = src;
+            return;
+        }
+
+        img.dataset.src = src;
+
+        // Modern TVs (Chromium 51+): use native IntersectionObserver
+        if (typeof window.IntersectionObserver === 'function') {
+            if (!this._io) {
+                this._io = new IntersectionObserver((entries) => {
+                    for (let i = 0; i < entries.length; i++) {
+                        const entry = entries[i];
+                        if (entry.isIntersecting || entry.intersectionRatio > 0) {
+                            const target = entry.target;
+                            this._io.unobserve(target);
+                            if (target.dataset && target.dataset.src) {
+                                target.src = target.dataset.src;
+                                delete target.dataset.src;
+                            }
+                        }
+                    }
+                }, { rootMargin: '360px' });
+            }
+            this._io.observe(img);
+            return;
+        }
+
+        // Legacy webOS 3.x (Chromium 38): staggered non-blocking queue that skips detached nodes
+        this._lazyQueue.push(img);
+        if (!this._lazyTimer) {
+            const pump = () => {
+                let loaded = 0;
+                while (this._lazyQueue.length > 0 && loaded < 6) {
+                    const nextImg = this._lazyQueue.shift();
+                    if (nextImg && nextImg.dataset && nextImg.dataset.src && document.contains(nextImg)) {
+                        nextImg.src = nextImg.dataset.src;
+                        delete nextImg.dataset.src;
+                        loaded++;
+                    }
+                }
+                if (this._lazyQueue.length > 0) {
+                    this._lazyTimer = setTimeout(pump, 55);
+                } else {
+                    this._lazyTimer = null;
+                }
+            };
+            this._lazyTimer = setTimeout(pump, 55);
+        }
+    },
+
+    eagerLoad(cardEl) {
+        if (!cardEl) return;
+        const img = cardEl._img || (cardEl.querySelector && cardEl.querySelector('img[data-src]'));
+        if (img && img.dataset && img.dataset.src) {
+            img.src = img.dataset.src;
+            delete img.dataset.src;
+        }
     },
 
     create(item, type, options = {}) {
@@ -45,7 +117,6 @@ window.IPTV.Card = {
         if (posterSrc) {
             const img = document.createElement('img');
             img.className = 'card-poster';
-            img.src = posterSrc;
             img.alt = '';
             img.decoding = 'async';
             img.loading = 'lazy';
@@ -53,6 +124,8 @@ window.IPTV.Card = {
                 this.replaceWith(createFallback());
             };
             card.appendChild(img);
+            card._img = img;
+            this._scheduleLazyImg(img, posterSrc);
         } else {
             card.appendChild(createFallback());
         }
@@ -81,7 +154,7 @@ window.IPTV.Card = {
             e.stopPropagation();
             if (window.app && window.app.toggleFavorite) {
                 window.app.toggleFavorite(item);
-                const nowFav = window.app.isFavorite(item.id);
+                const nowFav = window.app.isFavorite(item);
                 favBtn.classList.toggle('active', nowFav);
                 card.classList.toggle('is-favorited', nowFav);
             }

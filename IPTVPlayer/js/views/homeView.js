@@ -32,15 +32,28 @@ window.IPTV.HomeView = {
             if (descEl) descEl.textContent = heroItem.plot || heroItem.category || '';
 
             const playBtn = document.getElementById('hero-play');
-            if (playBtn) playBtn.onclick = () => this.app.onItemClick(heroItem, movies.includes(heroItem) ? 'movie' : 'live');
+            if (playBtn) playBtn.onclick = () => this.app.onItemClick(heroItem, heroItem.type || 'movie');
 
             const favBtn = document.getElementById('hero-fav');
             if (favBtn) {
-                const isFav = this.app.isFavorite(heroItem.id);
-                favBtn.textContent = isFav ? '★ Favorited' : '☆ Add to Favorites';
+                const updateHeroFav = () => {
+                    const isFav = this.app.isFavorite(heroItem);
+                    favBtn.classList.toggle('active', isFav);
+                    const iconSpan = favBtn.querySelector('.btn-icon');
+                    const label = isFav ? ' Favorited' : ' Add to Favorites';
+                    if (iconSpan) {
+                        while (iconSpan.nextSibling) {
+                            favBtn.removeChild(iconSpan.nextSibling);
+                        }
+                        favBtn.appendChild(document.createTextNode(label));
+                    } else {
+                        favBtn.textContent = isFav ? '★ Favorited' : '☆ Add to Favorites';
+                    }
+                };
+                updateHeroFav();
                 favBtn.onclick = () => {
                     this.app.toggleFavorite(heroItem);
-                    favBtn.textContent = this.app.isFavorite(heroItem.id) ? '★ Favorited' : '☆ Add to Favorites';
+                    updateHeroFav();
                 };
             }
         }
@@ -72,13 +85,15 @@ window.IPTV.HomeView = {
         const scroll = document.createElement('div');
         scroll.className = 'row-scroll';
 
+        const frag = document.createDocumentFragment();
         items.forEach(item => {
             const card = window.IPTV.Card.create(item, type, {
-                isFavorite: this.app.isFavorite(item.id),
+                isFavorite: this.app.isFavorite(item),
                 onClick: (selectedItem, itemType) => this.app.onItemClick(selectedItem, itemType)
             });
-            scroll.appendChild(card);
+            frag.appendChild(card);
         });
+        scroll.appendChild(frag);
 
         row.appendChild(scroll);
         this.rowsContainer.appendChild(row);

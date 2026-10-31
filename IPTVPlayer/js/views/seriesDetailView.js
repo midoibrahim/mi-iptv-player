@@ -28,7 +28,7 @@ window.IPTV.SeriesDetailView = {
         const favBtn = document.getElementById('series-fav-btn');
         const favText = document.getElementById('series-fav-text');
         if (!favBtn || !this.currentSeries) return;
-        const isFav = this.app.isFavorite(this.currentSeries.id);
+        const isFav = this.app.isFavorite(this.currentSeries);
         favBtn.classList.toggle('active', isFav);
         if (favText) {
             favText.textContent = isFav ? 'Remove from Favorites' : 'Add to Favorites';
@@ -193,6 +193,9 @@ window.IPTV.SeriesDetailView = {
             ? this.app.connection.server.replace(/\/+$/, '')
             : '';
 
+        const frag = document.createDocumentFragment();
+        const playIconHtml = window.IPTV.Icons ? window.IPTV.Icons.get('play', 'ep-play-svg') : '▶';
+
         episodes.forEach(ep => {
             const card = document.createElement('div');
             card.className = 'episode-card';
@@ -209,17 +212,42 @@ window.IPTV.SeriesDetailView = {
             const epTitle = this._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum);
             const epNumStr = `S${seasonNum} E${epNum}`;
 
-            card.innerHTML = `
-                <div class="episode-thumb-container">
-                    ${thumb ? `<img class="episode-thumb" src="${thumb}" alt="${epTitle}" loading="lazy" onerror="this.style.display='none'">` : ''}
-                    <div class="episode-play-icon">${window.IPTV.Icons ? window.IPTV.Icons.get('play', 'ep-play-svg') : '▶'}</div>
-                </div>
-                <div class="episode-info">
-                    <span class="episode-number">${epNumStr}</span>
-                    <h4 class="episode-title">${epTitle}</h4>
-                    ${ep.info && ep.info.plot ? `<p class="episode-plot">${ep.info.plot}</p>` : ''}
-                </div>
-            `;
+            const thumbContainer = document.createElement('div');
+            thumbContainer.className = 'episode-thumb-container';
+            if (thumb) {
+                const img = document.createElement('img');
+                img.className = 'episode-thumb';
+                img.src = thumb;
+                img.alt = '';
+                img.loading = 'lazy';
+                img.onerror = function() { this.style.display = 'none'; };
+                thumbContainer.appendChild(img);
+            }
+            const playIcon = document.createElement('div');
+            playIcon.className = 'episode-play-icon';
+            playIcon.innerHTML = playIconHtml;
+            thumbContainer.appendChild(playIcon);
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'episode-info';
+            const numSpan = document.createElement('span');
+            numSpan.className = 'episode-number';
+            numSpan.textContent = epNumStr;
+            const titleH4 = document.createElement('h4');
+            titleH4.className = 'episode-title';
+            titleH4.textContent = epTitle;
+            infoDiv.appendChild(numSpan);
+            infoDiv.appendChild(titleH4);
+
+            if (ep.info && ep.info.plot) {
+                const plotP = document.createElement('p');
+                plotP.className = 'episode-plot';
+                plotP.textContent = ep.info.plot;
+                infoDiv.appendChild(plotP);
+            }
+
+            card.appendChild(thumbContainer);
+            card.appendChild(infoDiv);
 
             card.addEventListener('click', () => {
                 if (!streamUrl) {
@@ -236,8 +264,9 @@ window.IPTV.SeriesDetailView = {
                 });
             });
 
-            grid.appendChild(card);
+            frag.appendChild(card);
         });
+        grid.appendChild(frag);
     },
 
     close() {

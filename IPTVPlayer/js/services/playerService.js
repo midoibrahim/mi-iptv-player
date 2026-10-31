@@ -405,6 +405,42 @@ window.IPTV.PlayerService = {
     },
 
 
+    _scriptPromises: {},
+
+    _loadScriptOnce(src) {
+        if (this._scriptPromises[src]) return this._scriptPromises[src];
+        this._scriptPromises[src] = new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = src;
+            s.async = true;
+            s.onload = () => resolve(true);
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        });
+        return this._scriptPromises[src];
+    },
+
+    _getCandidateStrategy(rawUrl) {
+        if (!rawUrl) return '';
+        if (rawUrl.indexOf('mse-hls:') === 0) return 'mse-hls';
+        if (rawUrl.indexOf('mse-ts:') === 0) return 'mse-ts';
+        const isProxy = rawUrl.indexOf('/api/proxy') !== -1;
+        const decoded = decodeURIComponent(rawUrl);
+        if (/\.m3u8($|\?)/i.test(decoded)) return isProxy ? 'proxy-hls' : 'native-hls';
+        if (/\.(ts|mpegts)($|\?)/i.test(decoded)) return isProxy ? 'proxy-ts' : 'native-ts';
+        return isProxy ? 'proxy-raw' : 'native-raw';
+    },
+
+    _markCandidateSuccess(rawCandidateUrl) {
+        this._clearCandidateWatchdog();
+        if (this.isLiveStream() && this.app && this.app.connection && window.IPTV.Storage && window.IPTV.Storage.saveStreamStrategy) {
+            const strat = this._getCandidateStrategy(rawCandidateUrl);
+            if (strat) {
+                window.IPTV.Storage.saveStreamStrategy(this.app.connection, strat);
+            }
+        }
+    },
+
     _buildCandidateUrls(item) {
         const list = [];
         const add = (u) => {
@@ -439,7 +475,7 @@ window.IPTV.PlayerService = {
             // Priority 1: Direct, MSE, & Proxied HLS (.m3u8)
             if (hlsCandidate) {
                 add(hlsCandidate);
-                if (canUseMse && window.Hls && Hls.isSupported()) {
+                if (canUseMse) {
                     add(`mse-hls:${hlsCandidate}`);
                 }
                 add(toProxy(hlsCandidate));
@@ -447,7 +483,7 @@ window.IPTV.PlayerService = {
             // Priority 2: Direct, MSE, & Proxied MPEG-TS (.ts)
             if (tsCandidate) {
                 add(tsCandidate);
-                if (canUseMse && window.mpegts && mpegts.isSupported()) {
+                if (canUseMse) {
                     add(`mse-ts:${tsCandidate}`);
                 }
                 add(toProxy(tsCandidate));
@@ -456,6 +492,18 @@ window.IPTV.PlayerService = {
             if (rawCandidate) {
                 add(rawCandidate);
                 add(toProxy(rawCandidate));
+            }
+
+            // Promote remembered winning strategy for this server to index 0 for < 2s channel zapping
+            const preferredStrategy = (this.app && this.app.connection && window.IPTV.Storage && window.IPTV.Storage.getStreamStrategy)
+                ? window.IPTV.Storage.getStreamStrategy(this.app.connection)
+                : null;
+            if (preferredStrategy && list.length > 1) {
+                const prefIdx = list.findIndex(u => this._getCandidateStrategy(u) === preferredStrategy);
+                if (prefIdx > 0) {
+                    const [winner] = list.splice(prefIdx, 1);
+                    list.unshift(winner);
+                }
             }
             return list;
         }
@@ -506,7 +554,7 @@ window.IPTV.PlayerService = {
         }
     },
 
-    _loadStreamCandidate(rawCandidateUrl, item) {
+    async _loadStreamCandidate(rawCandidateUrl, item) {
         this._destroyPlayers();
         if (!this.video) return;
 
@@ -526,84 +574,106 @@ window.IPTV.PlayerService = {
 
         console.log(`[PlayerService] Loading stream candidate [${this.currentCandidateIndex + 1}/${this.currentCandidates.length}]: ${rawCandidateUrl}`);
 
-        // Start watchdog timer so if a candidate stalls without firing an error, we try the next one
-        this._startCandidateWatchdog(item, isLive ? 8000 : 12000);
+        // Fast 5s watchdog for live zapping so stalled candidates advance quickly
+        this._startCandidateWatchdog(item, isLive ? 5000 : 10000);
 
         const isWebOSTV = !!(window.webOS || /Web0S|webOS|SmartTV/i.test(navigator.userAgent));
 
         // 1. HLS (.m3u8) streams:
         // On LG webOS TVs, try native hardware GStreamer HLS playback first; if forceMseHls is set
-        // (or on browsers without native HLS), use Hls.js MSE (works great on webOS 5+ / Chromium 68+).
+        // (or on browsers without native HLS), lazy-load Hls.js MSE on demand.
         if (isM3u8) {
             if (!forceMseHls && (isWebOSTV || this.video.canPlayType('application/vnd.apple.mpegurl') || this.video.canPlayType('application/x-mpegURL'))) {
-                this._playNativeDirect(url, item, 'application/vnd.apple.mpegurl');
+                this._playNativeDirect(url, item, rawCandidateUrl);
                 return;
             }
-            if (window.Hls && Hls.isSupported()) {
-                try {
-                    const hls = new Hls({
-                        enableWorker: false,
-                        lowLatencyMode: false,
-                        maxBufferLength: 25,
-                        maxMaxBufferLength: 45
-                    });
-                    this.hls = hls;
-                    hls.loadSource(url);
-                    hls.attachMedia(this.video);
+            if (typeof window.MediaSource !== 'undefined') {
+                if (!window.Hls) {
+                    await this._loadScriptOnce('js/hls.min.js');
+                    if (!this.visible || this.currentItem !== item) return;
+                }
+                if (window.Hls && Hls.isSupported()) {
+                    try {
+                        const hls = new Hls({
+                            enableWorker: false,
+                            lowLatencyMode: false,
+                            maxBufferLength: 25,
+                            maxMaxBufferLength: 45
+                        });
+                        this.hls = hls;
+                        hls.loadSource(url);
+                        hls.attachMedia(this.video);
 
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        this._clearCandidateWatchdog();
-                        const p = this.video.play();
-                        if (p && typeof p.catch === 'function') p.catch(() => {});
-                    });
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            this._markCandidateSuccess(rawCandidateUrl);
+                            const p = this.video.play();
+                            if (p && typeof p.catch === 'function') p.catch(() => {});
+                        });
 
-                    hls.on(Hls.Events.ERROR, (event, data) => {
-                        if (data.fatal) {
-                            console.warn('[PlayerService] HLS fatal error:', data.type, data.details);
-                            this._tryNextCandidate(item);
-                        }
-                    });
-                    return;
-                } catch(e) {
-                    console.warn('[PlayerService] Hls.js init failed, falling back to native:', e);
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            if (data.fatal) {
+                                console.warn('[PlayerService] HLS fatal error:', data.type, data.details);
+                                this._tryNextCandidate(item);
+                            }
+                        });
+                        return;
+                    } catch(e) {
+                        console.warn('[PlayerService] Hls.js init failed, falling back to native:', e);
+                    }
                 }
             }
         }
 
         // 2. MPEG-TS (.ts) streams:
-        // On LG webOS TVs, try native hardware MPEG-TS first; if forceMseTs is set (or on desktop browsers), use mpegts.js MSE
-        if (isTs && (forceMseTs || !isWebOSTV) && window.mpegts && mpegts.isSupported()) {
-            try {
-                const player = mpegts.createPlayer({
-                    type: 'mse',
-                    isLive: true,
-                    url: url
-                }, {
-                    enableWorker: false,
-                    lazyLoadMaxDuration: 120,
-                    seekType: 'range'
-                });
-                this.mpegtsPlayer = player;
-                player.attachMediaElement(this.video);
-                player.load();
-                const p = player.play();
-                if (p && typeof p.catch === 'function') p.catch(() => {});
+        // On LG webOS TVs, try native hardware MPEG-TS first; if forceMseTs is set (or on desktop browsers), lazy-load mpegts.js MSE
+        if (isTs && (forceMseTs || !isWebOSTV) && typeof window.MediaSource !== 'undefined') {
+            if (!window.mpegts) {
+                await this._loadScriptOnce('js/mpegts.js');
+                if (!this.visible || this.currentItem !== item) return;
+            }
+            if (window.mpegts && mpegts.isSupported()) {
+                try {
+                    const player = mpegts.createPlayer({
+                        type: 'mse',
+                        isLive: true,
+                        url: url
+                    }, {
+                        enableWorker: false,
+                        lazyLoadMaxDuration: 120,
+                        seekType: 'range'
+                    });
+                    this.mpegtsPlayer = player;
+                    player.attachMediaElement(this.video);
+                    player.load();
+                    const p = player.play();
+                    if (p && typeof p.catch === 'function') p.catch(() => {});
 
-                player.on(mpegts.Events.ERROR, (errType, errDetail) => {
-                    console.warn('[PlayerService] mpegts error:', errType, errDetail);
-                    this._tryNextCandidate(item);
-                });
-                return;
-            } catch(e) {
-                console.warn('[PlayerService] mpegts init error:', e);
+                    const onMsePlaying = () => {
+                        this._markCandidateSuccess(rawCandidateUrl);
+                        this.video.removeEventListener('playing', onMsePlaying);
+                        this.video.removeEventListener('loadeddata', onMsePlaying);
+                    };
+                    this.video.addEventListener('playing', onMsePlaying);
+                    this.video.addEventListener('loadeddata', onMsePlaying);
+
+                    player.on(mpegts.Events.ERROR, (errType, errDetail) => {
+                        this.video.removeEventListener('playing', onMsePlaying);
+                        this.video.removeEventListener('loadeddata', onMsePlaying);
+                        console.warn('[PlayerService] mpegts error:', errType, errDetail);
+                        this._tryNextCandidate(item);
+                    });
+                    return;
+                } catch(e) {
+                    console.warn('[PlayerService] mpegts init error:', e);
+                }
             }
         }
 
         // 3. Direct native hardware video playback (LG webOS GStreamer / MP4 VOD / TS)
-        this._playNativeDirect(url, item);
+        this._playNativeDirect(url, item, rawCandidateUrl);
     },
 
-    _playNativeDirect(url, item, mimeType) {
+    _playNativeDirect(url, item, rawCandidateUrl) {
         if (!this.video) return;
 
         // Clear any old <source> tags
@@ -612,7 +682,7 @@ window.IPTV.PlayerService = {
         }
 
         const onPlaying = () => {
-            this._clearCandidateWatchdog();
+            this._markCandidateSuccess(rawCandidateUrl || url);
             this.video.removeEventListener('playing', onPlaying);
             this.video.removeEventListener('loadeddata', onPlaying);
         };
@@ -697,19 +767,28 @@ window.IPTV.PlayerService = {
         );
     },
 
+    _osdEls() {
+        if (!this._cachedOsdEls) {
+            this._cachedOsdEls = {
+                bar: document.getElementById('osd-progress-bar'),
+                fill: document.getElementById('osd-progress-fill'),
+                thumb: document.getElementById('osd-progress-thumb'),
+                cur: document.getElementById('osd-time-current'),
+                dur: document.getElementById('osd-time-duration')
+            };
+        }
+        return this._cachedOsdEls;
+    },
+
     _updateProgressUI(currentTime, duration) {
         if (!duration || isNaN(duration) || !isFinite(duration) || duration <= 0) return;
         const pct = Math.max(0, Math.min(100, (currentTime / duration) * 100));
-        const fill = document.getElementById('osd-progress-fill');
-        if (fill) fill.style.width = `${pct}%`;
-        const thumb = document.getElementById('osd-progress-thumb');
-        if (thumb) thumb.style.left = `${pct}%`;
-        const cur = document.getElementById('osd-time-current');
-        if (cur) cur.textContent = this._fmtTime(currentTime);
-        const dur = document.getElementById('osd-time-duration');
-        if (dur) dur.textContent = this._fmtTime(duration);
-        const bar = document.getElementById('osd-progress-bar');
-        if (bar) bar.setAttribute('aria-valuenow', Math.round(pct).toString());
+        const els = this._osdEls();
+        if (els.fill) els.fill.style.width = `${pct}%`;
+        if (els.thumb) els.thumb.style.left = `${pct}%`;
+        if (els.cur) els.cur.textContent = this._fmtTime(currentTime);
+        if (els.dur) els.dur.textContent = this._fmtTime(duration);
+        if (els.bar) els.bar.setAttribute('aria-valuenow', Math.round(pct).toString());
     },
 
     seekTo(targetSeconds, startPlaying = true) {
@@ -744,16 +823,17 @@ window.IPTV.PlayerService = {
                 if (p && typeof p.then === 'function') {
                     p.catch(e => console.warn('Play after seek caught:', e));
                 }
-                const pp = document.getElementById('osd-playpause');
-                if (pp) pp.textContent = '⏸';
+                this._updatePlayPauseIcon(true);
             }
         };
 
-        // When seek finishes, immediately resume
-        this.video.addEventListener('seeked', () => {
+        // Self-removing listener (compatible with Chromium 38 where options object is treated as useCapture)
+        const onSeeked = () => {
+            this.video.removeEventListener('seeked', onSeeked);
             ensurePlaying();
             this._updateProgress();
-        }, { once: true });
+        };
+        this.video.addEventListener('seeked', onSeeked);
 
         // Immediate and timeout fallbacks in case seeked is delayed
         ensurePlaying();
@@ -853,7 +933,7 @@ window.IPTV.PlayerService = {
     updateFavoriteState() {
         const favBtn = document.getElementById('osd-fav');
         if (!favBtn || !this.currentItem) return;
-        const isFav = this.app.isFavorite(this.currentItem.id);
+        const isFav = this.app.isFavorite(this.currentItem);
         favBtn.classList.toggle('active', isFav);
         favBtn.title = isFav ? 'Remove from Favorites (Press F on remote)' : 'Add to Favorites (Press F on remote)';
     },
@@ -896,13 +976,14 @@ window.IPTV.PlayerService = {
     },
 
     _updateProgress() {
-        if (!this.video) return;
+        if (!this.video || !this.isOSDVisible()) return;
 
-        const bar = document.getElementById('osd-progress-bar');
-        const fill = document.getElementById('osd-progress-fill');
-        const thumb = document.getElementById('osd-progress-thumb');
-        const cur = document.getElementById('osd-time-current');
-        const dur = document.getElementById('osd-time-duration');
+        const els = this._osdEls();
+        const bar = els.bar;
+        const fill = els.fill;
+        const thumb = els.thumb;
+        const cur = els.cur;
+        const dur = els.dur;
 
         const isLive = this.isLiveStream();
         if (isLive) {

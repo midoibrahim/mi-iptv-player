@@ -327,7 +327,7 @@ window.IPTV.KeyHandler = {
                 e.preventDefault();
                 e.stopPropagation();
                 this.app.toggleFavorite(active._item);
-                const nowFav = this.app.isFavorite(active._item.id);
+                const nowFav = this.app.isFavorite(active._item);
                 if (active._favBtn) active._favBtn.classList.toggle('active', nowFav);
                 active.classList.toggle('is-favorited', nowFav);
                 return;

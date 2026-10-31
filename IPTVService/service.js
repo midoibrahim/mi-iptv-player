@@ -33,6 +33,8 @@ var keepAliveActivity = null;
 var activeSockets = [];
 var lastPollTime = 0;
 var pollWatchdogTimer = null;
+var httpAgent = new http.Agent({ keepAlive: true, maxSockets: 16 });
+var httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 16, rejectUnauthorized: false });
 
 function log(msg) {
     try { console.log('[miiptv-service] ' + msg); } catch (e) { /* ignore */ }
@@ -105,12 +107,14 @@ function proxy(req, res, target, redirects) {
     if (req.headers.range) headers.Range = req.headers.range;
 
     var lib = parsed.protocol === 'https:' ? https : http;
+    var agent = parsed.protocol === 'https:' ? httpsAgent : httpAgent;
     var upstream = lib.request({
         method: 'GET',
         hostname: parsed.hostname,
         port: parsed.port,
         path: parsed.path,
         headers: headers,
+        agent: agent,
         rejectUnauthorized: false
     }, function (up) {
         if (up.statusCode >= 300 && up.statusCode < 400 && up.headers.location && redirects < 5) {

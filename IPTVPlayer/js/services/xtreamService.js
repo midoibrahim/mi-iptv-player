@@ -83,7 +83,6 @@ window.IPTV.XtreamService = {
                 name: name,
                 type: 'live',
                 _idx: i,
-                _q: (name + ' ' + catName).toLowerCase(),
                 logo: ch.stream_icon || '',
                 category: catName,
                 categoryId: ch.category_id,
@@ -110,12 +109,11 @@ window.IPTV.XtreamService = {
                 id: String(sid),
                 name: name,
                 type: 'movie',
-                _q: (name + ' ' + catName).toLowerCase(),
                 poster: m.stream_icon || '',
                 category: catName,
                 categoryId: m.category_id,
                 url: `${base}/movie/${conn.user}/${conn.pass}/${sid}.${m.container_extension || 'mp4'}`,
-                plot: m.plot || '',
+                plot: i < 15 ? (m.plot || '') : '',
                 rating: m.rating || '',
                 year: m.year || ''
             };
@@ -136,11 +134,10 @@ window.IPTV.XtreamService = {
                 id: String(s.series_id),
                 name: name,
                 type: 'series',
-                _q: (name + ' ' + catName).toLowerCase(),
                 poster: s.cover || '',
                 category: catName,
                 categoryId: s.category_id,
-                plot: s.plot || '',
+                plot: i < 15 ? (s.plot || '') : '',
                 rating: s.rating || '',
                 year: s.year || ''
             };

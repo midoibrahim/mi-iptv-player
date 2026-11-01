@@ -89,6 +89,14 @@ window.IPTV.Card = {
         }
     },
 
+    clearLazyQueue() {
+        this._lazyQueue.length = 0;
+        if (this._lazyTimer) {
+            clearTimeout(this._lazyTimer);
+            this._lazyTimer = null;
+        }
+    },
+
     create(item, type, options = {}) {
         const { isFavorite = false, onClick = null } = options;
 

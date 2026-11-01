@@ -290,6 +290,10 @@ window.IPTV.BrowseView = class {
         content.className = `browse-content ${this.viewMode === 'grid' ? 'grid-view' : 'rows-view'}`;
         content.scrollTop = 0;
 
+        if (window.IPTV.Card && window.IPTV.Card.clearLazyQueue) {
+            window.IPTV.Card.clearLazyQueue();
+        }
+
         if (this.viewMode === 'rows') {
             this._renderRows(content, this._filteredItems);
         } else {

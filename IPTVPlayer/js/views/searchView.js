@@ -90,6 +90,9 @@ window.IPTV.SearchView = {
             { title: 'Series',        type: 'series', items: this._collectPoolMatches(this.app.series, q, maxPerGroup) }
         ].filter(g => g.items.length > 0);
 
+        if (window.IPTV.Card && window.IPTV.Card.clearLazyQueue) {
+            window.IPTV.Card.clearLazyQueue();
+        }
         this.resultsContainer.innerHTML = '';
 
         if (groups.length === 0) {

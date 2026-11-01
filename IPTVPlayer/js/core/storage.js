@@ -262,13 +262,53 @@ window.IPTV.CatalogCache = {
             try {
                 const tx = db.transaction(this.STORE_NAME, 'readwrite');
                 const store = tx.objectStore(this.STORE_NAME);
+
+                // Lean serialization to protect TV flash storage quota
+                const leanLive = (data.liveChannels || []).map(ch => ({
+                    id: ch.id,
+                    name: ch.name,
+                    type: 'live',
+                    logo: ch.logo || '',
+                    category: ch.category || '',
+                    categoryId: ch.categoryId,
+                    url: ch.url || '',
+                    hlsUrl: ch.hlsUrl || '',
+                    fallbackUrl: ch.fallbackUrl || '',
+                    hd: !!ch.hd
+                }));
+
+                const leanMovies = (data.movies || []).map(m => ({
+                    id: m.id,
+                    name: m.name,
+                    type: 'movie',
+                    poster: m.poster || '',
+                    category: m.category || '',
+                    categoryId: m.categoryId,
+                    url: m.url || '',
+                    plot: m.plot || '',
+                    rating: m.rating || '',
+                    year: m.year || ''
+                }));
+
+                const leanSeries = (data.series || []).map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    type: 'series',
+                    poster: s.poster || '',
+                    category: s.category || '',
+                    categoryId: s.categoryId,
+                    plot: s.plot || '',
+                    rating: s.rating || '',
+                    year: s.year || ''
+                }));
+
                 store.put({
                     timestamp: Date.now(),
                     userInfo: data.userInfo || null,
                     categories: data.categories || { live: [], movies: [], series: [] },
-                    liveChannels: data.liveChannels || [],
-                    movies: data.movies || [],
-                    series: data.series || []
+                    liveChannels: leanLive,
+                    movies: leanMovies,
+                    series: leanSeries
                 }, key);
                 tx.oncomplete = () => resolve(true);
                 tx.onerror = () => resolve(false);

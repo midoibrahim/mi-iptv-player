@@ -597,8 +597,9 @@ window.IPTV.PlayerService = {
                         const hls = new Hls({
                             enableWorker: false,
                             lowLatencyMode: false,
-                            maxBufferLength: 25,
-                            maxMaxBufferLength: 45
+                            maxBufferLength: 15,
+                            maxMaxBufferLength: 30,
+                            maxBufferSize: 20 * 1000 * 1000
                         });
                         this.hls = hls;
                         hls.loadSource(url);
@@ -639,7 +640,8 @@ window.IPTV.PlayerService = {
                         url: url
                     }, {
                         enableWorker: false,
-                        lazyLoadMaxDuration: 120,
+                        lazyLoadMaxDuration: 30,
+                        lazyLoadRecoverDuration: 15,
                         seekType: 'range'
                     });
                     this.mpegtsPlayer = player;

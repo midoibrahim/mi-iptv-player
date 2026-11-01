@@ -56,13 +56,23 @@ window.IPTV.SpatialNav = {
     },
 
     getActiveRoot() {
-        if (document.body.classList.contains('player-active')) {
-            return document.getElementById('player-screen');
+        // Modal focus trap for continue watching resume choice
+        const cwModal = document.getElementById('continue-watching-modal');
+        if (cwModal && !cwModal.classList.contains('hidden')) {
+            return cwModal;
         }
         // Modal focus trap for profile delete confirmation
         const confirmModal = document.getElementById('profile-delete-modal');
         if (confirmModal && !confirmModal.classList.contains('hidden')) {
             return confirmModal;
+        }
+        // Side Channel List drawer focus trap inside player
+        const channelDrawer = document.getElementById('player-channel-drawer');
+        if (channelDrawer && !channelDrawer.classList.contains('hidden')) {
+            return channelDrawer;
+        }
+        if (document.body.classList.contains('player-active')) {
+            return document.getElementById('player-screen');
         }
         const seriesScreen = document.getElementById('series-detail-screen');
         if (seriesScreen && seriesScreen.classList.contains('active')) {
@@ -135,9 +145,12 @@ window.IPTV.SpatialNav = {
     navigate(dir) {
         this._ensureSideNavBinding();
 
-        // If player is active, playerService handles its own OSD controls
+        // If player is active, playerService handles its own OSD controls unless channel drawer is open
         if (document.body.classList.contains('player-active')) {
-            return false;
+            const channelDrawer = document.getElementById('player-channel-drawer');
+            if (!channelDrawer || channelDrawer.classList.contains('hidden')) {
+                return false;
+            }
         }
 
         const activeRoot = this.getActiveRoot();

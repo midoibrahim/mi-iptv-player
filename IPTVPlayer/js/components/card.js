@@ -153,6 +153,19 @@ window.IPTV.Card = {
             card.appendChild(hdBadge);
         }
 
+        // Progress Bar on Card (Continue Watching)
+        const progressData = options.progress || (item.position && item.duration ? { position: item.position, duration: item.duration } : null);
+        if (progressData && progressData.duration > 0) {
+            const pct = Math.max(0, Math.min(100, Math.round((progressData.position / progressData.duration) * 100)));
+            const barContainer = document.createElement('div');
+            barContainer.className = 'card-progress-bar';
+            const fill = document.createElement('div');
+            fill.className = 'card-progress-fill';
+            fill.style.width = `${pct}%`;
+            barContainer.appendChild(fill);
+            card.appendChild(barContainer);
+        }
+
         // Interactive Favorite Button
         const favBtn = document.createElement('button');
         favBtn.className = isFavorite ? 'card-fav-btn active' : 'card-fav-btn';
@@ -181,10 +194,11 @@ window.IPTV.Card = {
         titleEl.textContent = item.name || 'Unknown';
         info.appendChild(titleEl);
 
-        if (item.category || item.year) {
+        const subText = options.subtitle || (item.year ? (item.category ? `${item.year} · ${item.category}` : String(item.year)) : item.category);
+        if (subText) {
             const sub = document.createElement('div');
             sub.className = 'card-sub';
-            sub.textContent = item.year ? (item.category ? `${item.year} · ${item.category}` : String(item.year)) : item.category;
+            sub.textContent = subText;
             info.appendChild(sub);
         }
 

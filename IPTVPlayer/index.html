@@ -16,8 +16,10 @@
     <link rel="stylesheet" type="text/css" href="css/series.css">
     <link rel="stylesheet" type="text/css" href="css/player.css">
 
-    <!-- Polyfills (HLS/MPEG-TS MSE libraries are lazy-loaded on demand by PlayerService) -->
+    <!-- Polyfills & Streaming Engines (Hls.js & mpegts.js) -->
     <script src="js/core/polyfills.js"></script>
+    <script src="js/hls.min.js"></script>
+    <script src="js/mpegts.js"></script>
 </head>
 
 <body>
@@ -374,6 +376,11 @@
                                 d="M10.746 6.00002C10.746 5.69663 10.5632 5.42312 10.2829 5.30707C10.0026 5.19101 9.67996 5.25526 9.4655 5.46986L3.51254 11.4266C3.35184 11.5642 3.25 11.7685 3.25 11.9966V11.9982C3.24959 12.1906 3.32276 12.3831 3.46949 12.53L9.46548 18.5302C9.67994 18.7448 10.0026 18.809 10.2829 18.693C10.5632 18.5769 10.746 18.3034 10.746 18L10.746 12.7466L20.0014 12.7466C20.4156 12.7466 20.7514 12.4108 20.7514 11.9966C20.7514 11.5824 20.4156 11.2466 20.0014 11.2466L10.746 11.2466V6.00002Z" />
                         </svg></button>
                     <span id="osd-channel-name" class="osd-title"></span>
+                    <button id="osd-channels-btn" class="osd-btn" tabindex="0" title="Channels List"><svg class="osd-svg-icon"
+                            viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M4 5.75C4 5.05964 4.55964 4.5 5.25 4.5H18.75C19.4404 4.5 20 5.05964 20 5.75C20 6.44036 19.4404 7 18.75 7H5.25C4.55964 7 4 6.44036 4 5.75ZM4 12C4 11.3096 4.55964 10.75 5.25 10.75H18.75C19.4404 10.75 20 11.3096 20 12C20 12.6904 19.4404 13.25 18.75 13.25H5.25C4.55964 13.25 4 12.6904 4 12ZM5.25 17C4.55964 17 4 17.5596 4 18.25C4 18.9404 4.55964 19.5 5.25 19.5H18.75C19.4404 19.5 20 18.9404 20 18.25C20 17.5596 19.4404 17 18.75 17H5.25Z" />
+                        </svg></button>
                     <button id="osd-fav" class="osd-btn" tabindex="0" title="Toggle Favorite"><svg class="osd-svg-icon"
                             viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -387,7 +394,9 @@
                         <div id="osd-progress-bar" class="progress-bar" tabindex="0" role="slider"
                             aria-label="Playback timeline" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                             <div id="osd-progress-fill" class="progress-fill"></div>
-                            <div id="osd-progress-thumb" class="progress-thumb"></div>
+                            <div id="osd-progress-thumb" class="progress-thumb">
+                                <span id="osd-scrub-bubble" class="scrub-bubble">00:00</span>
+                            </div>
                         </div>
                         <span id="osd-time-duration">00:00</span>
                     </div>
@@ -448,6 +457,36 @@
                 <div class="seek-hud-content">
                     <span id="seek-hud-text" class="seek-hud-text">+10s</span>
                     <span id="seek-hud-time" class="seek-hud-time">00:00 / 00:00</span>
+                </div>
+            </div>
+
+            <!-- In-Player Side Channel List Drawer (Live TV) -->
+            <div id="player-drawer-backdrop" class="player-drawer-backdrop hidden"></div>
+            <div id="player-channel-drawer" class="player-channel-drawer hidden" role="region" aria-label="Live Channels">
+                <div class="drawer-header">
+                    <div class="drawer-title-row">
+                        <h3 class="drawer-title">Channels</h3>
+                        <button id="drawer-close-btn" class="drawer-close-btn" tabindex="0" title="Close Channel List">&times;</button>
+                    </div>
+                    <div id="drawer-categories-bar" class="drawer-categories-bar">
+                        <!-- Category pills rendered dynamically -->
+                    </div>
+                </div>
+                <div id="drawer-channel-list" class="drawer-channel-list">
+                    <!-- Channels rendered dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ CONTINUE WATCHING RESUME MODAL ============ -->
+        <div id="continue-watching-modal" class="confirm-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="cw-modal-title">
+            <div class="confirm-modal-card">
+                <h3 id="cw-modal-title" class="confirm-modal-title">Resume Playback</h3>
+                <p id="cw-modal-desc" class="confirm-modal-desc">Pick up where you left off or start over from the beginning.</p>
+                <div class="confirm-modal-actions">
+                    <button id="btn-cw-resume" class="btn-primary" tabindex="0">Resume</button>
+                    <button id="btn-cw-restart" class="btn-ghost" tabindex="0">Start Over</button>
+                    <button id="btn-cw-cancel" class="btn-ghost" tabindex="0">Cancel</button>
                 </div>
             </div>
         </div>

@@ -219,6 +219,19 @@ window.IPTV.KeyHandler = {
         );
     },
 
+    isChannelListKey(e) {
+        const key = e.key;
+        const code = e.keyCode || e.which;
+        return (
+            key === 'c' || key === 'C' ||
+            key === 'g' || key === 'G' ||
+            key === 'ChannelList' ||
+            key === 'Guide' ||
+            code === 458 || // webOS Guide
+            code === 10140  // webOS ChannelList
+        );
+    },
+
     isPlayerActive() {
         return !!(
             (this.app && this.app.playerService && this.app.playerService.isVisible()) ||
@@ -278,17 +291,25 @@ window.IPTV.KeyHandler = {
 
         // ---- 2. Hardware Channel +/- Buttons (Dedicated Next/Previous Channel) ----
         if (this.isChannelUp(e)) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.app.nextChannel();
-            return;
+            if (this.isPlayerActive() && this.app.playerService && this.app.playerService.isChannelDrawerOpen) {
+                // Pass to drawer navigation
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+                this.app.nextChannel();
+                return;
+            }
         }
 
         if (this.isChannelDown(e)) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.app.prevChannel();
-            return;
+            if (this.isPlayerActive() && this.app.playerService && this.app.playerService.isChannelDrawerOpen) {
+                // Pass to drawer navigation
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+                this.app.prevChannel();
+                return;
+            }
         }
 
         // ---- 3. Dedicated Favorite Shortcut (F / Yellow / Blue Key on TV Remote) ----

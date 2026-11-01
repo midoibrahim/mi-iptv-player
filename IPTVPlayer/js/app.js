@@ -161,6 +161,17 @@ class IPTVApp {
     }
 
     goBack() {
+        // -1. If Continue Watching resume modal is open, close it and restore focus
+        const cwModal = document.getElementById('continue-watching-modal');
+        if (cwModal && !cwModal.classList.contains('hidden')) {
+            if (this.homeView && typeof this.homeView.closeResumeModal === 'function') {
+                this.homeView.closeResumeModal();
+            } else {
+                cwModal.classList.add('hidden');
+            }
+            return true;
+        }
+
         // 0. If profile delete confirmation modal is open, close it and restore focus
         const confirmModal = document.getElementById('profile-delete-modal');
         if (confirmModal && !confirmModal.classList.contains('hidden')) {
@@ -172,12 +183,16 @@ class IPTVApp {
             return true;
         }
 
-        // 1. If video player is visible, exit player back to the originating screen
+        // 1. If video player is visible, exit drawer or player back to the originating screen
         const playerScreen = document.getElementById('player-screen');
         const isPlayerOpen = (this.playerService && this.playerService.isVisible()) ||
                              (playerScreen && playerScreen.classList.contains('active')) ||
                              document.body.classList.contains('player-active');
         if (isPlayerOpen) {
+            if (this.playerService && this.playerService.isChannelDrawerOpen) {
+                this.playerService.closeChannelDrawer();
+                return true;
+            }
             if (this.playerService) {
                 this.playerService.close();
             } else {

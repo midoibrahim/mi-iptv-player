@@ -104,6 +104,17 @@ body.player-active #login-screen {
     user-select: none;
     -webkit-user-select: none;
 }
+/* Large 54px pointer hit area for Magic Remote cursor grabbing */
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    bottom: -20px;
+    left: -12px;
+    right: -12px;
+    background: transparent;
+    cursor: pointer;
+}
 .progress-bar:hover,
 .progress-bar:focus {
     height: 18px;
@@ -123,17 +134,44 @@ body.player-active #login-screen {
     top: 50%;
     left: 0%;
     transform: translate(-50%, -50%);
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: #FFFFFF;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
     opacity: 0;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: transform 0.1s ease-out;
 }
 .progress-bar:hover .progress-thumb,
 .progress-bar:focus .progress-thumb,
 .progress-bar.scrubbing .progress-thumb {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+}
+
+/* Scrub Time Preview Bubble directly above Thumb */
+.scrub-bubble {
+    position: absolute;
+    bottom: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 14, 24, 0.96);
+    border: 2px solid var(--accent);
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    padding: 6px 14px;
+    border-radius: 8px;
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.80);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease-out;
+}
+.progress-bar.scrubbing .scrub-bubble {
     opacity: 1;
 }
 
@@ -302,4 +340,191 @@ body.player-active #login-screen {
     height: 36px;
     display: block;
     fill: currentColor;
+}
+
+/* ============================================================
+   IN-PLAYER SIDE CHANNEL LIST DRAWER (Live TV 10-Foot UI)
+   ============================================================ */
+.player-drawer-backdrop {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 150;
+    transition: opacity 0.20s ease-out;
+}
+.player-drawer-backdrop.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.player-channel-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 620px;
+    background: var(--bg-surface);
+    border-left: 2px solid var(--border-medium);
+    z-index: 160;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -14px 0 36px rgba(0, 0, 0, 0.85);
+    transform: translateX(0);
+    transition: transform 0.22s ease-out;
+}
+.player-channel-drawer.hidden {
+    transform: translateX(100%);
+    pointer-events: none;
+}
+
+.drawer-header {
+    padding: 32px 32px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    flex-shrink: 0;
+}
+.drawer-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+.drawer-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text-bright);
+}
+.drawer-close-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    color: var(--text-dim);
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.14s ease-out, background 0.14s ease-out, border-color 0.14s ease-out;
+}
+.drawer-close-btn:hover,
+.drawer-close-btn:focus {
+    background: var(--accent);
+    border-color: #FFFFFF;
+    color: var(--text-on-accent);
+    transform: scale(1.08);
+    outline: none;
+}
+
+.drawer-categories-bar {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    gap: 12px;
+    scrollbar-width: none;
+}
+.drawer-categories-bar::-webkit-scrollbar {
+    display: none;
+}
+.drawer-cat-btn {
+    padding: 8px 20px;
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    border: 2px solid var(--border-subtle);
+    color: var(--text-dim);
+    font-size: 19px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.14s ease-out, background 0.14s ease-out, border-color 0.14s ease-out, color 0.14s ease-out;
+}
+.drawer-cat-btn:hover {
+    background: var(--bg-card-h);
+    color: var(--text-bright);
+}
+.drawer-cat-btn:focus {
+    border-color: var(--border-focus);
+    background: var(--bg-card-h);
+    color: var(--text-bright);
+    transform: scale(1.04);
+    outline: none;
+}
+.drawer-cat-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--text-on-accent);
+}
+
+.drawer-channel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.drawer-channel-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    border: 2px solid transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    min-height: 52px;
+    transition: transform 0.12s ease-out, background 0.12s ease-out, border-color 0.12s ease-out;
+}
+.drawer-channel-item:hover {
+    background: var(--bg-card-h);
+}
+.drawer-channel-item:focus {
+    background: var(--bg-card-h);
+    border-color: var(--border-focus);
+    transform: scale(1.02);
+    outline: none;
+}
+.drawer-channel-item.active-playing {
+    border-color: var(--accent);
+    background: var(--accent-subtle);
+}
+.drawer-channel-item.active-playing:focus {
+    border-color: var(--border-focus);
+    background: var(--accent-subtle);
+    box-shadow: 0 0 0 2px var(--border-focus);
+}
+.drawer-ch-num {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    width: 50px;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+.drawer-ch-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.drawer-playing-badge {
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    color: var(--text-on-accent);
+    font-size: 15px;
+    font-weight: 800;
+    margin-left: 12px;
+    flex-shrink: 0;
 }

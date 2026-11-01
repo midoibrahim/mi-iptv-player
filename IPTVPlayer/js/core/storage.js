@@ -13,7 +13,8 @@ window.IPTV.Storage = {
         SETTINGS: 'iptv_settings',
         VIEW_MODE: 'iptv_view_mode',
         MIGRATED: 'iptv_profiles_migrated',
-        STREAM_STRATEGIES: 'iptv_stream_strategies'
+        STREAM_STRATEGIES: 'iptv_stream_strategies',
+        WATCH_PROGRESS: 'iptv_watch_progress'
     },
 
     // ---- Profiles ----
@@ -90,6 +91,12 @@ window.IPTV.Storage = {
         this.saveProfiles(remaining);
         if (target && window.IPTV.CatalogCache) {
             window.IPTV.CatalogCache.remove(target);
+        }
+        if (target) {
+            const connKey = this.getConnectionKey(target);
+            if (connKey) {
+                try { localStorage.removeItem(`${this.KEYS.WATCH_PROGRESS}_${connKey}`); } catch(e) {}
+            }
         }
 
         // If the deleted profile matches current active connection, clear it
@@ -189,6 +196,109 @@ window.IPTV.Storage = {
             if (map[key] === strategy) return;
             map[key] = strategy;
             localStorage.setItem(this.KEYS.STREAM_STRATEGIES, JSON.stringify(map));
+        } catch(e) {}
+    },
+
+    // ---- Continue Watching / Watch Progress (Scoped per Connection/Profile) ----
+    getConnectionKey(conn) {
+        if (!conn) return '';
+        if (conn.type === 'xtream') {
+            return `xtream:${(conn.server || '').replace(/\/+$/, '')}:${conn.user || ''}`;
+        }
+        return `m3u:${conn.url || ''}`;
+    },
+
+    getWatchProgress(conn) {
+        const connKey = this.getConnectionKey(conn);
+        if (!connKey) return [];
+        try {
+            const raw = localStorage.getItem(`${this.KEYS.WATCH_PROGRESS}_${connKey}`);
+            if (!raw) return [];
+            const list = JSON.parse(raw);
+            if (!Array.isArray(list)) return [];
+
+            // Deduplicate series so there is strictly at most ONE continue-watching entry per series
+            const seenSeries = new Set();
+            const deduplicated = [];
+            for (const item of list) {
+                const sId = item.seriesId || (item.type === 'series' ? (item.id || '').replace(/^series_/, '') : null);
+                if (sId) {
+                    const norm = String(sId);
+                    if (seenSeries.has(norm)) continue;
+                    seenSeries.add(norm);
+                }
+                deduplicated.push(item);
+            }
+            return deduplicated.slice(0, 10);
+        } catch(e) {
+            return [];
+        }
+    },
+
+    saveWatchProgress(conn, list) {
+        const connKey = this.getConnectionKey(conn);
+        if (!connKey) return;
+        try {
+            // Deduplicate series and cap at 10 items, newest first
+            const seenSeries = new Set();
+            const deduplicated = [];
+            const source = Array.isArray(list) ? list : [];
+            for (const item of source) {
+                const sId = item.seriesId || (item.type === 'series' ? (item.id || '').replace(/^series_/, '') : null);
+                if (sId) {
+                    const norm = String(sId);
+                    if (seenSeries.has(norm)) continue;
+                    seenSeries.add(norm);
+                }
+                deduplicated.push(item);
+            }
+            const capped = deduplicated.slice(0, 10);
+            localStorage.setItem(`${this.KEYS.WATCH_PROGRESS}_${connKey}`, JSON.stringify(capped));
+        } catch(e) {
+            console.warn('[Storage] Failed to save watch progress (ignored):', e);
+        }
+    },
+
+    saveWatchProgressItem(conn, record) {
+        if (!conn || !record || !record.id) return;
+        try {
+            let list = this.getWatchProgress(conn);
+            const isSeries = record.type === 'series' || !!record.seriesId;
+            const targetSeriesId = record.seriesId || (isSeries ? String(record.id).replace(/^series_/, '') : null);
+
+            // Replace any existing episode of the exact same series or same item ID
+            const idx = list.findIndex(item => {
+                if (isSeries && targetSeriesId) {
+                    const itemSeriesId = item.seriesId || (item.type === 'series' ? String(item.id).replace(/^series_/, '') : null);
+                    if (itemSeriesId && String(itemSeriesId) === String(targetSeriesId)) {
+                        return true;
+                    }
+                }
+                return String(item.id) === String(record.id);
+            });
+
+            if (idx >= 0) {
+                list.splice(idx, 1);
+            }
+            list.unshift(record);
+            this.saveWatchProgress(conn, list);
+        } catch(e) {}
+    },
+
+    removeWatchProgress(conn, itemId) {
+        if (!conn || !itemId) return;
+        try {
+            let list = this.getWatchProgress(conn);
+            const strId = String(itemId).replace(/^series_/, '');
+            const filtered = list.filter(item => {
+                const itemSeriesId = item.seriesId || (item.type === 'series' ? String(item.id).replace(/^series_/, '') : null);
+                if (itemSeriesId && String(itemSeriesId) === strId) {
+                    return false;
+                }
+                const rawId = String(item.id).replace(/^series_/, '');
+                return rawId !== strId;
+            });
+            this.saveWatchProgress(conn, filtered);
         } catch(e) {}
     }
 };

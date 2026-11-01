@@ -742,6 +742,25 @@
     padding: 10px 16px;
 }
 
+/* Continue Watching Card Progress Bar */
+.card-progress-bar {
+    position: absolute;
+    bottom: 102px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.65);
+    overflow: hidden;
+    z-index: 6;
+}
+.card-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    transition: width 0.2s ease-out;
+}
+
 /* Card Badges (Theme-Aware Semantic Surface + Crisp Border) */
 .card-live-badge {
     position: absolute;

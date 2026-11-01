@@ -83,6 +83,7 @@ window.IPTV.SeriesDetailView = {
 
     renderScreen(seriesInfo, seasonsData) {
         this.currentSeries = seriesInfo;
+        this.seasonsData = seasonsData;
         document.getElementById('series-title').textContent = seriesInfo.name;
         this.updateFavoriteState();
         
@@ -181,7 +182,51 @@ window.IPTV.SeriesDetailView = {
         return t;
     },
 
+    buildEpisodePlayItem(connection, seriesInfo, seasonsData, seasonNum, epIndex) {
+        const seasonStr = String(seasonNum);
+        const episodes = (seasonsData && seasonsData[seasonStr]) ? seasonsData[seasonStr] : null;
+        if (!episodes || !episodes[epIndex]) return null;
+        const ep = episodes[epIndex];
+
+        const base = (connection && connection.type === 'xtream')
+            ? connection.server.replace(/\/+$/, '')
+            : '';
+        let streamUrl = ep.url;
+        if (!streamUrl && connection && connection.type === 'xtream') {
+            const ext = ep.container_extension || 'mp4';
+            streamUrl = `${base}/series/${connection.user}/${connection.pass}/${ep.id}.${ext}`;
+        }
+        if (!streamUrl) return null;
+
+        const epNum = ep.episode_num || ep.episode || (epIndex + 1);
+        const epTitle = this._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum);
+        const epNumStr = `S${seasonNum} E${epNum}`;
+        const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
+
+        return {
+            id: `series_${seriesInfo.id || ''}_${ep.id || ''}`,
+            name: `${seriesInfo.name} - ${epNumStr}: ${epTitle}`,
+            type: 'series',
+            url: streamUrl,
+            logo: thumb || seriesInfo.poster,
+            category: seriesInfo.name,
+            seriesContext: {
+                seriesId: seriesInfo.id,
+                seriesName: seriesInfo.name,
+                poster: seriesInfo.poster,
+                plot: seriesInfo.plot,
+                seasonsData: seasonsData,
+                currentSeason: seasonStr,
+                currentEpisodeIndex: epIndex,
+                currentEpisodeId: ep.id,
+                currentEpisodeNum: epNum,
+                currentEpisodeTitle: epTitle
+            }
+        };
+    },
+
     renderEpisodesList(seriesInfo, episodes, seasonNum) {
+        this.currentSeasonNum = String(seasonNum);
         const grid = document.getElementById('series-episodes-list');
         grid.innerHTML = '';
 
@@ -190,25 +235,16 @@ window.IPTV.SeriesDetailView = {
             return;
         }
 
-        const base = (this.app.connection && this.app.connection.type === 'xtream')
-            ? this.app.connection.server.replace(/\/+$/, '')
-            : '';
-
         const frag = document.createDocumentFragment();
         const playIconHtml = window.IPTV.Icons ? window.IPTV.Icons.get('play', 'ep-play-svg') : '▶';
 
-        episodes.forEach(ep => {
+        episodes.forEach((ep, epIndex) => {
             const card = document.createElement('div');
             card.className = 'episode-card';
             card.tabIndex = 0;
+            card.dataset.episodeId = String(ep.id || '');
 
-            let streamUrl = ep.url;
-            if (!streamUrl && this.app.connection && this.app.connection.type === 'xtream') {
-                const ext = ep.container_extension || 'mp4';
-                streamUrl = `${base}/series/${this.app.connection.user}/${this.app.connection.pass}/${ep.id}.${ext}`;
-            }
-
-            const epNum = ep.episode_num || ep.episode || '';
+            const epNum = ep.episode_num || ep.episode || (epIndex + 1);
             const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
             const epTitle = this._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum);
             const epNumStr = `S${seasonNum} E${epNum}`;
@@ -251,23 +287,64 @@ window.IPTV.SeriesDetailView = {
             card.appendChild(infoDiv);
 
             card.addEventListener('click', () => {
-                if (!streamUrl) {
+                const playItem = this.buildEpisodePlayItem(
+                    this.app.connection,
+                    seriesInfo,
+                    this.seasonsData,
+                    seasonNum,
+                    epIndex
+                );
+                if (!playItem) {
                     this.app.toast('No episode stream URL available');
                     return;
                 }
-                this.app.playerService.play({
-                    id: `series_${seriesInfo.id || ''}_${ep.id || ''}`,
-                    name: `${seriesInfo.name} - ${epNumStr}: ${epTitle}`,
-                    type: 'series',
-                    url: streamUrl,
-                    logo: thumb || seriesInfo.poster,
-                    category: seriesInfo.name
-                });
+                this.app.playerService.play(playItem);
             });
 
             frag.appendChild(card);
         });
         grid.appendChild(frag);
+    },
+
+    focusEpisodeCard(seasonNum, episodeId) {
+        if (!this.screen || !this.screen.classList.contains('active')) return;
+
+        // If the active season tab differs from the requested season, switch tabs
+        if (seasonNum && this.currentSeasonNum !== String(seasonNum)) {
+            const tabsContainer = document.getElementById('series-seasons-tabs');
+            if (tabsContainer) {
+                const tabs = Array.from(tabsContainer.querySelectorAll('.season-tab-btn'));
+                const targetTab = tabs.find(t => t.textContent.trim() === `Season ${seasonNum}`);
+                if (targetTab) {
+                    tabs.forEach(b => b.classList.remove('active'));
+                    targetTab.classList.add('active');
+                    if (this.currentSeries && this.seasonsData && this.seasonsData[String(seasonNum)]) {
+                        this.renderEpisodesList(this.currentSeries, this.seasonsData[String(seasonNum)], seasonNum);
+                    }
+                }
+            }
+        }
+
+        // Focus the specific episode card
+        if (episodeId) {
+            const card = this.screen.querySelector(`.episode-card[data-episode-id="${String(episodeId)}"]`);
+            if (card) {
+                if (window.IPTV.SpatialNav) {
+                    window.IPTV.SpatialNav.focusElement(card);
+                } else {
+                    card.focus();
+                }
+                try { card.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch(e) {}
+                return;
+            }
+        }
+
+        // Fallback to last focused element
+        if (this.lastFocusedElement && document.contains(this.lastFocusedElement)) {
+            setTimeout(() => {
+                try { this.lastFocusedElement.focus(); } catch(e) {}
+            }, 60);
+        }
     },
 
     close() {

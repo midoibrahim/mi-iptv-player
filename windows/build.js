@@ -13,7 +13,19 @@ const appDir = path.join(__dirname, 'app');
 if (fs.existsSync(appDir)) {
     fs.rmSync(appDir, { recursive: true, force: true });
 }
-fs.cpSync(srcDir, appDir, { recursive: true });
+const IGNORED_NAMES = new Set(['Tools', 'Downloads', 'Config', 'OSE', 'TV', 'store_icons', 'node_modules', '.git']);
+fs.cpSync(srcDir, appDir, {
+    recursive: true,
+    filter: (src) => {
+        const base = path.basename(src);
+        if (IGNORED_NAMES.has(base)) return false;
+        if (base.endsWith('.py') || base.endsWith('.iso') || base.endsWith('.dll') || base.endsWith('.exe')) {
+            // Keep only web assets, exclude any loose executables/DLLs in source tree
+            return false;
+        }
+        return true;
+    }
+});
 
 console.log('[2/3] Packaging Windows executable with @electron/packager...');
 const outDir = path.join(__dirname, '../dist/windows');

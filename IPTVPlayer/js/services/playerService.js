@@ -31,6 +31,7 @@ window.IPTV.PlayerService = {
         // Resume & Watch progress state
         this._initialSeekPending = null;
         this._lastProgressSaveTime = 0;
+        this._userPaused = false;
 
         this._bindEvents();
     },
@@ -233,21 +234,28 @@ window.IPTV.PlayerService = {
         });
         this.video.addEventListener('canplay', () => {
             this._checkPendingInitialSeek();
-            if (!this.video.paused) {
-                this.video.play().catch(() => {});
+            if (!this._userPaused) {
+                const p = this.video.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
             }
         });
         this.video.addEventListener('seeked', () => {
-            if (!this.video.paused) {
-                this.video.play().catch(() => {});
+            if (!this._userPaused) {
+                const p = this.video.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
             }
             this._updateProgress();
         });
         this.video.addEventListener('play', () => {
             this._updatePlayPauseIcon(true);
         });
+        this.video.addEventListener('playing', () => {
+            this._updatePlayPauseIcon(true);
+        });
         this.video.addEventListener('pause', () => {
-            this._updatePlayPauseIcon(false);
+            if (this._userPaused) {
+                this._updatePlayPauseIcon(false);
+            }
             this._recordWatchProgress();
         });
         this.video.addEventListener('ended', () => {
@@ -300,6 +308,7 @@ window.IPTV.PlayerService = {
 
         this.currentItem = item;
         this.seriesContext = item.seriesContext || null;
+        this._userPaused = false;
         this._initialSeekPending = (options && typeof options.initialSeekTime === 'number' && options.initialSeekTime > 0)
             ? options.initialSeekTime
             : null;
@@ -985,13 +994,17 @@ window.IPTV.PlayerService = {
             }
             if (window.Hls && Hls.isSupported()) {
                 try {
-                    const hls = new Hls({
+                    const hlsConfig = {
                         enableWorker: false,
                         lowLatencyMode: false,
                         maxBufferLength: 20,
                         maxMaxBufferLength: 40,
                         maxBufferSize: 30 * 1000 * 1000
-                    });
+                    };
+                    if (this._initialSeekPending !== null && this._initialSeekPending > 0) {
+                        hlsConfig.startPosition = this._initialSeekPending;
+                    }
+                    const hls = new Hls(hlsConfig);
                     this.hls = hls;
                     hls.loadSource(url);
                     hls.attachMedia(this.video);
@@ -1136,6 +1149,7 @@ window.IPTV.PlayerService = {
 
     playVideo() {
         if (!this.video) return;
+        this._userPaused = false;
         this.video.play().catch(e => console.warn('Play blocked:', e));
         this._updatePlayPauseIcon(true);
         this.showSeekHUD('play', 'Play', '');
@@ -1144,6 +1158,7 @@ window.IPTV.PlayerService = {
 
     pauseVideo() {
         if (!this.video) return;
+        this._userPaused = true;
         this.video.pause();
         this._updatePlayPauseIcon(false);
         this.showSeekHUD('pause', 'Pause', '');
@@ -1175,7 +1190,9 @@ window.IPTV.PlayerService = {
         if (!this.hasValidDuration()) return false;
         try {
             const seekable = this.video.seekable;
-            if (!seekable || seekable.length === 0) return false;
+            if (!seekable || seekable.length === 0) {
+                return this.hasValidDuration() && this.video.duration > 0;
+            }
             return seekable.end(seekable.length - 1) > 0;
         } catch(e) {
             return false;
@@ -1220,23 +1237,23 @@ window.IPTV.PlayerService = {
             try { this.hls.startLoad(clamped); } catch(e) {}
         }
 
-        // Perform native seek
+        // Perform native seek (always standard currentTime on progressive streams)
         try {
-            if (typeof this.video.fastSeek === 'function') {
-                this.video.fastSeek(clamped);
-            } else {
-                this.video.currentTime = clamped;
-            }
-        } catch(err) {
             this.video.currentTime = clamped;
+        } catch(err) {
+            console.warn('[PlayerService] Seek error:', err);
+        }
+
+        if (startPlaying) {
+            this._userPaused = false;
         }
 
         // Guarantee playback starts from the seeked position
         const ensurePlaying = () => {
-            if (startPlaying || !this.video.paused) {
+            if (!this._userPaused) {
                 const p = this.video.play();
                 if (p && typeof p.then === 'function') {
-                    p.catch(e => console.warn('Play after seek caught:', e));
+                    p.catch(e => console.warn('[PlayerService] Play after seek caught:', e));
                 }
                 this._updatePlayPauseIcon(true);
             }

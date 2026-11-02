@@ -1,0 +1,22 @@
+{
+  "name": "mi-iptv-player",
+  "version": "1.0.0",
+  "description": "MI IPTV Player - Desktop Windows Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "node build.js"
+  },
+  "keywords": [
+    "iptv",
+    "player",
+    "electron",
+    "windows"
+  ],
+  "author": "Mohamed Ibrahim",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron/packager": "^18.3.6",
+    "electron": "^33.2.1"
+  }
+}

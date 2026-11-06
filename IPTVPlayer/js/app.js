@@ -37,15 +37,17 @@ class IPTVApp {
         window.IPTV.ThemeManager.init();
         this.favorites = window.IPTV.Storage.getFavorites();
 
+        // Initialize Desktop Download Manager early so isDesktop is true for all views
+        if (window.IPTV.DownloadManager) {
+            window.IPTV.DownloadManager.init(this);
+        }
+
         // 2. Initialize Subsystems
         this.playerService.init(this);
         this.seriesDetailView.init(this);
         this.searchView.init(this);
         this.settingsView.init(this);
         this.homeView.init(this);
-        if (window.IPTV.DownloadManager) {
-            window.IPTV.DownloadManager.init(this);
-        }
 
         // 3. Initialize Reusable Browse Views (Live TV, Movies, Series)
         this.browseViews.live = new window.IPTV.BrowseView('live', {

@@ -206,6 +206,14 @@ function createWindow() {
     mainWindow.loadFile(indexPath);
     downloader.setMainWindow(mainWindow);
 
+    // F12 / Ctrl+Shift+I toggle DevTools shortcut
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+        if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+            mainWindow.webContents.toggleDevTools();
+            event.preventDefault();
+        }
+    });
+
     // Notify renderer when fullscreen state changes
     mainWindow.on('enter-full-screen', () => {
         if (mainWindow && !mainWindow.isDestroyed()) {

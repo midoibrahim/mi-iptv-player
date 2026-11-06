@@ -221,6 +221,7 @@ window.IPTV.SettingsView = {
     },
 
     _loadSettings() {
+        this._setupDownloadSettings();
         const s = window.IPTV.Storage.getSettings();
         if (this.qualitySelect && s.quality) this.qualitySelect.value = s.quality;
         if (this.bufferSelect && s.buffer) this.bufferSelect.value = s.buffer;

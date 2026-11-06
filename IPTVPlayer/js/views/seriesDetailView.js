@@ -131,10 +131,30 @@ window.IPTV.SeriesDetailView = {
 
         document.getElementById('series-plot').textContent = seriesInfo.plot || 'No description available.';
 
-        const dlAllBtn = document.getElementById('series-download-all-btn');
-        if (dlAllBtn) {
-            const hasEpisodes = seasonsData && Object.keys(seasonsData).some(k => Array.isArray(seasonsData[k]) && seasonsData[k].length > 0);
-            dlAllBtn.style.display = hasEpisodes ? 'inline-flex' : 'none';
+        // Series Download All button dynamic setup
+        if (window.IPTV.DownloadManager && window.IPTV.DownloadManager.isDesktop) {
+            const header = this.screen ? this.screen.querySelector('.series-detail-header') : null;
+            let dlAllBtn = document.getElementById('series-download-all-btn');
+            if (!dlAllBtn && header) {
+                dlAllBtn = document.createElement('button');
+                dlAllBtn.id = 'series-download-all-btn';
+                dlAllBtn.className = 'btn-ghost';
+                dlAllBtn.tabIndex = 0;
+                dlAllBtn.title = 'Download All Episodes in this Series';
+                const dlIcon = window.IPTV.Icons ? window.IPTV.Icons.get('download') : '⬇';
+                dlAllBtn.innerHTML = '<span class="btn-icon">' + dlIcon + '</span> <span>Download Series</span>';
+                header.appendChild(dlAllBtn);
+            }
+            if (dlAllBtn) {
+                dlAllBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (this.currentSeries && this.seasonsData) {
+                        window.IPTV.DownloadManager.downloadEntireSeries(this.currentSeries, this.seasonsData);
+                    }
+                };
+                const hasEpisodes = seasonsData && Object.keys(seasonsData).some(k => Array.isArray(seasonsData[k]) && seasonsData[k].length > 0);
+                dlAllBtn.style.display = hasEpisodes ? 'inline-flex' : 'none';
+            }
         }
 
         // Seasons tabs

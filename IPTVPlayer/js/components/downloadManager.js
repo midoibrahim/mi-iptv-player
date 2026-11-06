@@ -9,7 +9,7 @@ window.IPTV = window.IPTV || {};
 
 window.IPTV.DownloadManager = {
     app: null,
-    isDesktop: false,
+    isDesktop: Boolean(typeof window !== 'undefined' && window.electronDesktop && window.electronDesktop.downloads),
     activeTasks: new Map(), // id -> task
     history: [],
     settings: {
@@ -50,6 +50,12 @@ window.IPTV.DownloadManager = {
             <span class="nav-text">Downloads</span>
             <span class="nav-badge hidden" id="nav-downloads-badge">0</span>
         `;
+
+        dlLi.addEventListener('click', () => {
+            if (this.app) {
+                this.app.navigateTo('downloads');
+            }
+        });
 
         if (settingsItem) {
             sideNavUl.insertBefore(dlLi, settingsItem);

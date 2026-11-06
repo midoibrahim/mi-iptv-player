@@ -609,6 +609,7 @@ function setupIpcHandlers() {
     ipcMain.handle('downloads-cancel', (_e, id) => downloader.cancelDownload(id));
     ipcMain.handle('downloads-delete', (_e, id) => downloader.deleteDownloadedFile(id));
     ipcMain.handle('downloads-clear-history', () => downloader.clearHistory());
+    ipcMain.handle('downloads-convert-to-mp4', (_e, id) => downloader.convertItemToMp4(id));
 }
 
 app.whenReady().then(() => {

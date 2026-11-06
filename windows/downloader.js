@@ -1,10 +1,12 @@
 // ============================================================
 // MI IPTV Player — Desktop Windows Downloader Engine
 // Background HTTP/HTTPS Streaming, Pause/Resume, Chunked Downloads,
-// Directory Selection, History Persistence & Windows Shell Integration
+// Directory Selection, History Persistence, Windows Shell Integration
+// & Universal TV/Receiver Remuxing (H.264 + AAC 48kHz MP4)
 // ============================================================
 
 const { app, dialog, shell } = require('electron');
+const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -47,7 +49,11 @@ class Downloader {
             if (fs.existsSync(this.settingsPath)) {
                 const data = JSON.parse(fs.readFileSync(this.settingsPath, 'utf8'));
                 if (data && data.saveDirectory) {
-                    return data;
+                    return {
+                        saveDirectory: data.saveDirectory,
+                        askEveryTime: Boolean(data.askEveryTime),
+                        autoConvertToMp4: data.autoConvertToMp4 !== false
+                    };
                 }
             }
         } catch (e) {
@@ -55,7 +61,8 @@ class Downloader {
         }
         return {
             saveDirectory: this.defaultDownloadDir,
-            askEveryTime: false
+            askEveryTime: false,
+            autoConvertToMp4: true // Enabled by default for universal TV & receiver compatibility
         };
     }
 
@@ -119,7 +126,8 @@ class Downloader {
     getSettings() {
         return {
             saveDirectory: this.settings.saveDirectory,
-            askEveryTime: Boolean(this.settings.askEveryTime)
+            askEveryTime: Boolean(this.settings.askEveryTime),
+            autoConvertToMp4: this.settings.autoConvertToMp4 !== false
         };
     }
 
@@ -130,6 +138,9 @@ class Downloader {
         }
         if (typeof newSettings.askEveryTime === 'boolean') {
             this.settings.askEveryTime = newSettings.askEveryTime;
+        }
+        if (typeof newSettings.autoConvertToMp4 === 'boolean') {
+            this.settings.autoConvertToMp4 = newSettings.autoConvertToMp4;
         }
         this._saveSettings();
         return this.getSettings();
@@ -199,6 +210,7 @@ class Downloader {
         // Re-check disk presence for history items
         this.history.forEach(item => {
             item.existsOnDisk = Boolean(item.filePath && fs.existsSync(item.filePath));
+            item.isUniversalMp4 = Boolean(item.filePath && path.extname(item.filePath).toLowerCase() === '.mp4');
         });
 
         return {
@@ -206,6 +218,97 @@ class Downloader {
             active: activeList,
             history: this.history
         };
+    }
+
+    /**
+     * Remux any video file to universal MP4 with AAC 48kHz audio.
+     * Copies video stream directly without quality loss (-c:v copy).
+     * Converts audio to standard AAC-LC 48,000 Hz.
+     */
+    _remuxToMp4(inputPath, callback) {
+        const ext = path.extname(inputPath).toLowerCase();
+        if (ext === '.mp4') {
+            return callback(null, inputPath);
+        }
+
+        const outputPath = inputPath.replace(/\.[a-zA-Z0-9]+$/, '.mp4');
+        const args = [
+            '-y',
+            '-i', inputPath,
+            '-c:v', 'copy',
+            '-c:a', 'aac',
+            '-ar', '48000',
+            '-b:a', '128k',
+            outputPath
+        ];
+
+        console.log(`[Downloader] Remuxing to Universal MP4 (AAC 48kHz): ${path.basename(inputPath)} -> ${path.basename(outputPath)}`);
+        
+        let proc;
+        try {
+            proc = spawn('ffmpeg', args, { windowsHide: true });
+        } catch (e) {
+            console.warn('[Downloader] FFmpeg spawn error:', e.message);
+            return callback(e, inputPath);
+        }
+
+        proc.on('close', (code) => {
+            if (code === 0 && fs.existsSync(outputPath)) {
+                try {
+                    const stat = fs.statSync(outputPath);
+                    if (stat.size > 1024) {
+                        // Safely remove original MKV
+                        try { fs.unlinkSync(inputPath); } catch (e) {}
+                        console.log(`[Downloader] Successfully converted to Universal MP4: ${path.basename(outputPath)}`);
+                        return callback(null, outputPath);
+                    }
+                } catch (e) {}
+            }
+            console.warn('[Downloader] FFmpeg remux failed with code:', code, 'keeping original file');
+            callback(new Error('Remux failed with code ' + code), inputPath);
+        });
+
+        proc.on('error', (err) => {
+            console.warn('[Downloader] FFmpeg error:', err.message, 'keeping original file');
+            callback(err, inputPath);
+        });
+    }
+
+    /**
+     * Convert an already downloaded file from history to Universal MP4 on demand
+     */
+    async convertItemToMp4(id) {
+        const item = this.history.find(h => h.id === id);
+        if (!item || !item.filePath || !fs.existsSync(item.filePath)) {
+            return { success: false, error: 'File not found on disk' };
+        }
+        if (path.extname(item.filePath).toLowerCase() === '.mp4') {
+            return { success: true, message: 'Already MP4', filePath: item.filePath };
+        }
+
+        return new Promise((resolve) => {
+            this._sendToRenderer('download-converting', { id, status: 'converting' });
+            this._remuxToMp4(item.filePath, (err, newPath) => {
+                if (err || !fs.existsSync(newPath) || path.extname(newPath).toLowerCase() !== '.mp4') {
+                    this._sendToRenderer('download-history-updated', this.history);
+                    return resolve({ success: false, error: 'Remux failed. Verify ffmpeg is installed.' });
+                }
+
+                try {
+                    const stat = fs.statSync(newPath);
+                    item.filePath = newPath;
+                    item.fileName = path.basename(newPath);
+                    item.fileSize = stat.size;
+                    item.fileSizeFormatted = this._formatBytes(stat.size);
+                    item.isUniversalMp4 = true;
+                    this._saveHistory();
+                    this._sendToRenderer('download-history-updated', this.history);
+                    resolve({ success: true, filePath: newPath });
+                } catch (statErr) {
+                    resolve({ success: false, error: statErr.message });
+                }
+            });
+        });
     }
 
     /**
@@ -426,33 +529,54 @@ class Downloader {
                         return this._handleError(task, new Error('Failed to finalize file: ' + renErr.message));
                     }
 
-                    task.status = 'completed';
-                    task.percent = 100;
-                    task.speedBps = 0;
-                    task.speedFormatted = 'Completed';
+                    const finalizeHistory = (finalPath) => {
+                        const stat = fs.existsSync(finalPath) ? fs.statSync(finalPath) : null;
+                        const finalSize = stat ? stat.size : (task.receivedBytes || task.totalBytes);
 
-                    const historyItem = {
-                        id: task.id,
-                        itemId: task.itemId,
-                        title: task.title,
-                        fileName: task.fileName,
-                        filePath: task.filePath,
-                        fileSize: task.receivedBytes || task.totalBytes,
-                        fileSizeFormatted: this._formatBytes(task.receivedBytes || task.totalBytes),
-                        poster: task.poster,
-                        type: task.type,
-                        url: task.url,
-                        completedAt: Date.now(),
-                        existsOnDisk: true
+                        task.status = 'completed';
+                        task.percent = 100;
+                        task.speedBps = 0;
+                        task.speedFormatted = 'Completed';
+                        task.filePath = finalPath;
+                        task.fileName = path.basename(finalPath);
+
+                        const historyItem = {
+                            id: task.id,
+                            itemId: task.itemId,
+                            title: task.title,
+                            fileName: path.basename(finalPath),
+                            filePath: finalPath,
+                            fileSize: finalSize,
+                            fileSizeFormatted: this._formatBytes(finalSize),
+                            poster: task.poster,
+                            type: task.type,
+                            url: task.url,
+                            completedAt: Date.now(),
+                            existsOnDisk: true,
+                            isUniversalMp4: path.extname(finalPath).toLowerCase() === '.mp4'
+                        };
+
+                        this.history.unshift(historyItem);
+                        if (this.history.length > 100) this.history.pop();
+                        this._saveHistory();
+
+                        this.activeDownloads.delete(task.id);
+                        this._sendToRenderer('download-completed', historyItem);
+                        console.log(`[Downloader] Download completed & ready: ${historyItem.fileName}`);
                     };
 
-                    this.history.unshift(historyItem);
-                    if (this.history.length > 100) this.history.pop();
-                    this._saveHistory();
+                    // Auto-convert to Universal MP4 (H.264 + AAC 48kHz) if enabled and source is not already MP4
+                    if (this.settings.autoConvertToMp4 !== false && path.extname(task.filePath).toLowerCase() !== '.mp4') {
+                        task.status = 'converting';
+                        task.speedFormatted = 'Optimizing for TV/Receiver (MP4)...';
+                        this._sendToRenderer('download-progress', this._serializeTask(task));
 
-                    this.activeDownloads.delete(task.id);
-                    this._sendToRenderer('download-completed', historyItem);
-                    console.log(`[Downloader] Download completed: ${task.fileName}`);
+                        this._remuxToMp4(task.filePath, (err, convertedPath) => {
+                            finalizeHistory(convertedPath);
+                        });
+                    } else {
+                        finalizeHistory(task.filePath);
+                    }
                 });
             });
 
@@ -575,4 +699,3 @@ class Downloader {
 }
 
 module.exports = new Downloader();
-

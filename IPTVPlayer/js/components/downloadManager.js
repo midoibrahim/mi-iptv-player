@@ -92,10 +92,16 @@ window.IPTV.DownloadManager = {
                         <span class="path-label">Saving to:</span>
                         <span class="path-value" id="dl-current-path">Loading folder...</span>
                     </div>
-                    <label class="downloads-checkbox-label">
-                        <input type="checkbox" id="dl-check-ask-everytime" tabindex="0">
-                        <span>Always ask where to save</span>
-                    </label>
+                    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                        <label class="downloads-checkbox-label">
+                            <input type="checkbox" id="dl-check-auto-mp4" tabindex="0">
+                            <span title="Automatically copies video to MP4 and converts audio to AAC 48kHz for older receivers & TVs">Universal TV Compatibility (MP4 + AAC 48kHz)</span>
+                        </label>
+                        <label class="downloads-checkbox-label">
+                            <input type="checkbox" id="dl-check-ask-everytime" tabindex="0">
+                            <span>Always ask where to save</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="downloads-content">
@@ -155,6 +161,16 @@ window.IPTV.DownloadManager = {
                 this.history = [];
                 this._render();
                 if (this.app) this.app.toast('Download history cleared');
+            });
+        }
+
+        const checkAutoMp4 = this.sectionEl.querySelector('#dl-check-auto-mp4');
+        if (checkAutoMp4) {
+            checkAutoMp4.addEventListener('change', async (e) => {
+                const val = Boolean(e.target.checked);
+                this.settings.autoConvertToMp4 = val;
+                await window.electronDesktop.downloads.updateSettings({ autoConvertToMp4: val });
+                if (this.app) this.app.toast(val ? 'Universal TV Compatibility enabled (MP4 + AAC 48kHz)' : 'Universal TV Compatibility disabled');
             });
         }
 
@@ -247,6 +263,11 @@ window.IPTV.DownloadManager = {
             pathEl.textContent = this.settings.saveDirectory || 'Default Downloads folder';
             pathEl.title = this.settings.saveDirectory;
         }
+        const checkAutoMp4 = document.getElementById('dl-check-auto-mp4');
+        if (checkAutoMp4) {
+            checkAutoMp4.checked = this.settings.autoConvertToMp4 !== false;
+        }
+
         const checkAsk = document.getElementById('dl-check-ask-everytime');
         if (checkAsk) {
             checkAsk.checked = Boolean(this.settings.askEveryTime);
@@ -377,6 +398,7 @@ window.IPTV.DownloadManager = {
                 <div class="dl-card-meta">
                     <span class="dl-meta-size">${item.fileSizeFormatted || 'Ready'}</span>
                     ${dateStr ? `<span class="dl-meta-date">${dateStr}</span>` : ''}
+                    ${item.isUniversalMp4 || (item.fileName && item.fileName.toLowerCase().endsWith('.mp4')) ? '<span class="dl-badge-compat" title="Universal H.264 + AAC 48kHz MP4 (Compatible with all TVs & Older Receivers)">✓ TV Compatible</span>' : ''}
                     <span class="dl-meta-path" title="${item.filePath || ''}">${item.fileName || ''}</span>
                 </div>
             </div>
@@ -388,6 +410,11 @@ window.IPTV.DownloadManager = {
                     <button class="btn-ghost dl-btn-show" tabindex="0" title="Show in File Explorer">
                         Show in Folder
                     </button>
+                    ${(!item.isUniversalMp4 && item.fileName && item.fileName.toLowerCase().endsWith('.mkv')) ? `
+                    <button class="btn-ghost dl-btn-convert" tabindex="0" title="Convert to Universal MP4 (H.264 + AAC 48kHz) for Older Receivers and Smart TVs">
+                        Convert to TV MP4
+                    </button>
+                    ` : ''}
                 ` : ''}
                 <button class="btn-ghost dl-btn-delete" tabindex="0" title="Delete Download">
                     Delete
@@ -419,6 +446,24 @@ window.IPTV.DownloadManager = {
             showBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 window.electronDesktop.downloads.showInFolder(item.filePath);
+            });
+        }
+
+        const convertBtn = card.querySelector('.dl-btn-convert');
+        if (convertBtn) {
+            convertBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                convertBtn.textContent = 'Converting...';
+                convertBtn.disabled = true;
+                if (this.app) this.app.toast('Remuxing to Universal MP4 (AAC 48kHz)...');
+                const res = await window.electronDesktop.downloads.convertToMp4(item.id);
+                if (res && res.success) {
+                    if (this.app) this.app.toast('Successfully converted to Universal TV MP4!');
+                } else {
+                    if (this.app) this.app.toast('Conversion failed: ' + (res ? res.error : 'Unknown error'));
+                    convertBtn.textContent = 'Convert to TV MP4';
+                    convertBtn.disabled = false;
+                }
             });
         }
 

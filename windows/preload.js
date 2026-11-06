@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('electronDesktop', {
         cancel: (id) => ipcRenderer.invoke('downloads-cancel', id),
         deleteFile: (id) => ipcRenderer.invoke('downloads-delete', id),
         clearHistory: () => ipcRenderer.invoke('downloads-clear-history'),
+        convertToMp4: (id) => ipcRenderer.invoke('downloads-convert-to-mp4', id),
         onStarted: (cb) => ipcRenderer.on('download-started', (_e, d) => cb && cb(d)),
         onProgress: (cb) => ipcRenderer.on('download-progress', (_e, d) => cb && cb(d)),
         onCompleted: (cb) => ipcRenderer.on('download-completed', (_e, d) => cb && cb(d)),

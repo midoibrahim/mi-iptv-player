@@ -181,6 +181,25 @@ window.IPTV.Card = {
             }
         });
         card.appendChild(favBtn);
+
+        // Desktop Download Button for Movies & Series
+        if (type !== 'live' && window.IPTV.DownloadManager && window.IPTV.DownloadManager.isDesktop) {
+            const dlBtn = document.createElement('button');
+            dlBtn.className = 'card-download-btn';
+            dlBtn.tabIndex = -1;
+            dlBtn.title = type === 'series' ? 'Browse Episodes to Download' : 'Download to PC';
+            dlBtn.innerHTML = this._getIcon('download', 'card-dl-svg');
+            dlBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (type === 'series') {
+                    if (onClick) onClick(item, type);
+                } else {
+                    window.IPTV.DownloadManager.downloadMovie(item);
+                }
+            });
+            card.appendChild(dlBtn);
+            card._dlBtn = dlBtn;
+        }
         card._item = item;
         card._type = type;
         card._favBtn = favBtn;

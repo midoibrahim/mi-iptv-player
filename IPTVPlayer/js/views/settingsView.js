@@ -16,8 +16,58 @@ window.IPTV.SettingsView = {
         this.autoplayCheck = document.getElementById('setting-autoplay');
 
         this._setupThemeSelector();
+        this._setupDownloadSettings();
         this._bindUI();
         this._loadSettings();
+    },
+
+    _setupDownloadSettings() {
+        if (!window.IPTV.DownloadManager || !window.IPTV.DownloadManager.isDesktop) return;
+        const panel = document.querySelector('.settings-panel');
+        if (!panel || document.getElementById('settings-download-group')) return;
+
+        const dlGroup = document.createElement('div');
+        dlGroup.id = 'settings-download-group';
+        dlGroup.className = 'settings-group';
+
+        const dm = window.IPTV.DownloadManager;
+        const currentPath = dm.settings.saveDirectory || 'Default Downloads folder';
+
+        dlGroup.innerHTML = `
+            <h3>Desktop Downloads</h3>
+            <p class="settings-group-desc">Configure where movies and episodes are saved on this computer.</p>
+            <div class="setting-item">
+                <label>Destination Folder</label>
+                <div class="setting-val" id="setting-dl-path" style="font-family: monospace; font-size: 15px; color: var(--accent); word-break: break-all;">${currentPath}</div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;">
+                <button type="button" id="btn-setting-change-folder" class="btn-ghost" tabindex="0">Change Folder</button>
+                <button type="button" id="btn-setting-open-folder" class="btn-ghost" tabindex="0">Open in Explorer</button>
+            </div>
+        `;
+
+        panel.appendChild(dlGroup);
+
+        const btnChange = dlGroup.querySelector('#btn-setting-change-folder');
+        if (btnChange) {
+            btnChange.addEventListener('click', async () => {
+                const res = await window.electronDesktop.downloads.selectDirectory();
+                if (!res.canceled && res.path) {
+                    dm.settings.saveDirectory = res.path;
+                    const pathEl = document.getElementById('setting-dl-path');
+                    if (pathEl) pathEl.textContent = res.path;
+                    dm._updatePathDisplay();
+                    if (this.app) this.app.toast('Downloads folder updated');
+                }
+            });
+        }
+
+        const btnOpen = dlGroup.querySelector('#btn-setting-open-folder');
+        if (btnOpen) {
+            btnOpen.addEventListener('click', () => {
+                window.electronDesktop.downloads.openFolder(dm.settings.saveDirectory);
+            });
+        }
     },
 
     _setupThemeSelector() {

@@ -265,6 +265,19 @@ window.IPTV.SeriesDetailView = {
             playIcon.innerHTML = playIconHtml;
             thumbContainer.appendChild(playIcon);
 
+            if (window.IPTV.DownloadManager && window.IPTV.DownloadManager.isDesktop) {
+                const epDlBtn = document.createElement('button');
+                epDlBtn.className = 'ep-download-btn';
+                epDlBtn.tabIndex = 0;
+                epDlBtn.title = 'Download Episode to PC';
+                epDlBtn.innerHTML = window.IPTV.Icons ? window.IPTV.Icons.get('download') : '⬇';
+                epDlBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.IPTV.DownloadManager.downloadEpisode(seriesInfo, ep, seasonNum, epIndex);
+                });
+                thumbContainer.appendChild(epDlBtn);
+            }
+
             const infoDiv = document.createElement('div');
             infoDiv.className = 'episode-info';
             const numSpan = document.createElement('span');

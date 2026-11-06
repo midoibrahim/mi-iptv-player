@@ -6,6 +6,11 @@ console.log('========================================================');
 console.log('  MI IPTV Player - Windows Packaging Utility');
 console.log('========================================================\n');
 
+// Ensure any running instances of the app are closed so the executable is not locked
+try {
+    execSync('taskkill /F /IM "MI IPTV Player.exe" /T', { stdio: 'ignore' });
+} catch (e) {}
+
 console.log('[1/3] Preparing app bundle for Windows...');
 const srcDir = path.join(__dirname, '../IPTVPlayer');
 const appDir = path.join(__dirname, 'app');
@@ -40,7 +45,24 @@ if (fs.existsSync(iconFile)) {
     packagerCmd += ` --icon="${iconFile}"`;
 }
 
-execSync(packagerCmd, { stdio: 'inherit', cwd: __dirname });
+// Retry loop for Windows Defender momentary lock
+let packaged = false;
+for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+        console.log(`Packaging attempt ${attempt}/3...`);
+        execSync(packagerCmd, { stdio: 'inherit', cwd: __dirname });
+        packaged = true;
+        break;
+    } catch (err) {
+        console.warn(`Attempt ${attempt} encountered lock, waiting 3s before retry...`);
+        try { execSync('taskkill /F /IM "MI IPTV Player.exe" /T', { stdio: 'ignore' }); } catch (k) {}
+        execSync('node -e "setTimeout(() => {}, 3000)"');
+    }
+}
+
+if (!packaged) {
+    throw new Error('Packaging failed after 3 attempts');
+}
 
 // Clean up temporary app folder
 if (fs.existsSync(appDir)) {
@@ -52,4 +74,3 @@ const expectedExe = path.join(outDir, 'MI IPTV Player-win32-x64', 'MI IPTV Playe
 if (fs.existsSync(expectedExe)) {
     console.log('Executable: ' + expectedExe);
 }
-

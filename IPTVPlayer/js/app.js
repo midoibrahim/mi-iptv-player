@@ -43,6 +43,9 @@ class IPTVApp {
         this.searchView.init(this);
         this.settingsView.init(this);
         this.homeView.init(this);
+        if (window.IPTV.DownloadManager) {
+            window.IPTV.DownloadManager.init(this);
+        }
 
         // 3. Initialize Reusable Browse Views (Live TV, Movies, Series)
         this.browseViews.live = new window.IPTV.BrowseView('live', {
@@ -129,6 +132,10 @@ class IPTVApp {
             // If navigating to favorites, refresh favorites list
             if (section === 'favorites') {
                 this.renderFavorites();
+            }
+
+            if (section === 'downloads' && window.IPTV.DownloadManager) {
+                window.IPTV.DownloadManager._refreshData();
             }
 
             // Restore section scroll position (or default to top)

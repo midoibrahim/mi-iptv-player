@@ -1,0 +1,425 @@
+/* ============================================================
+   IPTV Player — Downloads Screen & Action Stylesheet
+   Desktop Windows Downloads Manager & In-Card Download Buttons
+   ============================================================ */
+
+#section-downloads {
+    display: none;
+    padding: 40px 60px 80px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+}
+
+#section-downloads.active {
+    display: block;
+}
+
+.downloads-container {
+    max-width: 1720px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.downloads-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.downloads-header-info h2 {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text-bright);
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+}
+
+.downloads-stats {
+    font-size: 18px;
+    color: var(--text-muted);
+}
+
+.downloads-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.downloads-path-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 16px 24px;
+    margin-bottom: 32px;
+    gap: 20px;
+}
+
+.downloads-path-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.path-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.path-value {
+    font-size: 16px;
+    color: var(--accent);
+    font-family: monospace, sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border-subtle);
+}
+
+.downloads-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-base);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.downloads-checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.downloads-group {
+    margin-bottom: 40px;
+}
+
+.downloads-group-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 10px;
+}
+
+.downloads-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Download Cards */
+.download-card {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    gap: 20px;
+    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+}
+
+.download-card:hover {
+    background: var(--bg-surface-hover);
+    border-color: var(--border-medium);
+}
+
+.download-card:focus-within {
+    border-color: var(--border-focus);
+}
+
+.dl-card-thumb {
+    width: 100px;
+    height: 70px;
+    background: var(--bg-card);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dl-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dl-type-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #FFFFFF;
+    letter-spacing: 0.04em;
+}
+
+.dl-card-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dl-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dl-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dl-card-status {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+.dl-card-status.downloading {
+    background: rgba(0, 168, 255, 0.18);
+    color: var(--accent);
+    border: 1px solid rgba(0, 168, 255, 0.35);
+}
+
+.dl-card-status.paused {
+    background: rgba(255, 179, 0, 0.18);
+    color: #FFB300;
+    border: 1px solid rgba(255, 179, 0, 0.35);
+}
+
+.dl-card-status.completed {
+    background: rgba(46, 213, 115, 0.18);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.35);
+}
+
+.dl-progress-wrapper {
+    width: 100%;
+}
+
+.dl-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dl-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, #38ef7d 100%);
+    border-radius: 4px;
+    transition: width 0.25s linear;
+}
+
+.dl-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.dl-meta-stats {
+    font-weight: 600;
+    color: var(--text-base);
+}
+
+.dl-meta-speed {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.dl-meta-path {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: monospace, sans-serif;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.dl-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.dl-card-actions button {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 15px;
+}
+
+/* Empty State */
+.downloads-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 20px;
+    background: var(--bg-surface);
+    border: 2px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-top: 20px;
+}
+
+.downloads-empty-icon {
+    width: 80px;
+    height: 80px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+}
+.downloads-empty-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.downloads-empty h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 10px;
+}
+
+.downloads-empty p {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+/* Nav Item Badge */
+.nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    line-height: 1.2;
+}
+
+/* In-Card Download Button (Movie & Episode Cards) */
+.card-download-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-overlay, rgba(15, 23, 42, 0.88));
+    border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.25));
+    color: var(--text-dim, #FFFFFF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover .card-download-btn,
+.card:focus .card-download-btn,
+.card:focus-within .card-download-btn,
+.card-download-btn.downloading,
+.card-download-btn.downloaded {
+    opacity: 1;
+}
+
+.card-download-btn:hover,
+.card-download-btn:focus {
+    background: var(--accent);
+    color: #FFFFFF;
+    border-color: #FFFFFF;
+    transform: scale(1.10);
+    outline: none;
+}
+
+.card-download-btn.downloaded {
+    color: #2ed573;
+    border-color: #2ed573;
+    background: rgba(46, 213, 115, 0.2);
+}
+
+.card-download-btn svg {
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+}
+
+/* Series Episode Card Download Button */
+.ep-download-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 4;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.ep-download-btn:hover,
+.ep-download-btn:focus {
+    background: var(--accent);
+    border-color: #FFFFFF;
+    transform: scale(1.10);
+    outline: none;
+}
+
+.ep-download-btn svg {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+

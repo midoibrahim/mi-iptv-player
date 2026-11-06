@@ -4,6 +4,7 @@ const fs = require('fs');
 const http = require('http');
 const os = require('os');
 const urlLib = require('url');
+const downloader = require('./downloader');
 
 // Hardware video decoding & acceleration switches for 4K / 60fps IPTV playback
 app.commandLine.appendSwitch('ignore-gpu-blocklist');
@@ -203,23 +204,7 @@ function createWindow() {
     const indexPath = fs.existsSync(packagedHtml) ? packagedHtml : devHtml;
 
     mainWindow.loadFile(indexPath);
-
-    // IPC Handlers for Fullscreen toggle from UI buttons and events
-    ipcMain.on('desktop-toggle-fullscreen', () => {
-        if (mainWindow) {
-            mainWindow.setFullScreen(!mainWindow.isFullScreen());
-        }
-    });
-
-    ipcMain.on('desktop-set-fullscreen', (_e, flag) => {
-        if (mainWindow) {
-            mainWindow.setFullScreen(Boolean(flag));
-        }
-    });
-
-    ipcMain.handle('desktop-is-fullscreen', () => {
-        return mainWindow ? mainWindow.isFullScreen() : false;
-    });
+    downloader.setMainWindow(mainWindow);
 
     // Notify renderer when fullscreen state changes
     mainWindow.on('enter-full-screen', () => {
@@ -350,6 +335,16 @@ function createWindow() {
                 display: none !important;
             }
 
+            /* Player OSD Download Button Styling */
+            #osd-download-btn {
+                cursor: pointer !important;
+            }
+            #osd-download-btn svg {
+                width: 28px !important;
+                height: 28px !important;
+                pointer-events: none !important;
+            }
+
             /* Player OSD Fullscreen Button Styling */
             #osd-fullscreen-btn {
                 cursor: pointer !important;
@@ -407,6 +402,57 @@ function createWindow() {
                         osdTop.insertBefore(btn, osdClock);
                     } else {
                         osdTop.appendChild(btn);
+                    }
+                }
+
+                // Inject Download button into Player OSD top bar for movies & episodes
+                function injectPlayerDownloadBtn() {
+                    var osdTop = document.querySelector('.osd-top');
+                    var osdClock = document.getElementById('osd-clock');
+                    if (!osdTop) return;
+
+                    var btn = document.getElementById('osd-download-btn');
+                    if (!btn) {
+                        btn = document.createElement('button');
+                        btn.id = 'osd-download-btn';
+                        btn.className = 'osd-btn';
+                        btn.tabIndex = 0;
+                        btn.title = 'Download Video to PC';
+                        btn.innerHTML = '<svg class="osd-svg-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25C12.4142 2.25 12.75 2.58579 12.75 3V13.6893L15.9697 10.4697C16.2626 10.1768 16.7374 10.1768 17.0303 10.4697C17.3232 10.7626 17.3232 11.2374 17.0303 11.5303L12.5303 16.0303C12.2374 16.3232 11.7626 16.3232 11.4697 16.0303L6.96967 11.5303C6.67678 11.2374 6.67678 10.7626 6.96967 10.4697C7.26256 10.1768 7.73744 10.1768 8.03033 10.4697L11.25 13.6893V3C11.25 2.58579 11.5858 2.25 12 2.25Z"/><path d="M3.75 16.5C4.16421 16.5 4.5 16.8358 4.5 17.25V18.75C4.5 19.1642 4.83579 19.5 5.25 19.5H18.75C19.1642 19.5 19.5 19.1642 19.5 18.75V17.25C19.5 16.8358 19.8358 16.5 20.25 16.5C20.6642 16.5 21 16.8358 21 17.25V18.75C21 19.9926 19.9926 21 18.75 21H5.25C4.00736 21 3 19.9926 3 18.75V17.25C3 16.8358 3.33579 16.5 3.75 16.5Z"/></svg>';
+
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (window.IPTV && window.IPTV.DownloadManager && window.app && window.app.playerService) {
+                                var item = window.app.playerService.currentItem;
+                                if (item) {
+                                    if (item.type === 'series' && item.seriesContext) {
+                                        var sc = item.seriesContext;
+                                        window.IPTV.DownloadManager.downloadEpisode(
+                                            { id: sc.seriesId, name: sc.seriesName, poster: sc.poster },
+                                            { id: sc.currentEpisodeId, title: sc.currentEpisodeTitle, episode_num: sc.currentEpisodeNum, url: item.url },
+                                            sc.currentSeason,
+                                            sc.currentEpisodeIndex
+                                        );
+                                    } else if (item.type !== 'live') {
+                                        window.IPTV.DownloadManager.downloadMovie(item);
+                                    }
+                                }
+                            }
+                        });
+
+                        var fsBtn = document.getElementById('osd-fullscreen-btn');
+                        if (fsBtn) {
+                            osdTop.insertBefore(btn, fsBtn);
+                        } else if (osdClock) {
+                            osdTop.insertBefore(btn, osdClock);
+                        } else {
+                            osdTop.appendChild(btn);
+                        }
+                    }
+
+                    if (window.app && window.app.playerService) {
+                        var cur = window.app.playerService.currentItem;
+                        btn.style.display = (cur && cur.type !== 'live') ? 'inline-flex' : 'none';
                     }
                 }
 
@@ -529,10 +575,44 @@ function createWindow() {
 
     mainWindow.on('closed', () => {
         mainWindow = null;
+        downloader.setMainWindow(null);
     });
 }
 
+let ipcRegistered = false;
+function setupIpcHandlers() {
+    if (ipcRegistered) return;
+    ipcRegistered = true;
+
+    // Fullscreen IPC Handlers
+    ipcMain.on('desktop-toggle-fullscreen', () => {
+        if (mainWindow) mainWindow.setFullScreen(!mainWindow.isFullScreen());
+    });
+    ipcMain.on('desktop-set-fullscreen', (_e, flag) => {
+        if (mainWindow) mainWindow.setFullScreen(Boolean(flag));
+    });
+    ipcMain.handle('desktop-is-fullscreen', () => {
+        return mainWindow ? mainWindow.isFullScreen() : false;
+    });
+
+    // Downloads IPC Handlers
+    ipcMain.handle('downloads-get-all', () => downloader.getAll());
+    ipcMain.handle('downloads-get-settings', () => downloader.getSettings());
+    ipcMain.handle('downloads-update-settings', (_e, s) => downloader.updateSettings(s));
+    ipcMain.handle('downloads-select-directory', () => downloader.selectDirectory());
+    ipcMain.handle('downloads-open-folder', (_e, dir) => downloader.openFolder(dir));
+    ipcMain.handle('downloads-show-in-folder', (_e, file) => downloader.showInFolder(file));
+    ipcMain.handle('downloads-open-file', (_e, file) => downloader.openFile(file));
+    ipcMain.handle('downloads-start', (_e, item, opts) => downloader.startDownload(item, opts));
+    ipcMain.handle('downloads-pause', (_e, id) => downloader.pauseDownload(id));
+    ipcMain.handle('downloads-resume', (_e, id) => downloader.resumeDownload(id));
+    ipcMain.handle('downloads-cancel', (_e, id) => downloader.cancelDownload(id));
+    ipcMain.handle('downloads-delete', (_e, id) => downloader.deleteDownloadedFile(id));
+    ipcMain.handle('downloads-clear-history', () => downloader.clearHistory());
+}
+
 app.whenReady().then(() => {
+    setupIpcHandlers();
     startCompanionServer();
     createWindow();
 

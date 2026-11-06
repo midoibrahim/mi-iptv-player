@@ -174,6 +174,16 @@ window.IPTV.DownloadManager = {
             });
         }
 
+        const selectParallel = this.sectionEl.querySelector('#dl-select-parallel');
+        if (selectParallel) {
+            selectParallel.addEventListener('change', async (e) => {
+                const val = parseInt(e.target.value, 10) || 1;
+                this.settings.maxConcurrent = val;
+                await window.electronDesktop.downloads.updateSettings({ maxConcurrent: val });
+                if (this.app) this.app.toast(`Parallel downloads set to ${val}`);
+            });
+        }
+
         const checkAsk = this.sectionEl.querySelector('#dl-check-ask-everytime');
         if (checkAsk) {
             checkAsk.addEventListener('change', async (e) => {
@@ -205,6 +215,7 @@ window.IPTV.DownloadManager = {
             this.history.unshift(historyItem);
             this._updateBadge();
             this._render();
+            this._refreshVisibleCardStates();
             if (this.app) this.app.toast(`Download complete: ${historyItem.title}`);
         });
 
@@ -234,6 +245,7 @@ window.IPTV.DownloadManager = {
         api.onHistoryUpdated((history) => {
             this.history = history || [];
             this._render();
+            this._refreshVisibleCardStates();
         });
     },
 
@@ -252,6 +264,7 @@ window.IPTV.DownloadManager = {
             this._updatePathDisplay();
             this._updateBadge();
             this._render();
+            this._refreshVisibleCardStates();
         } catch (err) {
             console.error('[DownloadManager] Failed to fetch initial download state:', err);
         }
@@ -266,6 +279,11 @@ window.IPTV.DownloadManager = {
         const checkAutoMp4 = document.getElementById('dl-check-auto-mp4');
         if (checkAutoMp4) {
             checkAutoMp4.checked = this.settings.autoConvertToMp4 !== false;
+        }
+
+        const selectParallel = document.getElementById('dl-select-parallel');
+        if (selectParallel) {
+            selectParallel.value = String(this.settings.maxConcurrent || 1);
         }
 
         const checkAsk = document.getElementById('dl-check-ask-everytime');
@@ -326,6 +344,21 @@ window.IPTV.DownloadManager = {
         card.id = `dl-task-${task.id}`;
 
         const isPaused = task.status === 'paused';
+        const isQueued = task.status === 'queued';
+        const isConverting = task.status === 'converting';
+
+        let statusLabel = 'Downloading';
+        let statusClass = 'downloading';
+        if (isQueued) {
+            statusLabel = 'In Queue';
+            statusClass = 'queued';
+        } else if (isPaused) {
+            statusLabel = 'Paused';
+            statusClass = 'paused';
+        } else if (isConverting) {
+            statusLabel = 'Converting';
+            statusClass = 'converting';
+        }
         const posterSrc = task.poster || '';
 
         card.innerHTML = `
@@ -336,7 +369,7 @@ window.IPTV.DownloadManager = {
             <div class="dl-card-main">
                 <div class="dl-card-header">
                     <h4 class="dl-card-title" title="${task.title}">${task.title}</h4>
-                    <span class="dl-card-status ${isPaused ? 'paused' : 'downloading'}">${isPaused ? 'Paused' : 'Downloading'}</span>
+                    <span class="dl-card-status ${statusClass}">${statusLabel}</span>
                 </div>
                 <div class="dl-progress-wrapper">
                     <div class="dl-progress-bar">
@@ -345,7 +378,7 @@ window.IPTV.DownloadManager = {
                 </div>
                 <div class="dl-card-meta">
                     <span class="dl-meta-stats">${task.receivedFormatted || '0 B'} / ${task.totalFormatted || 'Unknown'} (${task.percent || 0}%)</span>
-                    <span class="dl-meta-speed">${isPaused ? 'Paused' : (task.speedFormatted || '0 B/s')}</span>
+                    <span class="dl-meta-speed">${isQueued ? 'Waiting in queue...' : (isPaused ? 'Paused' : (task.speedFormatted || '0 B/s'))}</span>
                 </div>
             </div>
             <div class="dl-card-actions">
@@ -519,9 +552,79 @@ window.IPTV.DownloadManager = {
         return false;
     },
 
-    isCompleted(urlOrId) {
-        if (!urlOrId) return false;
-        return this.history.some(h => (h.id === urlOrId || h.itemId === urlOrId || h.url === urlOrId) && h.existsOnDisk);
+    getDownloadedItem(target) {
+        if (!this.isDesktop || !target) return null;
+        if (typeof target === 'string') {
+            return this.history.find(h =>
+                (h.status === 'completed' || h.percent === 100) &&
+                h.existsOnDisk &&
+                (h.id === target || h.itemId === target || h.url === target || h.filePath === target)
+            ) || null;
+        }
+
+        const targetUrl = target.url || target.hlsUrl;
+        const targetId = target.id;
+        const targetItemId = target.itemId;
+        const targetSeriesContext = target.seriesContext;
+
+        return this.history.find(h => {
+            if ((h.status !== 'completed' && h.percent !== 100) || !h.existsOnDisk || !h.filePath) return false;
+
+            // 1. Exact URL match
+            if (targetUrl && h.url === targetUrl) return true;
+
+            // 2. Exact ID or ItemId match
+            if (targetId && (h.id === targetId || h.itemId === targetId)) return true;
+            if (targetItemId && (h.id === targetItemId || h.itemId === targetItemId)) return true;
+
+            // 3. Series episode match by series name + season + episode
+            if (targetSeriesContext && h.type === 'series') {
+                const sameSeries = h.seriesName && targetSeriesContext.seriesName &&
+                    h.seriesName.trim().toLowerCase() === targetSeriesContext.seriesName.trim().toLowerCase();
+                const sameSeason = String(h.seasonNum || h.season) === String(targetSeriesContext.currentSeason);
+                const sameEp = String(h.episodeNum || h.episode) === String(targetSeriesContext.currentEpisodeNum || (targetSeriesContext.currentEpisodeIndex + 1));
+                if (sameSeries && sameSeason && sameEp) return true;
+            }
+
+            return false;
+        }) || null;
+    },
+
+    isCompleted(target) {
+        return Boolean(this.getDownloadedItem(target));
+    },
+
+    _refreshVisibleCardStates() {
+        document.querySelectorAll('.card-download-btn').forEach(btn => {
+            const card = btn.closest('.card');
+            if (card && card._item && card._type === 'movie') {
+                if (this.isCompleted(card._item)) {
+                    btn.classList.remove('downloading');
+                    btn.classList.add('downloaded');
+                    btn.title = 'Downloaded to PC (Click to open Downloads)';
+                    if (window.IPTV.Icons) btn.innerHTML = window.IPTV.Icons.get('check', 'card-dl-svg');
+                } else if (this.isDownloading(card._item.url || card._item.id)) {
+                    btn.classList.add('downloading');
+                    btn.classList.remove('downloaded');
+                } else {
+                    btn.classList.remove('downloading', 'downloaded');
+                    if (window.IPTV.Icons) btn.innerHTML = window.IPTV.Icons.get('download', 'card-dl-svg');
+                }
+            }
+        });
+
+        document.querySelectorAll('.episode-card').forEach(card => {
+            const epBtn = card.querySelector('.ep-download-btn');
+            const epId = card.dataset.episodeId;
+            if (epBtn && epId) {
+                if (this.isCompleted(epId)) {
+                    epBtn.classList.remove('downloading');
+                    epBtn.classList.add('downloaded');
+                    epBtn.title = 'Downloaded to PC';
+                    if (window.IPTV.Icons) epBtn.innerHTML = window.IPTV.Icons.get('check');
+                }
+            }
+        });
     },
 
     /**
@@ -534,8 +637,15 @@ window.IPTV.DownloadManager = {
             return;
         }
 
-        if (this.isDownloading(movieItem.url)) {
+        if (this.isDownloading(movieItem.url) || this.isDownloading(movieItem.id)) {
             if (this.app) this.app.toast('Already downloading this movie');
+            return;
+        }
+
+        const downloadedMovie = this.getDownloadedItem(movieItem);
+        if (downloadedMovie) {
+            if (this.app) this.app.toast('Movie already downloaded to PC! Available in Downloads.');
+            this._refreshVisibleCardStates();
             return;
         }
 
@@ -558,6 +668,101 @@ window.IPTV.DownloadManager = {
     /**
      * Download a Series Episode
      */
+    /**
+     * Download all episodes of an entire series (all seasons)
+     */
+    async downloadEntireSeries(seriesInfo, seasonsData) {
+        if (!this.isDesktop || !seriesInfo || !seasonsData) return;
+
+        const episodesToDownload = [];
+        const conn = this.app ? this.app.connection : null;
+        const base = (conn && conn.type === 'xtream') ? conn.server.replace(/\/+$/, '') : '';
+
+        const seasonKeys = Object.keys(seasonsData).sort((a, b) => Number(a) - Number(b));
+        seasonKeys.forEach(sNum => {
+            const episodes = seasonsData[sNum];
+            if (!Array.isArray(episodes)) return;
+            episodes.forEach((ep, epIndex) => {
+                let streamUrl = ep.url;
+                if (!streamUrl && conn && conn.type === 'xtream') {
+                    const ext = ep.container_extension || 'mp4';
+                    streamUrl = `${base}/series/${conn.user}/${conn.pass}/${ep.id}.${ext}`;
+                }
+                if (!streamUrl || this.isDownloading(streamUrl) || this.isCompleted(streamUrl)) return;
+
+                const epNum = ep.episode_num || ep.episode || (epIndex + 1);
+                const epTitle = (window.IPTV.SeriesDetailView && window.IPTV.SeriesDetailView._formatEpisodeTitle)
+                    ? window.IPTV.SeriesDetailView._formatEpisodeTitle(ep.title, seriesInfo.name, sNum, epNum)
+                    : (ep.title || `Episode ${epNum}`);
+                const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
+
+                episodesToDownload.push({
+                    id: `ep_${seriesInfo.id}_${ep.id}`,
+                    title: epTitle,
+                    seriesName: seriesInfo.name,
+                    season: sNum,
+                    episode: epNum,
+                    url: streamUrl,
+                    poster: thumb,
+                    type: 'series'
+                });
+            });
+        });
+
+        if (episodesToDownload.length === 0) {
+            if (this.app) this.app.toast('All episodes are already downloading or downloaded');
+            return;
+        }
+
+        if (this.app) this.app.toast(`Queued ${episodesToDownload.length} episodes of "${seriesInfo.name}"`);
+        await window.electronDesktop.downloads.startBatch(episodesToDownload);
+    },
+
+    /**
+     * Download all episodes in a specific season
+     */
+    async downloadSeason(seriesInfo, seasonNum, episodes) {
+        if (!this.isDesktop || !seriesInfo || !episodes || !Array.isArray(episodes)) return;
+
+        const episodesToDownload = [];
+        const conn = this.app ? this.app.connection : null;
+        const base = (conn && conn.type === 'xtream') ? conn.server.replace(/\/+$/, '') : '';
+
+        episodes.forEach((ep, epIndex) => {
+            let streamUrl = ep.url;
+            if (!streamUrl && conn && conn.type === 'xtream') {
+                const ext = ep.container_extension || 'mp4';
+                streamUrl = `${base}/series/${conn.user}/${conn.pass}/${ep.id}.${ext}`;
+            }
+            if (!streamUrl || this.isDownloading(streamUrl) || this.isCompleted(streamUrl)) return;
+
+            const epNum = ep.episode_num || ep.episode || (epIndex + 1);
+            const epTitle = (window.IPTV.SeriesDetailView && window.IPTV.SeriesDetailView._formatEpisodeTitle)
+                ? window.IPTV.SeriesDetailView._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum)
+                : (ep.title || `Episode ${epNum}`);
+            const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
+
+            episodesToDownload.push({
+                id: `ep_${seriesInfo.id}_${ep.id}`,
+                title: epTitle,
+                seriesName: seriesInfo.name,
+                season: seasonNum,
+                episode: epNum,
+                url: streamUrl,
+                poster: thumb,
+                type: 'series'
+            });
+        });
+
+        if (episodesToDownload.length === 0) {
+            if (this.app) this.app.toast(`All episodes in Season ${seasonNum} are already downloading or downloaded`);
+            return;
+        }
+
+        if (this.app) this.app.toast(`Queued ${episodesToDownload.length} episodes of Season ${seasonNum}`);
+        await window.electronDesktop.downloads.startBatch(episodesToDownload);
+    },
+
     async downloadEpisode(seriesInfo, episode, seasonNum, epIndex) {
         if (!this.isDesktop) return;
 
@@ -574,8 +779,16 @@ window.IPTV.DownloadManager = {
             return;
         }
 
-        if (this.isDownloading(streamUrl)) {
+        const epRecordId = `ep_${seriesInfo.id}_${episode.id}`;
+        if (this.isDownloading(streamUrl) || this.isDownloading(epRecordId)) {
             if (this.app) this.app.toast('Already downloading this episode');
+            return;
+        }
+
+        const downloadedEp = this.getDownloadedItem(streamUrl) || this.getDownloadedItem(epRecordId);
+        if (downloadedEp) {
+            if (this.app) this.app.toast('Episode already downloaded to PC! Available in Downloads.');
+            this._refreshVisibleCardStates();
             return;
         }
 

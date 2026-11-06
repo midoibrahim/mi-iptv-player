@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('electronDesktop', {
         showInFolder: (file) => ipcRenderer.invoke('downloads-show-in-folder', file),
         openFile: (file) => ipcRenderer.invoke('downloads-open-file', file),
         start: (item, opts) => ipcRenderer.invoke('downloads-start', item, opts),
+        startBatch: (items, opts) => ipcRenderer.invoke('downloads-start-batch', items, opts),
         pause: (id) => ipcRenderer.invoke('downloads-pause', id),
         resume: (id) => ipcRenderer.invoke('downloads-resume', id),
         cancel: (id) => ipcRenderer.invoke('downloads-cancel', id),

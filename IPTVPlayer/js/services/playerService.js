@@ -309,6 +309,7 @@ window.IPTV.PlayerService = {
         this.currentItem = item;
         this.seriesContext = item.seriesContext || null;
         this._userPaused = false;
+        this._localToastShown = false;
         this._initialSeekPending = (options && typeof options.initialSeekTime === 'number' && options.initialSeekTime > 0)
             ? options.initialSeekTime
             : null;
@@ -805,6 +806,12 @@ window.IPTV.PlayerService = {
 
     _markCandidateSuccess(rawCandidateUrl) {
         this._clearCandidateWatchdog();
+        if (rawCandidateUrl && String(rawCandidateUrl).startsWith('file:///')) {
+            if (this.app && typeof this.app.toast === 'function' && !this._localToastShown) {
+                this._localToastShown = true;
+                this.app.toast('⚡ Playing from downloaded local file (Offline)', 3000);
+            }
+        }
         if (this.isLiveStream() && this.app && this.app.connection && window.IPTV.Storage && window.IPTV.Storage.saveStreamStrategy) {
             const strat = this._getCandidateStrategy(rawCandidateUrl);
             if (strat) {
@@ -894,6 +901,17 @@ window.IPTV.PlayerService = {
         }
 
         // Movies & Series (VOD)
+        if (window.IPTV.DownloadManager && window.IPTV.DownloadManager.isDesktop) {
+            const downloaded = window.IPTV.DownloadManager.getDownloadedItem(item);
+            if (downloaded && downloaded.filePath) {
+                const localUrl = `file:///${downloaded.filePath.replace(/\\/g, '/')}`;
+                console.log('[PlayerService] Found local downloaded file, prioritizing local playback:', localUrl);
+                add(localUrl);
+                item._isLocalPlayback = true;
+                item._localFilePath = downloaded.filePath;
+            }
+        }
+
         const vodUrl = item.url || item.hlsUrl || item.fallbackUrl;
         if (vodUrl) {
             const isM3u8Vod = /\.m3u8($|\?)/i.test(vodUrl);

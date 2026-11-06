@@ -40,6 +40,16 @@ window.IPTV.SettingsView = {
                 <label>Destination Folder</label>
                 <div class="setting-val" id="setting-dl-path" style="font-family: monospace; font-size: 15px; color: var(--accent); word-break: break-all;">${currentPath}</div>
             </div>
+            <div class="setting-item" style="margin-top: 14px;">
+                <label for="setting-dl-parallel">Parallel Downloads</label>
+                <select id="setting-dl-parallel" class="setting-select" tabindex="0">
+                    <option value="1">1 (Sequential - Default)</option>
+                    <option value="2">2 Simultaneous</option>
+                    <option value="3">3 Simultaneous</option>
+                    <option value="4">4 Simultaneous</option>
+                    <option value="5">5 Simultaneous</option>
+                </select>
+            </div>
             <div style="display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;">
                 <button type="button" id="btn-setting-change-folder" class="btn-ghost" tabindex="0">Change Folder</button>
                 <button type="button" id="btn-setting-open-folder" class="btn-ghost" tabindex="0">Open in Explorer</button>
@@ -66,6 +76,18 @@ window.IPTV.SettingsView = {
         if (btnOpen) {
             btnOpen.addEventListener('click', () => {
                 window.electronDesktop.downloads.openFolder(dm.settings.saveDirectory);
+            });
+        }
+
+        const selParallel = dlGroup.querySelector('#setting-dl-parallel');
+        if (selParallel) {
+            selParallel.value = String(dm.settings.maxConcurrent || 1);
+            selParallel.addEventListener('change', async (e) => {
+                const val = parseInt(e.target.value, 10) || 1;
+                dm.settings.maxConcurrent = val;
+                await window.electronDesktop.downloads.updateSettings({ maxConcurrent: val });
+                dm._updatePathDisplay();
+                if (this.app) this.app.toast(`Parallel downloads set to ${val}`);
             });
         }
     },

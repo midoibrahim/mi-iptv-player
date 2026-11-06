@@ -604,6 +604,7 @@ function setupIpcHandlers() {
     ipcMain.handle('downloads-show-in-folder', (_e, file) => downloader.showInFolder(file));
     ipcMain.handle('downloads-open-file', (_e, file) => downloader.openFile(file));
     ipcMain.handle('downloads-start', (_e, item, opts) => downloader.startDownload(item, opts));
+    ipcMain.handle('downloads-start-batch', (_e, items, opts) => downloader.startBatchDownloads(items, opts));
     ipcMain.handle('downloads-pause', (_e, id) => downloader.pauseDownload(id));
     ipcMain.handle('downloads-resume', (_e, id) => downloader.resumeDownload(id));
     ipcMain.handle('downloads-cancel', (_e, id) => downloader.cancelDownload(id));

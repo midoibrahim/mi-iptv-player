@@ -1,8 +1,8 @@
 // ============================================================
 // MI IPTV Player — Desktop Windows Downloader Engine
-// Background HTTP/HTTPS Streaming, Pause/Resume, Chunked Downloads,
-// Directory Selection, History Persistence, Windows Shell Integration
-// & Universal TV/Receiver Remuxing (H.264 + AAC 48kHz MP4)
+// Background HTTP/HTTPS Streaming, Queue & Concurrency Management,
+// Nested Series/Season Folders, Directory Selection, History Persistence,
+// Windows Shell Integration & Universal TV/Receiver Remuxing (H.264 + AAC 48kHz MP4)
 // ============================================================
 
 const { app, dialog, shell } = require('electron');
@@ -52,7 +52,8 @@ class Downloader {
                     return {
                         saveDirectory: data.saveDirectory,
                         askEveryTime: Boolean(data.askEveryTime),
-                        autoConvertToMp4: data.autoConvertToMp4 !== false
+                        autoConvertToMp4: data.autoConvertToMp4 !== false,
+                        maxConcurrent: Math.max(1, parseInt(data.maxConcurrent, 10) || 1)
                     };
                 }
             }
@@ -62,7 +63,8 @@ class Downloader {
         return {
             saveDirectory: this.defaultDownloadDir,
             askEveryTime: false,
-            autoConvertToMp4: true // Enabled by default for universal TV & receiver compatibility
+            autoConvertToMp4: true, // Universal TV compatibility
+            maxConcurrent: 1         // 1 parallel download by default (queue rest)
         };
     }
 
@@ -79,10 +81,10 @@ class Downloader {
             if (fs.existsSync(this.historyPath)) {
                 const list = JSON.parse(fs.readFileSync(this.historyPath, 'utf8'));
                 if (Array.isArray(list)) {
-                    // Check if files still exist on disk
                     return list.map(item => ({
                         ...item,
-                        existsOnDisk: fs.existsSync(item.filePath)
+                        existsOnDisk: fs.existsSync(item.filePath),
+                        isUniversalMp4: Boolean(item.filePath && path.extname(item.filePath).toLowerCase() === '.mp4')
                     }));
                 }
             }
@@ -101,11 +103,11 @@ class Downloader {
     }
 
     _sanitizeFileName(name) {
-        if (!name) return 'download_' + Date.now();
-        // Remove characters forbidden in Windows file names: < > : " / \ | ? * and control chars
+        if (!name) return 'media_' + Date.now();
+        // Remove characters forbidden in Windows file & folder names: < > : " / \ | ? * and control chars
         let clean = name.replace(/[<>:"/\\|?*\x00-\x1F]/g, '_').replace(/\s+/g, ' ').trim();
-        if (clean.length > 180) {
-            clean = clean.substring(0, 180).trim();
+        if (clean.length > 160) {
+            clean = clean.substring(0, 160).trim();
         }
         return clean || 'media_' + Date.now();
     }
@@ -127,7 +129,8 @@ class Downloader {
         return {
             saveDirectory: this.settings.saveDirectory,
             askEveryTime: Boolean(this.settings.askEveryTime),
-            autoConvertToMp4: this.settings.autoConvertToMp4 !== false
+            autoConvertToMp4: this.settings.autoConvertToMp4 !== false,
+            maxConcurrent: Math.max(1, parseInt(this.settings.maxConcurrent, 10) || 1)
         };
     }
 
@@ -141,6 +144,10 @@ class Downloader {
         }
         if (typeof newSettings.autoConvertToMp4 === 'boolean') {
             this.settings.autoConvertToMp4 = newSettings.autoConvertToMp4;
+        }
+        if (typeof newSettings.maxConcurrent === 'number') {
+            this.settings.maxConcurrent = Math.max(1, Math.min(10, newSettings.maxConcurrent));
+            this._processQueue();
         }
         this._saveSettings();
         return this.getSettings();
@@ -188,26 +195,8 @@ class Downloader {
     }
 
     getAll() {
-        const activeList = Array.from(this.activeDownloads.values()).map(t => ({
-            id: t.id,
-            title: t.title,
-            fileName: t.fileName,
-            filePath: t.filePath,
-            url: t.url,
-            poster: t.poster,
-            type: t.type,
-            status: t.status,
-            totalBytes: t.totalBytes,
-            receivedBytes: t.receivedBytes,
-            percent: t.percent,
-            speedBps: t.speedBps,
-            speedFormatted: t.speedFormatted,
-            receivedFormatted: this._formatBytes(t.receivedBytes),
-            totalFormatted: this._formatBytes(t.totalBytes),
-            error: t.error
-        }));
+        const activeList = Array.from(this.activeDownloads.values()).map(t => this._serializeTask(t));
 
-        // Re-check disk presence for history items
         this.history.forEach(item => {
             item.existsOnDisk = Boolean(item.filePath && fs.existsSync(item.filePath));
             item.isUniversalMp4 = Boolean(item.filePath && path.extname(item.filePath).toLowerCase() === '.mp4');
@@ -220,11 +209,48 @@ class Downloader {
         };
     }
 
-    /**
-     * Remux any video file to universal MP4 with AAC 48kHz audio.
-     * Copies video stream directly without quality loss (-c:v copy).
-     * Converts audio to standard AAC-LC 48,000 Hz.
-     */
+    isDownloading(urlOrId) {
+        if (!urlOrId) return false;
+        for (const task of this.activeDownloads.values()) {
+            if (task.id === urlOrId || task.itemId === urlOrId || task.url === urlOrId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    isCompleted(urlOrId) {
+        if (!urlOrId) return false;
+        return this.history.some(h => 
+            (h.id === urlOrId || h.itemId === urlOrId || h.url === urlOrId) && 
+            h.filePath && 
+            fs.existsSync(h.filePath)
+        );
+    }
+
+    _processQueue() {
+        let runningCount = 0;
+        for (const task of this.activeDownloads.values()) {
+            if (task.status === 'downloading' || task.status === 'converting') {
+                runningCount++;
+            }
+        }
+
+        const maxParallel = Math.max(1, parseInt(this.settings.maxConcurrent, 10) || 1);
+        if (runningCount >= maxParallel) return;
+
+        for (const task of this.activeDownloads.values()) {
+            if (task.status === 'queued') {
+                task.status = 'downloading';
+                task.speedFormatted = 'Connecting...';
+                this._sendToRenderer('download-progress', this._serializeTask(task));
+                this._executeDownload(task);
+                runningCount++;
+                if (runningCount >= maxParallel) break;
+            }
+        }
+    }
+
     _remuxToMp4(inputPath, callback) {
         const ext = path.extname(inputPath).toLowerCase();
         if (ext === '.mp4') {
@@ -243,7 +269,7 @@ class Downloader {
         ];
 
         console.log(`[Downloader] Remuxing to Universal MP4 (AAC 48kHz): ${path.basename(inputPath)} -> ${path.basename(outputPath)}`);
-        
+
         let proc;
         try {
             proc = spawn('ffmpeg', args, { windowsHide: true });
@@ -257,7 +283,6 @@ class Downloader {
                 try {
                     const stat = fs.statSync(outputPath);
                     if (stat.size > 1024) {
-                        // Safely remove original MKV
                         try { fs.unlinkSync(inputPath); } catch (e) {}
                         console.log(`[Downloader] Successfully converted to Universal MP4: ${path.basename(outputPath)}`);
                         return callback(null, outputPath);
@@ -274,9 +299,6 @@ class Downloader {
         });
     }
 
-    /**
-     * Convert an already downloaded file from history to Universal MP4 on demand
-     */
     async convertItemToMp4(id) {
         const item = this.history.find(h => h.id === id);
         if (!item || !item.filePath || !fs.existsSync(item.filePath)) {
@@ -312,28 +334,50 @@ class Downloader {
     }
 
     /**
-     * Start a new download
-     * @param {Object} item { id, title, url, poster, type, seriesName, season, episode, ext }
-     * @param {Object} options { targetDir, customFileName }
+     * Start a single download
      */
     async startDownload(item, options = {}) {
         if (!item || !item.url) {
             throw new Error('Invalid download item: URL is required');
         }
 
-        // Check if user has "Ask Every Time" enabled and no explicit directory passed
-        let targetDir = options.targetDir;
-        if (!targetDir && this.settings.askEveryTime) {
+        if (this.isDownloading(item.url || item.id)) {
+            console.log('[Downloader] Download already active for: ' + (item.url || item.id));
+            return { alreadyActive: true };
+        }
+
+        const existingInHistory = this.history.find(h =>
+            (h.url === item.url || (item.id && (h.id === item.id || h.itemId === item.id))) &&
+            h.filePath &&
+            fs.existsSync(h.filePath)
+        );
+        if (existingInHistory && !options.forceRedownload) {
+            console.log('[Downloader] File already downloaded on disk: ' + existingInHistory.filePath);
+            return { alreadyDownloaded: true, filePath: existingInHistory.filePath, id: existingInHistory.id };
+        }
+
+        let baseDir = options.targetDir;
+        if (!baseDir && this.settings.askEveryTime && !options.skipPrompt) {
             const sel = await this.selectDirectory();
             if (sel.canceled) {
                 return { canceled: true };
             }
-            targetDir = sel.path;
+            baseDir = sel.path;
         }
-        targetDir = targetDir || this.settings.saveDirectory;
-        this._ensureDir(targetDir);
+        baseDir = baseDir || this.settings.saveDirectory;
+        this._ensureDir(baseDir);
 
-        // Derive extension from URL or item
+        // Nested folder structure:
+        // For Series: <saveDirectory>/<Series Name>/Season <XX>/<Episode File>
+        let targetDir = baseDir;
+        if (item.seriesName) {
+            const cleanSeriesName = this._sanitizeFileName(item.seriesName);
+            const sNum = String(item.season || '1').padStart(2, '0');
+            const seasonFolder = `Season ${sNum}`;
+            targetDir = path.join(baseDir, cleanSeriesName, seasonFolder);
+            this._ensureDir(targetDir);
+        }
+
         let ext = item.ext;
         if (!ext) {
             try {
@@ -344,16 +388,15 @@ class Downloader {
         }
         ext = ext || 'mp4';
 
-        // Clean & construct base file name
         let baseName = options.customFileName || item.title || item.name || 'Media';
         if (item.seriesName && (item.season != null || item.episode != null)) {
             const sNum = String(item.season || '1').padStart(2, '0');
             const eNum = String(item.episode || '1').padStart(2, '0');
-            baseName = `${item.seriesName} - S${sNum}E${eNum} - ${item.title || 'Episode ' + eNum}`;
+            baseName = `${this._sanitizeFileName(item.seriesName)} - S${sNum}E${eNum} - ${this._sanitizeFileName(item.title || 'Episode ' + eNum)}`;
+        } else {
+            baseName = this._sanitizeFileName(baseName);
         }
-        baseName = this._sanitizeFileName(baseName);
 
-        // Deduplicate file name if file already exists
         let finalFileName = `${baseName}.${ext}`;
         let targetPath = path.join(targetDir, finalFileName);
         let counter = 1;
@@ -366,10 +409,24 @@ class Downloader {
         const partPath = targetPath + '.part';
         const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
 
+        // Check active downloads against concurrency limit
+        let runningCount = 0;
+        for (const t of this.activeDownloads.values()) {
+            if (t.status === 'downloading' || t.status === 'converting') {
+                runningCount++;
+            }
+        }
+
+        const maxParallel = Math.max(1, parseInt(this.settings.maxConcurrent, 10) || 1);
+        const shouldQueue = runningCount >= maxParallel;
+
         const task = {
             id: downloadId,
             itemId: item.id,
             title: item.title || item.name || finalFileName,
+            seriesName: item.seriesName || null,
+            season: item.season || null,
+            episode: item.episode || null,
             fileName: finalFileName,
             filePath: targetPath,
             partPath: partPath,
@@ -381,8 +438,8 @@ class Downloader {
             receivedBytes: 0,
             percent: 0,
             speedBps: 0,
-            speedFormatted: '0 B/s',
-            status: 'downloading',
+            speedFormatted: shouldQueue ? 'In Queue' : '0 B/s',
+            status: shouldQueue ? 'queued' : 'downloading',
             error: null,
             startTime: Date.now(),
             lastReportTime: Date.now(),
@@ -394,8 +451,40 @@ class Downloader {
         this.activeDownloads.set(downloadId, task);
         this._sendToRenderer('download-started', this._serializeTask(task));
 
-        this._executeDownload(task);
+        if (!shouldQueue) {
+            this._executeDownload(task);
+        }
+
         return { canceled: false, task: this._serializeTask(task) };
+    }
+
+    /**
+     * Start a batch of downloads (e.g. an entire series or season)
+     */
+    async startBatchDownloads(items, options = {}) {
+        if (!Array.isArray(items) || items.length === 0) {
+            return { canceled: false, count: 0 };
+        }
+
+        let baseDir = options.targetDir;
+        if (!baseDir && this.settings.askEveryTime) {
+            const sel = await this.selectDirectory();
+            if (sel.canceled) return { canceled: true, count: 0 };
+            baseDir = sel.path;
+        }
+        baseDir = baseDir || this.settings.saveDirectory;
+
+        const added = [];
+        for (const item of items) {
+            if (this.isDownloading(item.url || item.id) || this.isCompleted(item.url || item.id)) continue;
+            const res = await this.startDownload(item, { ...options, targetDir: baseDir, skipPrompt: true });
+            if (res && res.task) {
+                added.push(res.task);
+            }
+        }
+
+        this._processQueue();
+        return { canceled: false, count: added.length, tasks: added };
     }
 
     _serializeTask(task) {
@@ -403,6 +492,9 @@ class Downloader {
             id: task.id,
             itemId: task.itemId,
             title: task.title,
+            seriesName: task.seriesName,
+            season: task.season,
+            episode: task.episode,
             fileName: task.fileName,
             filePath: task.filePath,
             url: task.url,
@@ -442,7 +534,6 @@ class Downloader {
         };
 
         let flags = 'w';
-        // Support Resume if .part already exists
         if (task.receivedBytes > 0 && fs.existsSync(task.partPath)) {
             const stat = fs.statSync(task.partPath);
             if (stat.size === task.receivedBytes) {
@@ -456,7 +547,6 @@ class Downloader {
         }
 
         const req = protocol.get(task.url, { headers }, (res) => {
-            // Handle redirects (301, 302, 303, 307, 308)
             if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
                 let nextUrl = res.headers.location;
                 if (!nextUrl.startsWith('http')) {
@@ -471,11 +561,9 @@ class Downloader {
                 return this._handleError(task, new Error(`HTTP ${res.statusCode}: ${res.statusMessage || 'Download failed'}`));
             }
 
-            // Total bytes determination
             const contentLength = parseInt(res.headers['content-length'], 10);
             if (!isNaN(contentLength) && contentLength > 0) {
                 if (res.statusCode === 206) {
-                    // Partial content: add existing received bytes
                     task.totalBytes = task.receivedBytes + contentLength;
                 } else {
                     task.totalBytes = contentLength;
@@ -495,7 +583,6 @@ class Downloader {
                 if (task.status !== 'downloading') return;
                 task.receivedBytes += chunk.length;
 
-                // Throttled UI progress report (every 350ms)
                 const now = Date.now();
                 const deltaMs = now - task.lastReportTime;
                 if (deltaMs >= 350) {
@@ -520,7 +607,6 @@ class Downloader {
                 if (task.status !== 'downloading') return;
 
                 task.fileStream.close(() => {
-                    // Rename .part to target path
                     try {
                         if (fs.existsSync(task.partPath)) {
                             fs.renameSync(task.partPath, task.filePath);
@@ -544,6 +630,9 @@ class Downloader {
                             id: task.id,
                             itemId: task.itemId,
                             title: task.title,
+                            seriesName: task.seriesName,
+                            season: task.season,
+                            episode: task.episode,
                             fileName: path.basename(finalPath),
                             filePath: finalPath,
                             fileSize: finalSize,
@@ -557,15 +646,17 @@ class Downloader {
                         };
 
                         this.history.unshift(historyItem);
-                        if (this.history.length > 100) this.history.pop();
+                        if (this.history.length > 150) this.history.pop();
                         this._saveHistory();
 
                         this.activeDownloads.delete(task.id);
                         this._sendToRenderer('download-completed', historyItem);
                         console.log(`[Downloader] Download completed & ready: ${historyItem.fileName}`);
+
+                        // Trigger next queued download
+                        this._processQueue();
                     };
 
-                    // Auto-convert to Universal MP4 (H.264 + AAC 48kHz) if enabled and source is not already MP4
                     if (this.settings.autoConvertToMp4 !== false && path.extname(task.filePath).toLowerCase() !== '.mp4') {
                         task.status = 'converting';
                         task.speedFormatted = 'Optimizing for TV/Receiver (MP4)...';
@@ -609,6 +700,9 @@ class Downloader {
         const serialized = this._serializeTask(task);
         this.activeDownloads.delete(task.id);
         this._sendToRenderer('download-failed', serialized);
+
+        // Advance queue
+        this._processQueue();
     }
 
     pauseDownload(id) {
@@ -629,18 +723,32 @@ class Downloader {
         }
 
         this._sendToRenderer('download-paused', this._serializeTask(task));
+        this._processQueue();
         return true;
     }
 
     resumeDownload(id) {
         const task = this.activeDownloads.get(id);
-        if (!task || task.status !== 'paused') return false;
+        if (!task || (task.status !== 'paused' && task.status !== 'queued')) return false;
 
-        task.status = 'downloading';
-        task.speedFormatted = 'Resuming...';
-        this._sendToRenderer('download-resumed', this._serializeTask(task));
+        let runningCount = 0;
+        for (const t of this.activeDownloads.values()) {
+            if (t.status === 'downloading' || t.status === 'converting') {
+                runningCount++;
+            }
+        }
 
-        this._executeDownload(task);
+        const maxParallel = Math.max(1, parseInt(this.settings.maxConcurrent, 10) || 1);
+        if (runningCount < maxParallel) {
+            task.status = 'downloading';
+            task.speedFormatted = 'Resuming...';
+            this._sendToRenderer('download-resumed', this._serializeTask(task));
+            this._executeDownload(task);
+        } else {
+            task.status = 'queued';
+            task.speedFormatted = 'In Queue';
+            this._sendToRenderer('download-progress', this._serializeTask(task));
+        }
         return true;
     }
 
@@ -657,17 +765,17 @@ class Downloader {
             try { task.fileStream.close(); } catch (e) {}
         }
 
-        // Clean up partial file
         try {
             if (fs.existsSync(task.partPath)) {
                 fs.unlinkSync(task.partPath);
             }
-        } catch (e) {
-            console.warn('[Downloader] Could not remove partial file:', e.message);
-        }
+        } catch (e) {}
 
         this.activeDownloads.delete(id);
         this._sendToRenderer('download-cancelled', { id });
+
+        // Advance queue to start next pending item
+        this._processQueue();
         return true;
     }
 

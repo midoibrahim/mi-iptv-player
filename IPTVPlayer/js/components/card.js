@@ -189,6 +189,17 @@ window.IPTV.Card = {
             dlBtn.tabIndex = -1;
             dlBtn.title = type === 'series' ? 'Browse Episodes to Download' : 'Download to PC';
             dlBtn.innerHTML = this._getIcon('download', 'card-dl-svg');
+
+            if (type === 'movie' && window.IPTV.DownloadManager) {
+                if (window.IPTV.DownloadManager.isCompleted(item)) {
+                    dlBtn.classList.add('downloaded');
+                    dlBtn.title = 'Downloaded to PC';
+                    dlBtn.innerHTML = this._getIcon('check', 'card-dl-svg');
+                } else if (window.IPTV.DownloadManager.isDownloading(item.url || item.id)) {
+                    dlBtn.classList.add('downloading');
+                    dlBtn.title = 'Downloading...';
+                }
+            }
             dlBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (type === 'series') {

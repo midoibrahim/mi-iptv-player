@@ -1,6 +1,7 @@
 /* ============================================================
-   IPTV Player — Video Player & HLS Streaming Engine
-   Adheres to TV Navigation Architecture Media Player OSD specs
+   IPTV Player — Video Player & HLS Streaming Coordinator
+   Coordinates PlaybackEngine, StreamResolver, PlayerOsd,
+   ChannelDrawer, and WatchProgressTracker.
    ============================================================ */
 
 window.IPTV = window.IPTV || {};
@@ -23,10 +24,11 @@ window.IPTV.PlayerService = {
         this.currentCandidates = [];
         this.currentCandidateIndex = 0;
 
-        // In-Player Channel Drawer state
+        // In-Player Channel Drawer component
         this.isChannelDrawerOpen = false;
-        this.selectedDrawerCategory = null;
-        this.drawerSearchQuery = '';
+        if (window.IPTV.ChannelDrawer) {
+            window.IPTV.ChannelDrawer.init(this);
+        }
 
         // Resume & Watch progress state
         this._initialSeekPending = null;
@@ -97,7 +99,7 @@ window.IPTV.PlayerService = {
         if (favBtn) {
             favBtn.addEventListener('click', () => {
                 if (this.currentItem) {
-                    this.app.toggleFavorite(this.currentItem);
+                    window.IPTV.CatalogStore.toggleFavorite(this.currentItem);
                     this.updateFavoriteState();
                 }
             });
@@ -113,113 +115,8 @@ window.IPTV.PlayerService = {
         }
 
         // Interactive Playbar Seeking (Click & Drag for Magic Remote Mouse & Touch Events)
-        const progressBar = document.getElementById('osd-progress-bar');
-        if (progressBar) {
-            let isDragging = false;
-            let pendingRatio = null;
-
-            const getRatioFromEvent = (e) => {
-                const rect = progressBar.getBoundingClientRect();
-                const clientX = (e.clientX !== undefined)
-                    ? e.clientX
-                    : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-                return Math.max(0, Math.min(1, (clientX - rect.left) / (rect.width || 1)));
-            };
-
-            const updateScrubPreview = (ratio) => {
-                if (!this.canSeek()) return;
-                const targetTime = ratio * this.video.duration;
-                this._updateProgressUI(targetTime, this.video.duration);
-                const bubble = document.getElementById('osd-scrub-bubble');
-                if (bubble) {
-                    bubble.textContent = this._fmtTime(targetTime);
-                    bubble.style.opacity = '1';
-                }
-                this.showSeekHUD(
-                    'seekPin',
-                    this._fmtTime(targetTime),
-                    `${this._fmtTime(targetTime)} / ${this._fmtTime(this.video.duration)}`
-                );
-            };
-
-            const onStart = (e) => {
-                if (!this.canSeek()) return;
-                if (e.button !== undefined && e.button !== 0) return; // ignore non-left click
-                isDragging = true;
-                this._isProgressBarDragging = true;
-                clearTimeout(this.osdTimeout);
-                progressBar.classList.add('scrubbing');
-                pendingRatio = getRatioFromEvent(e);
-                updateScrubPreview(pendingRatio);
-
-                const onMove = (ev) => {
-                    if (!isDragging) return;
-                    clearTimeout(this.osdTimeout);
-                    pendingRatio = getRatioFromEvent(ev);
-                    updateScrubPreview(pendingRatio);
-                };
-
-                const onEnd = (ev) => {
-                    window.removeEventListener('mousemove', onMove, true);
-                    window.removeEventListener('mouseup', onEnd, true);
-                    window.removeEventListener('touchmove', onMove);
-                    window.removeEventListener('touchend', onEnd);
-
-                    if (!isDragging) return;
-                    isDragging = false;
-                    this._isProgressBarDragging = false;
-                    progressBar.classList.remove('scrubbing');
-
-                    const bubble = document.getElementById('osd-scrub-bubble');
-                    if (bubble) bubble.style.opacity = '';
-
-                    if (pendingRatio !== null && this.canSeek()) {
-                        const targetTime = pendingRatio * this.video.duration;
-                        pendingRatio = null;
-                        this.seekTo(targetTime, true);
-                    }
-                    this.autoHideOSD();
-                };
-
-                window.addEventListener('mousemove', onMove, true);
-                window.addEventListener('mouseup', onEnd, true);
-                window.addEventListener('touchmove', onMove, { passive: true });
-                window.addEventListener('touchend', onEnd);
-            };
-
-            // Standard mouse events for LG Magic Remote (webOS 3.x / Chromium 38)
-            progressBar.addEventListener('mousedown', onStart);
-            progressBar.addEventListener('touchstart', onStart, { passive: true });
-
-            // Direct click on seek bar
-            progressBar.addEventListener('click', (e) => {
-                if (!this.canSeek()) return;
-                const ratio = getRatioFromEvent(e);
-                const targetTime = ratio * this.video.duration;
-                this.seekTo(targetTime, true);
-                this.autoHideOSD();
-            });
-
-            // Hover preview with Magic Remote pointer
-            progressBar.addEventListener('mousemove', (e) => {
-                if (!isDragging && this.canSeek()) {
-                    this.autoHideOSD();
-                    const ratio = getRatioFromEvent(e);
-                    const targetTime = ratio * this.video.duration;
-                    const bubble = document.getElementById('osd-scrub-bubble');
-                    if (bubble) {
-                        bubble.textContent = this._fmtTime(targetTime);
-                        bubble.style.opacity = '1';
-                    }
-                }
-            });
-
-            progressBar.addEventListener('mouseleave', () => {
-                if (!isDragging) {
-                    const bubble = document.getElementById('osd-scrub-bubble');
-                    if (bubble) bubble.style.opacity = '';
-                }
-            });
+        if (window.IPTV.PlayerOsd) {
+            window.IPTV.PlayerOsd.bindScrubbing(this);
         }
 
         // Video playback events
@@ -259,7 +156,7 @@ window.IPTV.PlayerService = {
             this._recordWatchProgress();
         });
         this.video.addEventListener('ended', () => {
-            this._recordWatchProgress(true); // Reached 100% -> cleans up per 95% threshold
+            this._recordWatchProgress(true);
             if (this.currentItem && this.currentItem.type === 'series') {
                 const settings = window.IPTV.Storage ? window.IPTV.Storage.getSettings() : null;
                 const autoplay = !settings || settings.autoplay !== false;
@@ -297,7 +194,7 @@ window.IPTV.PlayerService = {
 
     play(item, options = {}) {
         if (!item || (!item.url && !item.hlsUrl && !item.fallbackUrl)) {
-            this.app.toast('No stream URL provided');
+            window.IPTV.EventBus.toast('No stream URL provided');
             return;
         }
 
@@ -342,7 +239,7 @@ window.IPTV.PlayerService = {
         this.currentCandidateIndex = 0;
 
         if (this.currentCandidates.length === 0) {
-            this.app.toast('No valid stream URL found');
+            window.IPTV.EventBus.toast('No valid stream URL found');
             return;
         }
 
@@ -387,7 +284,6 @@ window.IPTV.PlayerService = {
             const mainShell = document.getElementById('main-shell');
             if (mainShell) mainShell.classList.remove('active');
 
-            // Restore focus to current episode card in series detail screen
             if (this.app && this.app.seriesDetailView && closedSeriesContext) {
                 this.app.seriesDetailView.focusEpisodeCard(
                     closedSeriesContext.currentSeason,
@@ -402,9 +298,12 @@ window.IPTV.PlayerService = {
             const mainShell = document.getElementById('main-shell');
             if (mainShell) mainShell.classList.add('active');
 
-            // If returning to Home screen, refresh Home View so Continue Watching row updates instantly
             if (this.app && this.app.currentSection === 'home' && this.app.homeView) {
-                this.app.homeView.render(this.app.liveChannels, this.app.movies, this.app.series);
+                this.app.homeView.render(
+                    window.IPTV.CatalogStore.getLive(),
+                    window.IPTV.CatalogStore.getMovies(),
+                    window.IPTV.CatalogStore.getSeries()
+                );
             }
 
             if (this.lastFocusedElement && document.contains(this.lastFocusedElement)) {
@@ -416,168 +315,11 @@ window.IPTV.PlayerService = {
     },
 
     _focusDrawerItem(el) {
-        if (!el) return;
-        if (window.IPTV.SpatialNav) {
-            window.IPTV.SpatialNav.focusElement(el);
-        } else {
-            el.focus();
-        }
-        try {
-            el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-        } catch(e) {}
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.focusItem(el);
     },
 
     handleDrawerKey(e, keyHandler) {
-        if (!keyHandler) return;
-
-        // 1. Back button: dismiss drawer without switching channel
-        if (keyHandler.isBackKey(e)) {
-            this.closeChannelDrawer();
-            return;
-        }
-
-        // 2. Channel Up / Down hardware remote keys: scroll channel list by page
-        if (keyHandler.isChannelUp(e) || keyHandler.isChannelDown(e)) {
-            const listEl = document.getElementById('drawer-channel-list');
-            if (listEl) {
-                listEl.scrollBy({ top: keyHandler.isChannelDown(e) ? 280 : -280, behavior: 'smooth' });
-            }
-            return;
-        }
-
-        const drawer = document.getElementById('player-channel-drawer');
-        if (!drawer) return;
-
-        // 3. Directional D-pad navigation inside drawer
-        const dir = keyHandler.getDirection(e);
-        if (dir) {
-            let active = document.activeElement;
-
-            // If active element is not inside drawer, focus playing channel or first channel
-            if (!active || !drawer.contains(active)) {
-                const target = drawer.querySelector('.drawer-channel-item.active-playing, .drawer-channel-item, .drawer-cat-btn');
-                if (target) {
-                    this._focusDrawerItem(target);
-                    return;
-                }
-            }
-
-            // Case A: Focused on a Channel Item in the vertical list
-            if (active.classList.contains('drawer-channel-item')) {
-                if (dir === 'down') {
-                    const idx = parseInt(active.getAttribute('data-index'), 10);
-                    if (!isNaN(idx) && idx >= this.drawerRenderedCount - 6) {
-                        this._appendDrawerChannelChunk(25);
-                    }
-                    const next = active.nextElementSibling;
-                    if (next && next.classList.contains('drawer-channel-item')) {
-                        this._focusDrawerItem(next);
-                        return;
-                    }
-                    return; // Clamp at bottom
-                }
-                if (dir === 'up') {
-                    const prev = active.previousElementSibling;
-                    if (prev && prev.classList.contains('drawer-channel-item')) {
-                        this._focusDrawerItem(prev);
-                        return;
-                    }
-                    // At top of channel list: navigate up to active category pill
-                    const activeCat = drawer.querySelector('.drawer-cat-btn.active') || drawer.querySelector('.drawer-cat-btn');
-                    if (activeCat) {
-                        this._focusDrawerItem(activeCat);
-                        return;
-                    }
-                    return;
-                }
-                if (dir === 'left') {
-                    // Page up by 5 items
-                    const items = Array.from(drawer.querySelectorAll('.drawer-channel-item'));
-                    const curIdx = items.indexOf(active);
-                    if (curIdx > 0) {
-                        const targetIdx = Math.max(0, curIdx - 5);
-                        this._focusDrawerItem(items[targetIdx]);
-                    }
-                    return;
-                }
-                if (dir === 'right') {
-                    // Page down by 5 items
-                    const idx = parseInt(active.getAttribute('data-index'), 10);
-                    if (!isNaN(idx) && idx >= this.drawerRenderedCount - 10) {
-                        this._appendDrawerChannelChunk(25);
-                    }
-                    const items = Array.from(drawer.querySelectorAll('.drawer-channel-item'));
-                    const curIdx = items.indexOf(active);
-                    if (curIdx >= 0 && curIdx < items.length - 1) {
-                        const targetIdx = Math.min(items.length - 1, curIdx + 5);
-                        this._focusDrawerItem(items[targetIdx]);
-                    }
-                    return;
-                }
-            }
-
-            // Case B: Focused on a Category Pill button
-            if (active.classList.contains('drawer-cat-btn')) {
-                if (dir === 'right') {
-                    const next = active.nextElementSibling;
-                    if (next && next.classList.contains('drawer-cat-btn')) {
-                        this._focusDrawerItem(next);
-                        return;
-                    }
-                    return; // Clamp at end of category row
-                }
-                if (dir === 'left') {
-                    const prev = active.previousElementSibling;
-                    if (prev && prev.classList.contains('drawer-cat-btn')) {
-                        this._focusDrawerItem(prev);
-                        return;
-                    }
-                    return; // Clamp at beginning of category row
-                }
-                if (dir === 'down') {
-                    // Move down into channel list: prioritize playing channel, else first channel
-                    const ch = drawer.querySelector('.drawer-channel-item.active-playing') || drawer.querySelector('.drawer-channel-item');
-                    if (ch) {
-                        this._focusDrawerItem(ch);
-                        return;
-                    }
-                    return;
-                }
-                if (dir === 'up') {
-                    const closeBtn = document.getElementById('drawer-close-btn');
-                    if (closeBtn) {
-                        this._focusDrawerItem(closeBtn);
-                        return;
-                    }
-                    return;
-                }
-            }
-
-            // Case C: Close Button
-            if (active.id === 'drawer-close-btn') {
-                if (dir === 'down') {
-                    const activeCat = drawer.querySelector('.drawer-cat-btn.active') || drawer.querySelector('.drawer-cat-btn');
-                    if (activeCat) {
-                        this._focusDrawerItem(activeCat);
-                        return;
-                    }
-                }
-                return;
-            }
-
-            // Fallback to spatial navigation inside drawer
-            const handled = window.IPTV.SpatialNav ? window.IPTV.SpatialNav.navigate(dir) : false;
-            if (handled) return;
-        }
-
-        // 4. Enter / Remote OK key
-        if (keyHandler.isEnterKey(e)) {
-            const active = document.activeElement;
-            if (active && typeof active.click === 'function') {
-                active.click();
-                return;
-            }
-        }
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.handleKey(e, keyHandler);
     },
 
     handleKey(e, keyHandler) {
@@ -654,515 +396,67 @@ window.IPTV.PlayerService = {
     },
 
     _navigateOSD(dir) {
-        // If OSD is currently hidden:
-        if (!this.isOSDVisible()) {
-            if (dir === 'left') {
-                // Quick scrub backward on left D-pad
-                this.seekRelative(-10);
-                this.showOSD();
-                return;
-            }
-            if (dir === 'right') {
-                // Quick scrub forward on right D-pad
-                this.seekRelative(10);
-                this.showOSD();
-                return;
-            }
-            // Up or Down: summon OSD and focus play/pause
-            this.showOSD();
-            const playPause = document.getElementById('osd-playpause');
-            if (playPause) playPause.focus();
-            return;
-        }
-
-        // OSD is visible: reset auto-hide timer
-        this.autoHideOSD();
-
-        const topBtns = [
-            document.getElementById('player-back'),
-            document.getElementById('osd-channels-btn'),
-            document.getElementById('osd-fav')
-        ].filter(b => b && b.style.display !== 'none');
-
-        const progressBar = document.getElementById('osd-progress-bar') || document.querySelector('.progress-bar');
-        const bottomBtns = [
-            document.getElementById('osd-prev'),
-            document.getElementById('osd-rw'),
-            document.getElementById('osd-playpause'),
-            document.getElementById('osd-ff'),
-            document.getElementById('osd-next')
-        ].filter(b => b && b.style.display !== 'none');
-
-        const active = document.activeElement;
-
-        // If focus is not currently inside OSD controls, focus default (Play/Pause)
-        if (!active || !this.osd || !this.osd.contains(active)) {
-            const defaultTarget = document.getElementById('osd-playpause') || bottomBtns[0];
-            if (defaultTarget) defaultTarget.focus();
-            return;
-        }
-
-        // Tier 1: Active is in Top Bar Buttons
-        const topIdx = topBtns.indexOf(active);
-        if (topIdx >= 0) {
-            if (dir === 'left' && topIdx > 0) {
-                topBtns[topIdx - 1].focus();
-                return;
-            }
-            if (dir === 'right' && topIdx < topBtns.length - 1) {
-                topBtns[topIdx + 1].focus();
-                return;
-            }
-            if (dir === 'down') {
-                if (progressBar && !this.isLiveStream()) {
-                    progressBar.focus();
-                } else {
-                    const pp = document.getElementById('osd-playpause') || bottomBtns[0];
-                    if (pp) pp.focus();
-                }
-                return;
-            }
-            return;
-        }
-
-        // Tier 2: Active is Middle Progress Bar
-        if (active === progressBar || (progressBar && progressBar.contains(active))) {
-            if (dir === 'up') {
-                if (topBtns.length > 0) topBtns[0].focus();
-                return;
-            }
-            if (dir === 'down') {
-                const pp = document.getElementById('osd-playpause') || bottomBtns[0];
-                if (pp) pp.focus();
-                return;
-            }
-            if (dir === 'left') {
-                this.seekRelative(-10);
-                return;
-            }
-            if (dir === 'right') {
-                this.seekRelative(10);
-                return;
-            }
-            return;
-        }
-
-        // Tier 3: Active is one of the Bottom Transport Buttons
-        const idx = bottomBtns.indexOf(active);
-        if (idx >= 0) {
-            if (dir === 'up') {
-                if (progressBar && !this.isLiveStream()) {
-                    progressBar.focus();
-                } else if (topBtns.length > 0) {
-                    topBtns[0].focus();
-                }
-                return;
-            }
-            if (dir === 'left') {
-                if (idx > 0) {
-                    bottomBtns[idx - 1].focus();
-                }
-                return;
-            }
-            if (dir === 'right') {
-                if (idx < bottomBtns.length - 1) {
-                    bottomBtns[idx + 1].focus();
-                }
-                return;
-            }
-            if (dir === 'down') {
-                // Clamp at bottom row
-                return;
-            }
-        }
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.navigate(this, dir);
     },
 
-
-    _scriptPromises: {},
-
     _loadScriptOnce(src) {
-        if (this._scriptPromises[src]) return this._scriptPromises[src];
-        this._scriptPromises[src] = new Promise((resolve) => {
-            const s = document.createElement('script');
-            s.src = src;
-            s.async = true;
-            s.onload = () => resolve(true);
-            s.onerror = () => resolve(false);
-            document.head.appendChild(s);
-        });
-        return this._scriptPromises[src];
+        return window.IPTV.PlaybackEngine ? window.IPTV.PlaybackEngine.loadScriptOnce(src) : Promise.resolve(false);
     },
 
     _getCandidateStrategy(rawUrl) {
-        if (!rawUrl) return '';
-        if (rawUrl.indexOf('mse-hls:') === 0) return 'mse-hls';
-        if (rawUrl.indexOf('mse-ts:') === 0) return 'mse-ts';
-        const isProxy = rawUrl.indexOf('/api/proxy') !== -1;
-        const decoded = decodeURIComponent(rawUrl);
-        if (/\.m3u8($|\?)/i.test(decoded)) return isProxy ? 'proxy-hls' : 'native-hls';
-        if (/\.(ts|mpegts)($|\?)/i.test(decoded)) return isProxy ? 'proxy-ts' : 'native-ts';
-        return isProxy ? 'proxy-raw' : 'native-raw';
+        return window.IPTV.StreamResolver ? window.IPTV.StreamResolver.getStrategy(rawUrl) : '';
     },
 
     _markCandidateSuccess(rawCandidateUrl) {
         this._clearCandidateWatchdog();
         if (rawCandidateUrl && String(rawCandidateUrl).startsWith('file:///')) {
-            if (this.app && typeof this.app.toast === 'function' && !this._localToastShown) {
+            if (window.IPTV.EventBus && !this._localToastShown) {
                 this._localToastShown = true;
-                this.app.toast('⚡ Playing from downloaded local file (Offline)', 3000);
+                window.IPTV.EventBus.toast('✓ Playing from downloaded local file (Offline)', 3000);
             }
         }
-        if (this.isLiveStream() && this.app && this.app.connection && window.IPTV.Storage && window.IPTV.Storage.saveStreamStrategy) {
+        if (this.isLiveStream() && window.IPTV.CatalogStore && window.IPTV.CatalogStore.getConnection() && window.IPTV.Storage && window.IPTV.Storage.saveStreamStrategy) {
             const strat = this._getCandidateStrategy(rawCandidateUrl);
             if (strat) {
-                window.IPTV.Storage.saveStreamStrategy(this.app.connection, strat);
+                window.IPTV.Storage.saveStreamStrategy(window.IPTV.CatalogStore.getConnection(), strat);
             }
         }
     },
 
     _buildCandidateUrls(item) {
-        const list = [];
-        const add = (u) => {
-            if (u && typeof u === 'string' && !list.includes(u)) {
-                list.push(u);
-            }
-        };
-
-        const canUseLocalProxy = (window.location.protocol.startsWith('http') && window.location.host) ||
-            (window.IPTV.TvServer && window.IPTV.TvServer.isRunning());
-        const proxyBase = (window.location.protocol.startsWith('http') && window.location.host)
-            ? `${window.location.origin}/api/proxy?url=`
-            : `http://127.0.0.1:8089/api/proxy?url=`;
-
-        const toProxy = (u) => (canUseLocalProxy && u && u.startsWith('http') && !u.includes('/api/proxy'))
-            ? `${proxyBase}${encodeURIComponent(u)}`
+        if (!window.IPTV.StreamResolver) return [];
+        const preferredStrategy = (window.IPTV.CatalogStore && window.IPTV.CatalogStore.getConnection() && window.IPTV.Storage && window.IPTV.Storage.getStreamStrategy)
+            ? window.IPTV.Storage.getStreamStrategy(window.IPTV.CatalogStore.getConnection())
             : null;
-
-        const canUseMse = typeof window.MediaSource !== 'undefined';
-
-        if (item.type === 'live') {
-            let hlsCandidate = null;
-            let tsCandidate = null;
-
-            if (item.hlsUrl) {
-                hlsCandidate = item.hlsUrl;
-            } else if (item.url && item.url.includes('.m3u8')) {
-                hlsCandidate = item.url;
-            } else if (item.url && item.url.includes('.ts')) {
-                hlsCandidate = item.url.replace(/\.ts($|\?)/i, '.m3u8$1');
-            }
-
-            if (item.url && item.url.includes('.ts')) {
-                tsCandidate = item.url;
-            } else if (item.url && item.url.includes('.m3u8')) {
-                tsCandidate = item.url.replace(/\.m3u8($|\?)/i, '.ts$1');
-            } else if (item.hlsUrl && item.hlsUrl.includes('.m3u8')) {
-                tsCandidate = item.hlsUrl.replace(/\.m3u8($|\?)/i, '.ts$1');
-            } else if (item.url) {
-                tsCandidate = item.url;
-            }
-
-            const rawCandidate = item.fallbackUrl || (item.url ? item.url.replace(/\.(ts|m3u8)($|\?)/i, '$2') : null);
-
-            // Priority 1: HLS (.m3u8) via MSE & Direct
-            if (hlsCandidate) {
-                if (canUseMse) {
-                    add(`mse-hls:${hlsCandidate}`);
-                }
-                add(hlsCandidate);
-                add(toProxy(hlsCandidate));
-            }
-            // Priority 2: MPEG-TS (.ts) via MSE & Direct
-            if (tsCandidate) {
-                if (canUseMse) {
-                    add(`mse-ts:${tsCandidate}`);
-                }
-                add(tsCandidate);
-                add(toProxy(tsCandidate));
-            }
-            // Priority 3: Extensionless stream URL
-            if (rawCandidate) {
-                add(rawCandidate);
-                add(toProxy(rawCandidate));
-            }
-
-            // Promote remembered winning strategy for this server to index 0 for < 2s channel zapping
-            const preferredStrategy = (this.app && this.app.connection && window.IPTV.Storage && window.IPTV.Storage.getStreamStrategy)
-                ? window.IPTV.Storage.getStreamStrategy(this.app.connection)
-                : null;
-            if (preferredStrategy && list.length > 1) {
-                const prefIdx = list.findIndex(u => this._getCandidateStrategy(u) === preferredStrategy);
-                if (prefIdx > 0) {
-                    const [winner] = list.splice(prefIdx, 1);
-                    list.unshift(winner);
-                }
-            }
-            return list;
-        }
-
-        // Movies & Series (VOD)
-        if (window.IPTV.DownloadManager && window.IPTV.DownloadManager.isDesktop) {
-            const downloaded = window.IPTV.DownloadManager.getDownloadedItem(item);
-            if (downloaded && downloaded.filePath) {
-                const localUrl = `file:///${downloaded.filePath.replace(/\\/g, '/')}`;
-                console.log('[PlayerService] Found local downloaded file, prioritizing local playback:', localUrl);
-                add(localUrl);
-                item._isLocalPlayback = true;
-                item._localFilePath = downloaded.filePath;
-            }
-        }
-
-        const vodUrl = item.url || item.hlsUrl || item.fallbackUrl;
-        if (vodUrl) {
-            const isM3u8Vod = /\.m3u8($|\?)/i.test(vodUrl);
-            const isTsVod = /\.(ts|mpegts)($|\?)/i.test(vodUrl);
-
-            if (isM3u8Vod && canUseMse) {
-                add(`mse-hls:${vodUrl}`);
-            } else if (isTsVod && canUseMse) {
-                add(`mse-ts:${vodUrl}`);
-            }
-            add(vodUrl);
-            if (item.url && item.url !== vodUrl) add(item.url);
-            if (item.hlsUrl && item.hlsUrl !== vodUrl) add(item.hlsUrl);
-            if (item.fallbackUrl && item.fallbackUrl !== vodUrl) add(item.fallbackUrl);
-            add(toProxy(vodUrl));
-        }
-
-        return list;
+        return window.IPTV.StreamResolver.buildCandidates(item, { preferredStrategy });
     },
 
     _clearCandidateWatchdog() {
-        if (this._candidateWatchdog) {
-            clearTimeout(this._candidateWatchdog);
-            this._candidateWatchdog = null;
-        }
+        if (window.IPTV.PlaybackEngine) window.IPTV.PlaybackEngine.clearWatchdog(this);
     },
 
     _startCandidateWatchdog(item, sessionId, timeoutMs = 8500) {
-        this._clearCandidateWatchdog();
-        this._candidateWatchdog = setTimeout(() => {
-            if (this._loadSessionId !== sessionId) return;
-            if (!this.visible || this.currentItem !== item) return;
-            const hasVideoData = this.video && (this.video.readyState >= 2 || this.video.currentTime > 0);
-            if (!hasVideoData) {
-                console.warn('[PlayerService] Candidate timed out waiting for data, trying next...');
-                this._tryNextCandidate(item, sessionId);
-            }
-        }, timeoutMs);
+        if (window.IPTV.PlaybackEngine) window.IPTV.PlaybackEngine.startWatchdog(this, item, sessionId, timeoutMs);
     },
 
     _destroyPlayers() {
-        this._clearCandidateWatchdog();
-        if (this.video) {
-            this.video.onerror = null;
-            this.video.onplaying = null;
-            this.video.onloadeddata = null;
-            this.video.oncanplay = null;
-            this.video.onended = null;
-        }
-        if (this.hls) {
-            try { this.hls.destroy(); } catch(e) {}
-            this.hls = null;
-        }
-        if (this.mpegtsPlayer) {
-            try {
-                this.mpegtsPlayer.pause();
-                this.mpegtsPlayer.unload();
-                this.mpegtsPlayer.detachMediaElement();
-                this.mpegtsPlayer.destroy();
-            } catch(e) {}
-            this.mpegtsPlayer = null;
-        }
+        if (window.IPTV.PlaybackEngine) window.IPTV.PlaybackEngine.destroy(this);
     },
 
     async _loadStreamCandidate(rawCandidateUrl, item) {
-        this._destroyPlayers();
-        if (!this.video) return;
-
-        this._loadSessionId = (this._loadSessionId || 0) + 1;
-        const currentSessionId = this._loadSessionId;
-
-        this.video.pause();
-        try {
-            this.video.removeAttribute('src');
-            this.video.load();
-        } catch(e) {}
-
-        const forceMseHls = rawCandidateUrl.indexOf('mse-hls:') === 0;
-        const forceMseTs = rawCandidateUrl.indexOf('mse-ts:') === 0;
-        const url = forceMseHls
-            ? rawCandidateUrl.slice(8)
-            : (forceMseTs ? rawCandidateUrl.slice(7) : rawCandidateUrl);
-
-        const isLive = this.isLiveStream();
-        const decodedUrl = decodeURIComponent(url);
-        const isM3u8 = forceMseHls || /\.m3u8($|\?)/i.test(decodedUrl);
-        const isTs = forceMseTs || (!isM3u8 && (/\.(ts|mpegts)($|\?)/i.test(decodedUrl) || (isLive && !/\.(mp4|mkv|avi|mov|webm)($|\?)/i.test(decodedUrl))));
-
-        console.log(`[PlayerService] Loading stream candidate [${this.currentCandidateIndex + 1}/${this.currentCandidates.length}]: ${rawCandidateUrl}`);
-
-        this._startCandidateWatchdog(item, currentSessionId, isLive ? 7000 : 12000);
-
-        // 1. HLS (.m3u8) streams via Hls.js MSE
-        if (isM3u8 && (forceMseHls || typeof window.MediaSource !== 'undefined')) {
-            if (!window.Hls) {
-                await this._loadScriptOnce('js/hls.min.js');
-                if (this._loadSessionId !== currentSessionId) return;
-            }
-            if (window.Hls && Hls.isSupported()) {
-                try {
-                    const hlsConfig = {
-                        enableWorker: false,
-                        lowLatencyMode: false,
-                        maxBufferLength: 20,
-                        maxMaxBufferLength: 40,
-                        maxBufferSize: 30 * 1000 * 1000
-                    };
-                    if (this._initialSeekPending !== null && this._initialSeekPending > 0) {
-                        hlsConfig.startPosition = this._initialSeekPending;
-                    }
-                    const hls = new Hls(hlsConfig);
-                    this.hls = hls;
-                    hls.loadSource(url);
-                    hls.attachMedia(this.video);
-
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        if (this._loadSessionId !== currentSessionId) return;
-                        this._markCandidateSuccess(rawCandidateUrl);
-                        const p = this.video.play();
-                        if (p && typeof p.catch === 'function') p.catch(() => {});
-                    });
-
-                    hls.on(Hls.Events.ERROR, (event, data) => {
-                        if (this._loadSessionId !== currentSessionId) return;
-                        if (data.fatal) {
-                            console.warn('[PlayerService] HLS fatal error:', data.type, data.details);
-                            this._tryNextCandidate(item, currentSessionId);
-                        }
-                    });
-                    return;
-                } catch(e) {
-                    console.warn('[PlayerService] Hls.js init failed, falling back to native:', e);
-                }
-            }
-        }
-
-        // 2. MPEG-TS (.ts) streams via mpegts.js MSE
-        if (isTs && (forceMseTs || typeof window.MediaSource !== 'undefined')) {
-            if (!window.mpegts) {
-                await this._loadScriptOnce('js/mpegts.js');
-                if (this._loadSessionId !== currentSessionId) return;
-            }
-            if (window.mpegts && mpegts.isSupported()) {
-                try {
-                    const player = mpegts.createPlayer({
-                        type: 'mse',
-                        isLive: isLive,
-                        url: url
-                    }, {
-                        enableWorker: false,
-                        lazyLoadMaxDuration: 30,
-                        lazyLoadRecoverDuration: 15,
-                        seekType: isLive ? 'range' : 'param'
-                    });
-                    this.mpegtsPlayer = player;
-                    player.attachMediaElement(this.video);
-                    player.load();
-                    const p = player.play();
-                    if (p && typeof p.catch === 'function') p.catch(() => {});
-
-                    const onMsePlaying = () => {
-                        if (this._loadSessionId !== currentSessionId) return;
-                        this._markCandidateSuccess(rawCandidateUrl);
-                        this.video.removeEventListener('playing', onMsePlaying);
-                        this.video.removeEventListener('loadeddata', onMsePlaying);
-                    };
-                    this.video.addEventListener('playing', onMsePlaying);
-                    this.video.addEventListener('loadeddata', onMsePlaying);
-
-                    player.on(mpegts.Events.ERROR, (errType, errDetail) => {
-                        if (this._loadSessionId !== currentSessionId) return;
-                        this.video.removeEventListener('playing', onMsePlaying);
-                        this.video.removeEventListener('loadeddata', onMsePlaying);
-                        console.warn('[PlayerService] mpegts error:', errType, errDetail);
-                        this._tryNextCandidate(item, currentSessionId);
-                    });
-                    return;
-                } catch(e) {
-                    console.warn('[PlayerService] mpegts init error:', e);
-                }
-            }
-        }
-
-        // 3. Direct native hardware video playback (MP4 / MKV VOD, or native HLS fallback)
-        this._playNativeDirect(url, item, rawCandidateUrl, currentSessionId);
+        if (window.IPTV.PlaybackEngine) return window.IPTV.PlaybackEngine.loadCandidate(this, rawCandidateUrl, item);
     },
 
     _playNativeDirect(url, item, rawCandidateUrl, sessionId) {
-        if (!this.video) return;
-
-        // Clear any old <source> tags
-        while (this.video.firstChild) {
-            this.video.removeChild(this.video.firstChild);
-        }
-
-        const onPlaying = () => {
-            if (this._loadSessionId !== sessionId) return;
-            this._markCandidateSuccess(rawCandidateUrl || url);
-            this.video.removeEventListener('playing', onPlaying);
-            this.video.removeEventListener('loadeddata', onPlaying);
-        };
-        this.video.addEventListener('playing', onPlaying);
-        this.video.addEventListener('loadeddata', onPlaying);
-
-        this.video.onerror = () => {
-            if (this._loadSessionId !== sessionId) return;
-            this.video.removeEventListener('playing', onPlaying);
-            this.video.removeEventListener('loadeddata', onPlaying);
-            this.video.onerror = null;
-            const err = this.video.error;
-            console.warn('[PlayerService] Native video error:', err ? err.code : 'unknown', 'on URL:', url);
-            this._tryNextCandidate(item, sessionId);
-        };
-
-        this.video.src = url;
-        this.video.load();
-
-        const p = this.video.play();
-        if (p && typeof p.catch === 'function') {
-            p.catch(e => {
-                console.warn('[PlayerService] Native play error:', e);
-            });
-        }
+        if (window.IPTV.PlaybackEngine) window.IPTV.PlaybackEngine.playNativeDirect(this, url, item, rawCandidateUrl, sessionId);
     },
 
     _tryNextCandidate(item, fromSessionId) {
-        if (fromSessionId !== undefined && fromSessionId !== this._loadSessionId) {
-            return;
-        }
-        if (!this.visible || this.currentItem !== item) return;
-
-        this.currentCandidateIndex++;
-        if (this.currentCandidateIndex < this.currentCandidates.length) {
-            const nextUrl = this.currentCandidates[this.currentCandidateIndex];
-            this._loadStreamCandidate(nextUrl, item);
-        } else {
-            console.error('[PlayerService] All stream candidates failed for:', item ? item.name : 'Unknown');
-            if (this.app && typeof this.app.toast === 'function') {
-                this.app.toast('Unable to play stream. Server unreachable or format unsupported.');
-            }
-        }
+        if (window.IPTV.PlaybackEngine) window.IPTV.PlaybackEngine.tryNextCandidate(this, item, fromSessionId);
     },
 
     _updatePlayPauseIcon(isPlaying) {
-        const pp = document.getElementById('osd-playpause');
-        if (!pp) return;
-        if (window.IPTV && window.IPTV.Icons) {
-            pp.innerHTML = window.IPTV.Icons.get(isPlaying ? 'pause' : 'play', 'osd-svg-icon');
-        } else {
-            pp.textContent = isPlaying ? '⏸' : '▶';
-        }
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.updatePlayPauseIcon(isPlaying);
     },
 
     playVideo() {
@@ -1194,10 +488,10 @@ window.IPTV.PlayerService = {
 
     hasValidDuration() {
         return !!(
-            this.video && 
-            this.video.duration && 
-            !isNaN(this.video.duration) && 
-            isFinite(this.video.duration) && 
+            this.video &&
+            this.video.duration &&
+            !isNaN(this.video.duration) &&
+            isFinite(this.video.duration) &&
             this.video.duration > 0 &&
             this.video.duration !== Infinity
         );
@@ -1218,27 +512,11 @@ window.IPTV.PlayerService = {
     },
 
     _osdEls() {
-        if (!this._cachedOsdEls) {
-            this._cachedOsdEls = {
-                bar: document.getElementById('osd-progress-bar'),
-                fill: document.getElementById('osd-progress-fill'),
-                thumb: document.getElementById('osd-progress-thumb'),
-                cur: document.getElementById('osd-time-current'),
-                dur: document.getElementById('osd-time-duration')
-            };
-        }
-        return this._cachedOsdEls;
+        return window.IPTV.PlayerOsd ? window.IPTV.PlayerOsd.osdEls(this) : {};
     },
 
     _updateProgressUI(currentTime, duration) {
-        if (!duration || isNaN(duration) || !isFinite(duration) || duration <= 0) return;
-        const pct = Math.max(0, Math.min(100, (currentTime / duration) * 100));
-        const els = this._osdEls();
-        if (els.fill) els.fill.style.width = `${pct}%`;
-        if (els.thumb) els.thumb.style.left = `${pct}%`;
-        if (els.cur) els.cur.textContent = this._fmtTime(currentTime);
-        if (els.dur) els.dur.textContent = this._fmtTime(duration);
-        if (els.bar) els.bar.setAttribute('aria-valuenow', Math.round(pct).toString());
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.updateProgressUI(this, currentTime, duration);
     },
 
     seekTo(targetSeconds, startPlaying = true) {
@@ -1246,16 +524,13 @@ window.IPTV.PlayerService = {
         const duration = this.video.duration;
         const clamped = Math.max(0, Math.min(duration - 0.5, targetSeconds));
 
-        // Update progress bar UI immediately
         this._updateProgressUI(clamped, duration);
         this.showOSD();
 
-        // If Hls.js is active, instruct it to load fragments from the seek point
         if (this.hls && typeof this.hls.startLoad === 'function') {
             try { this.hls.startLoad(clamped); } catch(e) {}
         }
 
-        // Perform native seek (always standard currentTime on progressive streams)
         try {
             this.video.currentTime = clamped;
         } catch(err) {
@@ -1266,7 +541,6 @@ window.IPTV.PlayerService = {
             this._userPaused = false;
         }
 
-        // Guarantee playback starts from the seeked position
         const ensurePlaying = () => {
             if (!this._userPaused) {
                 const p = this.video.play();
@@ -1277,7 +551,6 @@ window.IPTV.PlayerService = {
             }
         };
 
-        // Self-removing listener (compatible with Chromium 38 where options object is treated as useCapture)
         const onSeeked = () => {
             this.video.removeEventListener('seeked', onSeeked);
             ensurePlaying();
@@ -1285,7 +558,6 @@ window.IPTV.PlayerService = {
         };
         this.video.addEventListener('seeked', onSeeked);
 
-        // Immediate and timeout fallbacks in case seeked is delayed
         ensurePlaying();
         setTimeout(ensurePlaying, 200);
         setTimeout(ensurePlaying, 500);
@@ -1315,28 +587,7 @@ window.IPTV.PlayerService = {
     },
 
     showSeekHUD(icon, text, time) {
-        const hud = document.getElementById('seek-hud');
-        if (!hud) return;
-        const iconEl = document.getElementById('seek-hud-icon');
-        const textEl = document.getElementById('seek-hud-text');
-        const timeEl = document.getElementById('seek-hud-time');
-
-        if (iconEl) {
-            if (window.IPTV && window.IPTV.Icons) {
-                const mapped = icon === '⏩' ? 'ff' : (icon === '⏪' ? 'rw' : (icon === '▶' ? 'play' : (icon === '⏸' ? 'pause' : icon)));
-                iconEl.innerHTML = window.IPTV.Icons.get(mapped, 'hud-svg-icon');
-            } else {
-                iconEl.textContent = icon || '⏩';
-            }
-        }
-        if (textEl) textEl.textContent = text || '';
-        if (timeEl) timeEl.textContent = time || '';
-
-        hud.classList.remove('hidden');
-        clearTimeout(this.seekHudTimeout);
-        this.seekHudTimeout = setTimeout(() => {
-            hud.classList.add('hidden');
-        }, 1600);
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.showSeekHUD(this, icon, text, time);
     },
 
     isVisible() {
@@ -1344,253 +595,51 @@ window.IPTV.PlayerService = {
     },
 
     isOSDVisible() {
-        return this.osd && !this.osd.classList.contains('hidden');
+        return window.IPTV.PlayerOsd
+            ? window.IPTV.PlayerOsd.isVisible(this)
+            : !!(this.osd && !this.osd.classList.contains('hidden'));
     },
 
     showOSD() {
-        if (!this.osd) return;
-        this.osd.classList.remove('hidden');
-
-        // Update title and clock
-        const titleEl = document.getElementById('osd-channel-name');
-        if (titleEl && this.currentItem) titleEl.textContent = this.currentItem.name || '';
-
-        const clockEl = document.getElementById('osd-clock');
-        if (clockEl) {
-            const now = new Date();
-            clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        // Toggle buttons: Prev/Next for Live TV or Series, Rewind/Forward for Movies & Series
-        const isLive = this.isLiveStream();
-        const prevBtn = document.getElementById('osd-prev');
-        const nextBtn = document.getElementById('osd-next');
-        const rwBtn = document.getElementById('osd-rw');
-        const ffBtn = document.getElementById('osd-ff');
-        const channelsBtn = document.getElementById('osd-channels-btn');
-
-        if (isLive) {
-            if (channelsBtn) channelsBtn.style.display = '';
-            if (prevBtn) {
-                prevBtn.style.display = '';
-                prevBtn.title = 'Previous Channel';
-            }
-            if (nextBtn) {
-                nextBtn.style.display = '';
-                nextBtn.title = 'Next Channel';
-            }
-            if (rwBtn) rwBtn.style.display = 'none';
-            if (ffBtn) ffBtn.style.display = 'none';
-        } else if (this.currentItem && this.currentItem.type === 'series') {
-            if (channelsBtn) channelsBtn.style.display = 'none';
-            if (rwBtn) rwBtn.style.display = '';
-            if (ffBtn) ffBtn.style.display = '';
-
-            const { hasPrev, hasNext } = this._getSeriesAdjacentEpisodes();
-            if (prevBtn) {
-                prevBtn.style.display = hasPrev ? '' : 'none';
-                prevBtn.title = 'Previous Episode';
-            }
-            if (nextBtn) {
-                nextBtn.style.display = hasNext ? '' : 'none';
-                nextBtn.title = 'Next Episode';
-            }
-        } else {
-            // Movie
-            if (channelsBtn) channelsBtn.style.display = 'none';
-            if (prevBtn) prevBtn.style.display = 'none';
-            if (nextBtn) nextBtn.style.display = 'none';
-            if (rwBtn) rwBtn.style.display = '';
-            if (ffBtn) ffBtn.style.display = '';
-        }
-
-        this.updateFavoriteState();
-        this._updateProgress();
-        this.autoHideOSD();
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.show(this);
     },
 
     updateFavoriteState() {
-        const favBtn = document.getElementById('osd-fav');
-        if (!favBtn || !this.currentItem) return;
-        const isFav = this.app.isFavorite(this.currentItem);
-        favBtn.classList.toggle('active', isFav);
-        favBtn.title = isFav ? 'Remove from Favorites (Press F on remote)' : 'Add to Favorites (Press F on remote)';
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.updateFavoriteState(this);
     },
 
     hideOSD() {
-        if (this.osd) this.osd.classList.add('hidden');
-        clearTimeout(this.osdTimeout);
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.hide(this);
     },
 
     toggleOSD() {
-        if (this.isOSDVisible()) {
-            this.hideOSD();
-        } else {
-            this.showOSD();
-        }
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.toggle(this);
     },
 
     autoHideOSD() {
-        clearTimeout(this.osdTimeout);
-        if (this.isChannelDrawerOpen) return;
-        this.osdTimeout = setTimeout(() => this.hideOSD(), 4000);
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.autoHide(this);
     },
 
     showBanner(item) {
-        if (!this.banner) return;
-        const logo = document.getElementById('banner-logo');
-        if (logo) {
-            logo.src = item.logo || item.poster || '';
-            logo.style.display = (item.logo || item.poster) ? 'block' : 'none';
-        }
-
-        const nameEl = document.getElementById('banner-name');
-        if (nameEl) nameEl.textContent = item.name || '';
-
-        const progEl = document.getElementById('banner-program');
-        if (progEl) progEl.textContent = item.category || '';
-
-        this.banner.classList.remove('hidden');
-        clearTimeout(this.bannerTimeout);
-        this.bannerTimeout = setTimeout(() => this.banner.classList.add('hidden'), 3500);
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.showBanner(this, item);
     },
 
     _updateProgress() {
-        // Execute initial seek on resume when seekable ranges become ready
         this._checkPendingInitialSeek();
-
-        // Throttled watch progress save
         this._throttledSaveProgress();
-
-        if (!this.video || !this.isOSDVisible()) return;
-
-        const els = this._osdEls();
-        const bar = els.bar;
-        const fill = els.fill;
-        const thumb = els.thumb;
-        const cur = els.cur;
-        const dur = els.dur;
-
-        const isLive = this.isLiveStream();
-        if (isLive) {
-            if (fill) fill.style.width = '100%';
-            if (thumb) thumb.style.left = '100%';
-            if (cur) cur.textContent = 'LIVE';
-            if (dur) {
-                dur.innerHTML = (window.IPTV && window.IPTV.Icons)
-                    ? window.IPTV.Icons.get('liveDot', 'osd-live-svg') + '<span>LIVE</span>'
-                    : 'LIVE';
-            }
-            if (bar) {
-                bar.setAttribute('aria-valuenow', '100');
-                bar.removeAttribute('tabindex');
-            }
-            return;
-        }
-
-        // Movie or Series (VOD)
-        if (bar && !bar.hasAttribute('tabindex')) {
-            bar.setAttribute('tabindex', '0');
-        }
-
-        // Do not overwrite user preview if dragging/scrubbing
-        if (bar && bar.classList.contains('scrubbing')) {
-            return;
-        }
-
-        if (!this.canSeek()) {
-            // Still loading duration or seekable range from network
-            if (fill) fill.style.width = '0%';
-            if (thumb) thumb.style.left = '0%';
-            if (cur) cur.textContent = '00:00';
-            if (dur) dur.textContent = '--:--';
-            return;
-        }
-
-        this._updateProgressUI(this.video.currentTime || 0, this.video.duration);
+        if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.updateProgress(this);
     },
 
     _fmtTime(sec) {
-        if (isNaN(sec) || sec < 0) return '00:00';
-        const totalSec = Math.floor(sec);
-        const h = Math.floor(totalSec / 3600);
-        const m = Math.floor((totalSec % 3600) / 60);
-        const s = totalSec % 60;
-        if (h > 0 || (this.video && this.video.duration >= 3600)) {
-            return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        }
-        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        const dur = (this.video && this.video.duration) ? this.video.duration : 0;
+        return window.IPTV.PlayerOsd ? window.IPTV.PlayerOsd.fmtTime(sec, dur) : '00:00';
     },
 
     // ---- Series Adjacent Episode Navigation & Autoplay ----
     _getSeriesAdjacentEpisodes() {
-        if (!this.seriesContext || !this.seriesContext.seasonsData) {
-            return { hasPrev: false, hasNext: false };
-        }
-        const sc = this.seriesContext;
-        const seasons = sc.seasonsData;
-        const seasonKeys = Object.keys(seasons).sort((a, b) => Number(a) - Number(b));
-        if (seasonKeys.length === 0) {
-            return { hasPrev: false, hasNext: false };
-        }
-
-        // Single synthetic episode check (e.g. M3U single-episode series)
-        const totalEpisodes = seasonKeys.reduce((acc, k) => acc + (seasons[k] ? seasons[k].length : 0), 0);
-        if (totalEpisodes <= 1) {
-            return { hasPrev: false, hasNext: false };
-        }
-
-        const curSeasonStr = String(sc.currentSeason || seasonKeys[0]);
-        const curSeasonIdx = seasonKeys.indexOf(curSeasonStr);
-        const curEpisodes = seasons[curSeasonStr] || [];
-        const curEpIdx = typeof sc.currentEpisodeIndex === 'number'
-            ? sc.currentEpisodeIndex
-            : curEpisodes.findIndex(e => String(e.id) === String(sc.currentEpisodeId));
-
-        let hasPrev = false;
-        let prevSeason = null;
-        let prevIndex = -1;
-
-        if (curEpIdx > 0) {
-            hasPrev = true;
-            prevSeason = curSeasonStr;
-            prevIndex = curEpIdx - 1;
-        } else if (curSeasonIdx > 0) {
-            const prevSeasonKey = seasonKeys[curSeasonIdx - 1];
-            const prevEpisodes = seasons[prevSeasonKey] || [];
-            if (prevEpisodes.length > 0) {
-                hasPrev = true;
-                prevSeason = prevSeasonKey;
-                prevIndex = prevEpisodes.length - 1;
-            }
-        }
-
-        let hasNext = false;
-        let nextSeason = null;
-        let nextIndex = -1;
-
-        if (curEpIdx < curEpisodes.length - 1) {
-            hasNext = true;
-            nextSeason = curSeasonStr;
-            nextIndex = curEpIdx + 1;
-        } else if (curSeasonIdx >= 0 && curSeasonIdx < seasonKeys.length - 1) {
-            const nextSeasonKey = seasonKeys[curSeasonIdx + 1];
-            const nextEpisodes = seasons[nextSeasonKey] || [];
-            if (nextEpisodes.length > 0) {
-                hasNext = true;
-                nextSeason = nextSeasonKey;
-                nextIndex = 0;
-            }
-        }
-
-        return {
-            hasPrev,
-            hasNext,
-            prevSeason,
-            prevIndex,
-            nextSeason,
-            nextIndex
-        };
+        return window.IPTV.WatchProgressTracker
+            ? window.IPTV.WatchProgressTracker.getAdjacentEpisodes(this.seriesContext)
+            : { hasPrev: false, hasNext: false };
     },
 
     hasNextEpisode() {
@@ -1604,15 +653,14 @@ window.IPTV.PlayerService = {
     nextEpisode() {
         const { hasNext, nextSeason, nextIndex } = this._getSeriesAdjacentEpisodes();
         if (!hasNext || !this.app || !this.app.seriesDetailView || !this.seriesContext) {
-            this.app.toast('No next episode available');
+            window.IPTV.EventBus.toast('No next episode available');
             return;
         }
 
-        // Save progress before advancing
         this._recordWatchProgress(true);
 
         const nextPlayItem = this.app.seriesDetailView.buildEpisodePlayItem(
-            this.app.connection,
+            window.IPTV.CatalogStore.getConnection(),
             {
                 id: this.seriesContext.seriesId,
                 name: this.seriesContext.seriesName,
@@ -1626,21 +674,21 @@ window.IPTV.PlayerService = {
 
         if (nextPlayItem) {
             this.play(nextPlayItem);
-            this.app.toast(`Next: ${nextPlayItem.name}`);
+            window.IPTV.EventBus.toast(`Next: ${nextPlayItem.name}`);
         }
     },
 
     prevEpisode() {
         const { hasPrev, prevSeason, prevIndex } = this._getSeriesAdjacentEpisodes();
         if (!hasPrev || !this.app || !this.app.seriesDetailView || !this.seriesContext) {
-            this.app.toast('No previous episode available');
+            window.IPTV.EventBus.toast('No previous episode available');
             return;
         }
 
         this._recordWatchProgress();
 
         const prevPlayItem = this.app.seriesDetailView.buildEpisodePlayItem(
-            this.app.connection,
+            window.IPTV.CatalogStore.getConnection(),
             {
                 id: this.seriesContext.seriesId,
                 name: this.seriesContext.seriesName,
@@ -1654,282 +702,45 @@ window.IPTV.PlayerService = {
 
         if (prevPlayItem) {
             this.play(prevPlayItem);
-            this.app.toast(`Previous: ${prevPlayItem.name}`);
+            window.IPTV.EventBus.toast(`Previous: ${prevPlayItem.name}`);
         }
     },
 
-    // ---- In-Player Side Channel List Drawer (Live TV) ----
+    // ---- In-Player Side Channel List Drawer (delegates to ChannelDrawer) ----
     toggleChannelDrawer() {
-        if (this.isChannelDrawerOpen) {
-            this.closeChannelDrawer();
-        } else {
-            this.openChannelDrawer();
-        }
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.toggle();
     },
 
     openChannelDrawer() {
-        if (!this.isLiveStream()) return;
-        this.isChannelDrawerOpen = true;
-        this.hideOSD();
-
-        const drawer = document.getElementById('player-channel-drawer');
-        const backdrop = document.getElementById('player-drawer-backdrop');
-        if (drawer) drawer.classList.remove('hidden');
-        if (backdrop) backdrop.classList.remove('hidden');
-
-        // Always default to 'All Channels' category selected when opening
-        this.selectedDrawerCategory = null;
-
-        this.renderDrawerCategories();
-        this.renderDrawerChannels();
-
-        // Focus active playing channel and scroll into view
-        setTimeout(() => {
-            if (!drawer) return;
-            const activeCh = drawer.querySelector('.drawer-channel-item.active-playing, .drawer-channel-item');
-            if (activeCh) {
-                this._focusDrawerItem(activeCh);
-            }
-        }, 50);
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.open();
     },
 
     closeChannelDrawer() {
-        if (!this.isChannelDrawerOpen) return;
-        this.isChannelDrawerOpen = false;
-
-        const drawer = document.getElementById('player-channel-drawer');
-        const backdrop = document.getElementById('player-drawer-backdrop');
-        if (drawer) drawer.classList.add('hidden');
-        if (backdrop) backdrop.classList.add('hidden');
-
-        this.showOSD();
-        const chBtn = document.getElementById('osd-channels-btn');
-        if (chBtn) {
-            if (window.IPTV.SpatialNav) {
-                window.IPTV.SpatialNav.focusElement(chBtn);
-            } else {
-                chBtn.focus();
-            }
-        }
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.close();
     },
 
     renderDrawerCategories() {
-        const catBar = document.getElementById('drawer-categories-bar');
-        if (!catBar) return;
-        catBar.innerHTML = '';
-
-        const cats = (this.app && this.app.categories && Array.isArray(this.app.categories.live))
-            ? this.app.categories.live
-            : [];
-
-        // All Channels pill
-        const allBtn = document.createElement('button');
-        allBtn.className = `drawer-cat-btn ${!this.selectedDrawerCategory ? 'active' : ''}`;
-        allBtn.textContent = 'All Channels';
-        allBtn.tabIndex = 0;
-        allBtn.addEventListener('click', () => {
-            this.selectedDrawerCategory = null;
-            catBar.querySelectorAll('.drawer-cat-btn').forEach(b => b.classList.remove('active'));
-            allBtn.classList.add('active');
-            this.renderDrawerChannels();
-        });
-        catBar.appendChild(allBtn);
-
-        cats.forEach(cat => {
-            const catName = typeof cat === 'string' ? cat : (cat.category_name || cat.name || '');
-            if (!catName) return;
-            const btn = document.createElement('button');
-            const isActive = this.selectedDrawerCategory === catName;
-            btn.className = `drawer-cat-btn ${isActive ? 'active' : ''}`;
-            btn.textContent = catName;
-            btn.tabIndex = 0;
-            btn.addEventListener('click', () => {
-                this.selectedDrawerCategory = catName;
-                catBar.querySelectorAll('.drawer-cat-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.renderDrawerChannels();
-            });
-            catBar.appendChild(btn);
-            if (isActive) {
-                setTimeout(() => {
-                    try { btn.scrollIntoView({ inline: 'center' }); } catch(e) {}
-                }, 40);
-            }
-        });
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.renderCategories();
     },
 
     renderDrawerChannels() {
-        const listEl = document.getElementById('drawer-channel-list');
-        if (!listEl) return;
-        listEl.innerHTML = '';
-
-        const allChannels = (this.app && Array.isArray(this.app.liveChannels)) ? this.app.liveChannels : [];
-        const selCat = this.selectedDrawerCategory;
-
-        this.drawerFilteredChannels = allChannels.filter(ch => {
-            if (selCat) {
-                const chCat = ch.category || ch.category_name || '';
-                if (chCat !== selCat) return false;
-            }
-            return true;
-        });
-
-        if (this.drawerFilteredChannels.length === 0) {
-            listEl.innerHTML = '<p class="empty-state" style="padding:32px 0;">No channels in this category.</p>';
-            this.drawerRenderedCount = 0;
-            return;
-        }
-
-        this.drawerRenderedCount = 0;
-
-        // Find playing channel index in the filtered list
-        let currentIdx = -1;
-        if (this.currentItem) {
-            currentIdx = this.drawerFilteredChannels.findIndex(ch =>
-                ch.id === this.currentItem.id || (ch._idx !== undefined && ch._idx === this.currentItem._idx)
-            );
-        }
-
-        // Render initial chunk (at least 35, or up through current channel)
-        const initialChunk = Math.min(
-            this.drawerFilteredChannels.length,
-            Math.max(35, currentIdx >= 0 ? currentIdx + 15 : 35)
-        );
-
-        this._appendDrawerChannelChunk(initialChunk);
-
-        // Bind scroll listener for lazy pagination
-        if (!this._drawerScrollBound) {
-            this._drawerScrollBound = true;
-            listEl.addEventListener('scroll', () => {
-                if (listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 250) {
-                    this._appendDrawerChannelChunk(25);
-                }
-            });
-        }
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.renderChannels();
     },
 
     _appendDrawerChannelChunk(chunkSize) {
-        const listEl = document.getElementById('drawer-channel-list');
-        if (!listEl || !this.drawerFilteredChannels) return;
-
-        const start = this.drawerRenderedCount;
-        const end = Math.min(this.drawerFilteredChannels.length, start + chunkSize);
-        if (start >= end) return;
-
-        const frag = document.createDocumentFragment();
-        for (let i = start; i < end; i++) {
-            const ch = this.drawerFilteredChannels[i];
-            const itemEl = document.createElement('div');
-            const isCurrent = this.currentItem && (ch.id === this.currentItem.id || (ch._idx !== undefined && ch._idx === this.currentItem._idx));
-            itemEl.className = `drawer-channel-item ${isCurrent ? 'active-playing' : ''}`;
-            itemEl.tabIndex = 0;
-            itemEl.setAttribute('data-index', i);
-
-            const chNum = ch.num ? String(ch.num) : String(i + 1);
-            const numSpan = document.createElement('span');
-            numSpan.className = 'drawer-ch-num';
-            numSpan.textContent = chNum;
-            itemEl.appendChild(numSpan);
-
-            const nameEl = document.createElement('span');
-            nameEl.className = 'drawer-ch-name';
-            nameEl.textContent = ch.name || 'Channel';
-            itemEl.appendChild(nameEl);
-
-            if (isCurrent) {
-                const badge = document.createElement('span');
-                badge.className = 'drawer-playing-badge';
-                badge.textContent = 'PLAYING';
-                itemEl.appendChild(badge);
-            }
-
-            itemEl.addEventListener('click', () => {
-                this.closeChannelDrawer();
-                this.app.onItemClick(ch, 'live');
-            });
-
-            frag.appendChild(itemEl);
-        }
-
-        listEl.appendChild(frag);
-        this.drawerRenderedCount = end;
+        if (window.IPTV.ChannelDrawer) window.IPTV.ChannelDrawer.appendChunk(chunkSize);
     },
 
-    // ---- Watch Progress Persistence (Movies & Series) ----
+    // ---- Watch Progress Persistence (delegates to WatchProgressTracker) ----
     _recordWatchProgress(isCompleted = false) {
-        if (!this.currentItem || this.isLiveStream()) return;
-        if (!this.video) return;
-
-        const duration = this.video.duration;
-        const currentTime = this.video.currentTime || 0;
-
-        if (!duration || isNaN(duration) || duration <= 0 || !isFinite(duration)) return;
-
-        const pct = currentTime / duration;
-        const conn = this.app ? this.app.connection : null;
-        if (!conn || !window.IPTV.Storage) return;
-
-        const isSeries = this.currentItem.type === 'series';
-        const sc = isSeries ? this.currentItem.seriesContext : null;
-        const seriesId = sc ? sc.seriesId : (isSeries ? (this.currentItem.seriesId || this.currentItem.id) : null);
-        const recordId = seriesId ? `series_${seriesId}` : String(this.currentItem.id);
-
-        // Auto-cleanup / advance to next episode when >= 95% or completed
-        if (pct >= 0.95 || isCompleted) {
-            if (isSeries) {
-                const adjacent = this._getSeriesAdjacentEpisodes();
-                if (adjacent && adjacent.hasNext && adjacent.nextEpisode) {
-                    const nextEp = adjacent.nextEpisode;
-                    const nextRecord = {
-                        id: recordId,
-                        type: 'series',
-                        name: (sc && sc.seriesName) || this.currentItem.name,
-                        poster: (sc && sc.poster) || this.currentItem.logo || this.currentItem.poster || '',
-                        position: 0,
-                        duration: 0,
-                        updatedAt: Date.now(),
-                        seriesId: seriesId,
-                        seriesName: (sc && sc.seriesName) || this.currentItem.name,
-                        seasonNum: adjacent.nextSeason,
-                        episodeNum: adjacent.nextIndex + 1,
-                        episodeId: nextEp.id || nextEp.episode_num || null,
-                        episodeTitle: nextEp.title || nextEp.name || `Episode ${adjacent.nextIndex + 1}`
-                    };
-                    window.IPTV.Storage.saveWatchProgressItem(conn, nextRecord);
-                    return;
-                }
-            }
-            window.IPTV.Storage.removeWatchProgress(conn, recordId);
-            return;
-        }
-
-        // Do not record trivial scrubbing at start (< 5s)
-        if (currentTime < 5) return;
-
-        const record = {
-            id: recordId,
-            type: this.currentItem.type || 'movie',
-            name: (sc && sc.seriesName) || this.currentItem.name,
-            poster: (sc && sc.poster) || this.currentItem.logo || this.currentItem.poster || '',
-            position: Math.floor(currentTime),
-            duration: Math.floor(duration),
-            updatedAt: Date.now()
-        };
-
-        if (isSeries) {
-            record.seriesId = seriesId;
-            record.seriesName = (sc && sc.seriesName) || this.currentItem.name;
-            record.seasonNum = sc ? sc.currentSeason : (this.currentItem.seasonNum || 1);
-            record.episodeNum = sc ? sc.currentEpisodeNum : (this.currentItem.episodeNum || 1);
-            record.episodeId = sc ? sc.currentEpisodeId : (this.currentItem.episodeId || this.currentItem.id);
-            record.episodeTitle = sc ? sc.currentEpisodeTitle : (this.currentItem.episodeTitle || this.currentItem.name);
-        }
-
-        try {
-            window.IPTV.Storage.saveWatchProgressItem(conn, record);
-        } catch(err) {
-            // Failure handling: quota or write errors are caught and ignored so saving can never interrupt playback
+        if (!this.currentItem || this.isLiveStream() || !this.video) return;
+        if (window.IPTV.WatchProgressTracker) {
+            window.IPTV.WatchProgressTracker.recordProgress(
+                this.currentItem,
+                this.video.currentTime || 0,
+                this.video.duration,
+                isCompleted
+            );
         }
     },
 

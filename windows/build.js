@@ -15,6 +15,12 @@ console.log('[1/3] Preparing app bundle for Windows...');
 const srcDir = path.join(__dirname, '../IPTVPlayer');
 const appDir = path.join(__dirname, 'app');
 
+// Keep shared companion server core in sync with IPTVService/companionCore.js
+fs.copyFileSync(
+    path.join(__dirname, '../IPTVService/companionCore.js'),
+    path.join(__dirname, 'companionCore.js')
+);
+
 if (fs.existsSync(appDir)) {
     fs.rmSync(appDir, { recursive: true, force: true });
 }

@@ -1,8 +1,8 @@
 /* ============================================================
-   IPTV Player - On-TV Companion Server Launcher
-   Starts the bundled webOS JS service (com.miiptv.player.service)
-   ONLY while the QR code setup screen is displayed, and terminates
-   it immediately when leaving the QR setup screen.
+   IPTV Player - Companion Setup Server Client & Launcher
+   Manages the bundled webOS JS service (com.miiptv.player.service)
+   and HTTP communication (/api/info, /api/credentials) across
+   webOS TV, Electron Desktop, and Browser runtimes.
    ============================================================ */
 
 window.IPTV = window.IPTV || {};
@@ -12,6 +12,7 @@ window.IPTV.TvServer = {
     _promise: null,
     _request: null,
     _running: false,
+    _apiBase: null,
     info: null,
 
     isWebOS() {
@@ -71,12 +72,115 @@ window.IPTV.TvServer = {
     },
 
     /**
+     * Probes local companion HTTP server candidates and caches the active base URL + info.
+     */
+    async resolveApiBase() {
+        if (this._apiBase) return this._apiBase;
+
+        const candidates = [];
+        if (window.location && window.location.protocol && window.location.protocol.startsWith('http') &&
+            window.location.origin && window.location.origin !== 'null') {
+            candidates.push(window.location.origin);
+        }
+        candidates.push('http://127.0.0.1:8089');
+        candidates.push('http://localhost:8089');
+
+        for (let i = 0; i < candidates.length; i++) {
+            const base = candidates[i];
+            try {
+                let signal;
+                let timeoutId;
+                if (typeof AbortController !== 'undefined') {
+                    const controller = new AbortController();
+                    signal = controller.signal;
+                    timeoutId = setTimeout(() => controller.abort(), 1200);
+                }
+                const res = await fetch(`${base}/api/info`, signal ? { signal } : undefined);
+                if (timeoutId) clearTimeout(timeoutId);
+                if (res && res.ok) {
+                    this._apiBase = base;
+                    try {
+                        const data = await res.json();
+                        if (data && data.setupUrl) {
+                            this.info = data;
+                        }
+                    } catch (e) {}
+                    return base;
+                }
+            } catch (e) {}
+        }
+        return null;
+    },
+
+    /**
+     * Starts the companion server (if on webOS) and returns { setupUrl, apiBase }.
+     */
+    async getSetupInfo(isStillActive) {
+        await this.ensureStarted();
+        if (typeof isStillActive === 'function' && !isStillActive()) {
+            this.stop();
+            return null;
+        }
+
+        if (this.info && this.info.setupUrl) {
+            return { setupUrl: this.info.setupUrl, apiBase: this._apiBase || 'http://127.0.0.1:8089' };
+        }
+
+        const apiBase = await this.resolveApiBase();
+        if (typeof isStillActive === 'function' && !isStillActive()) {
+            this.stop();
+            return null;
+        }
+
+        if (this.info && this.info.setupUrl) {
+            return { setupUrl: this.info.setupUrl, apiBase };
+        }
+
+        if (apiBase) {
+            try {
+                const res = await fetch(`${apiBase}/api/info`);
+                if (res && res.ok) {
+                    const data = await res.json();
+                    if (data && data.setupUrl) {
+                        this.info = data;
+                        return { setupUrl: data.setupUrl, apiBase };
+                    }
+                }
+            } catch (e) {
+                console.warn('API info fetch error:', e);
+            }
+        }
+
+        const fallbackUrl = (window.location && window.location.protocol && window.location.protocol.startsWith('http') && window.location.host)
+            ? `${window.location.origin}/setup.html`
+            : 'http://127.0.0.1:8089/setup.html';
+
+        return { setupUrl: fallbackUrl, apiBase };
+    },
+
+    /**
+     * Polls the companion server for credentials submitted from the phone web UI.
+     */
+    async pollCredentials() {
+        const apiBase = (await this.resolveApiBase()) ||
+            ((window.location && window.location.protocol && window.location.protocol.startsWith('http')) ? '' : 'http://127.0.0.1:8089');
+        const res = await fetch(`${apiBase}/api/credentials`);
+        if (!res || !res.ok) return null;
+        const data = await res.json();
+        if (data && data.status === 'available' && data.credentials) {
+            return data.credentials;
+        }
+        return null;
+    },
+
+    /**
      * Immediately stops the HTTP server on port 8089 and cancels the Luna subscription
      * when the user leaves the QR code setup screen.
      */
     stop() {
         this._running = false;
         this._promise = null;
+        this._apiBase = null;
         this.info = null;
 
         if (this._request && typeof this._request.cancel === 'function') {

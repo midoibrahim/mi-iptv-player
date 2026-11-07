@@ -173,12 +173,11 @@ window.IPTV.Card = {
         favBtn.innerHTML = this._getIcon('favorites', 'card-fav-svg');
         favBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (window.app && window.app.toggleFavorite) {
-                window.app.toggleFavorite(item);
-                const nowFav = window.app.isFavorite(item);
-                favBtn.classList.toggle('active', nowFav);
-                card.classList.toggle('is-favorited', nowFav);
-            }
+            const store = window.IPTV.CatalogStore;
+            store.toggleFavorite(item);
+            const nowFav = store.isFavorite(item);
+            favBtn.classList.toggle('active', nowFav);
+            card.classList.toggle('is-favorited', nowFav);
         });
         card.appendChild(favBtn);
 

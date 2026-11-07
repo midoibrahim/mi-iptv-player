@@ -423,6 +423,18 @@
     pointer-events: none;
 }
 
+.ep-download-btn.downloading {
+    color: var(--accent);
+    border-color: var(--accent);
+    animation: dl-pulse 1.5s infinite ease-in-out;
+}
+
+.ep-download-btn.downloaded {
+    color: #2ed573;
+    border-color: #2ed573;
+    background: rgba(46, 213, 115, 0.2);
+}
+
 
 .dl-badge-compat {
     background: rgba(46, 213, 115, 0.15);

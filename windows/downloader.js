@@ -1,17 +1,23 @@
 // ============================================================
 // MI IPTV Player — Desktop Windows Downloader Engine
 // Background HTTP/HTTPS Streaming, Queue & Concurrency Management,
-// Nested Series/Season Folders, Directory Selection, History Persistence,
-// Windows Shell Integration & Universal TV/Receiver Remuxing (H.264 + AAC 48kHz MP4)
+// Directory Selection, History Persistence & Windows Shell Integration.
 // ============================================================
 
 const { app, dialog, shell } = require('electron');
-const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
+const {
+    ensureDir,
+    sanitizeFileName,
+    formatBytes,
+    resolveDownloadTarget,
+    serializeTask,
+    remuxToMp4
+} = require('./downloadUtils');
 
 class Downloader {
     constructor() {
@@ -23,10 +29,9 @@ class Downloader {
         this.settings = this._loadSettings();
         this.history = this._loadHistory();
 
-        this.activeDownloads = new Map(); // id -> downloadTask
+        this.activeDownloads = new Map();
         this.mainWindow = null;
 
-        // Ensure current download directory exists
         this._ensureDir(this.settings.saveDirectory);
     }
 
@@ -35,13 +40,7 @@ class Downloader {
     }
 
     _ensureDir(dirPath) {
-        try {
-            if (!fs.existsSync(dirPath)) {
-                fs.mkdirSync(dirPath, { recursive: true });
-            }
-        } catch (e) {
-            console.error('[Downloader] Failed to create directory:', dirPath, e.message);
-        }
+        ensureDir(dirPath);
     }
 
     _loadSettings() {
@@ -63,8 +62,8 @@ class Downloader {
         return {
             saveDirectory: this.defaultDownloadDir,
             askEveryTime: false,
-            autoConvertToMp4: true, // Universal TV compatibility
-            maxConcurrent: 1         // 1 parallel download by default (queue rest)
+            autoConvertToMp4: true,
+            maxConcurrent: 1
         };
     }
 
@@ -103,20 +102,11 @@ class Downloader {
     }
 
     _sanitizeFileName(name) {
-        if (!name) return 'media_' + Date.now();
-        // Remove characters forbidden in Windows file & folder names: < > : " / \ | ? * and control chars
-        let clean = name.replace(/[<>:"/\\|?*\x00-\x1F]/g, '_').replace(/\s+/g, ' ').trim();
-        if (clean.length > 160) {
-            clean = clean.substring(0, 160).trim();
-        }
-        return clean || 'media_' + Date.now();
+        return sanitizeFileName(name);
     }
 
     _formatBytes(bytes) {
-        if (!bytes || bytes <= 0) return '0 B';
-        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return (bytes / Math.pow(1024, i)).toFixed(i > 1 ? 2 : 0) + ' ' + units[i];
+        return formatBytes(bytes);
     }
 
     _sendToRenderer(channel, data) {
@@ -198,6 +188,8 @@ class Downloader {
         const activeList = Array.from(this.activeDownloads.values()).map(t => this._serializeTask(t));
 
         this.history.forEach(item => {
+            item.status = 'completed';
+            item.percent = 100;
             item.existsOnDisk = Boolean(item.filePath && fs.existsSync(item.filePath));
             item.isUniversalMp4 = Boolean(item.filePath && path.extname(item.filePath).toLowerCase() === '.mp4');
         });
@@ -211,8 +203,18 @@ class Downloader {
 
     isDownloading(urlOrId) {
         if (!urlOrId) return false;
+        const target = String(urlOrId);
+        const normTarget = target.replace(/^series_/, 'ep_');
         for (const task of this.activeDownloads.values()) {
-            if (task.id === urlOrId || task.itemId === urlOrId || task.url === urlOrId) {
+            const taskItemId = task.itemId ? String(task.itemId) : '';
+            const normTaskItemId = taskItemId.replace(/^series_/, 'ep_');
+            if (
+                task.id === target ||
+                taskItemId === target ||
+                (normTaskItemId && normTaskItemId === normTarget) ||
+                (taskItemId && taskItemId.endsWith('_' + target)) ||
+                task.url === target
+            ) {
                 return true;
             }
         }
@@ -221,21 +223,34 @@ class Downloader {
 
     isCompleted(urlOrId) {
         if (!urlOrId) return false;
-        return this.history.some(h => 
-            (h.id === urlOrId || h.itemId === urlOrId || h.url === urlOrId) && 
-            h.filePath && 
-            fs.existsSync(h.filePath)
-        );
+        const target = String(urlOrId);
+        const normTarget = target.replace(/^series_/, 'ep_');
+        return this.history.some(h => {
+            if (!h.filePath || !fs.existsSync(h.filePath)) return false;
+            const hItemId = h.itemId ? String(h.itemId) : '';
+            const normHItemId = hItemId.replace(/^series_/, 'ep_');
+            return (
+                h.id === target ||
+                hItemId === target ||
+                (normHItemId && normHItemId === normTarget) ||
+                (hItemId && hItemId.endsWith('_' + target)) ||
+                h.url === target
+            );
+        });
+    }
+
+    _runningCount() {
+        let count = 0;
+        for (const task of this.activeDownloads.values()) {
+            if (task.status === 'downloading' || task.status === 'converting') {
+                count++;
+            }
+        }
+        return count;
     }
 
     _processQueue() {
-        let runningCount = 0;
-        for (const task of this.activeDownloads.values()) {
-            if (task.status === 'downloading' || task.status === 'converting') {
-                runningCount++;
-            }
-        }
-
+        let runningCount = this._runningCount();
         const maxParallel = Math.max(1, parseInt(this.settings.maxConcurrent, 10) || 1);
         if (runningCount >= maxParallel) return;
 
@@ -252,51 +267,7 @@ class Downloader {
     }
 
     _remuxToMp4(inputPath, callback) {
-        const ext = path.extname(inputPath).toLowerCase();
-        if (ext === '.mp4') {
-            return callback(null, inputPath);
-        }
-
-        const outputPath = inputPath.replace(/\.[a-zA-Z0-9]+$/, '.mp4');
-        const args = [
-            '-y',
-            '-i', inputPath,
-            '-c:v', 'copy',
-            '-c:a', 'aac',
-            '-ar', '48000',
-            '-b:a', '128k',
-            outputPath
-        ];
-
-        console.log(`[Downloader] Remuxing to Universal MP4 (AAC 48kHz): ${path.basename(inputPath)} -> ${path.basename(outputPath)}`);
-
-        let proc;
-        try {
-            proc = spawn('ffmpeg', args, { windowsHide: true });
-        } catch (e) {
-            console.warn('[Downloader] FFmpeg spawn error:', e.message);
-            return callback(e, inputPath);
-        }
-
-        proc.on('close', (code) => {
-            if (code === 0 && fs.existsSync(outputPath)) {
-                try {
-                    const stat = fs.statSync(outputPath);
-                    if (stat.size > 1024) {
-                        try { fs.unlinkSync(inputPath); } catch (e) {}
-                        console.log(`[Downloader] Successfully converted to Universal MP4: ${path.basename(outputPath)}`);
-                        return callback(null, outputPath);
-                    }
-                } catch (e) {}
-            }
-            console.warn('[Downloader] FFmpeg remux failed with code:', code, 'keeping original file');
-            callback(new Error('Remux failed with code ' + code), inputPath);
-        });
-
-        proc.on('error', (err) => {
-            console.warn('[Downloader] FFmpeg error:', err.message, 'keeping original file');
-            callback(err, inputPath);
-        });
+        return remuxToMp4(inputPath, callback);
     }
 
     async convertItemToMp4(id) {
@@ -333,24 +304,30 @@ class Downloader {
         });
     }
 
-    /**
-     * Start a single download
-     */
     async startDownload(item, options = {}) {
         if (!item || !item.url) {
             throw new Error('Invalid download item: URL is required');
         }
 
-        if (this.isDownloading(item.url || item.id)) {
+        if (this.isDownloading(item.url) || (item.id && this.isDownloading(item.id))) {
             console.log('[Downloader] Download already active for: ' + (item.url || item.id));
             return { alreadyActive: true };
         }
 
-        const existingInHistory = this.history.find(h =>
-            (h.url === item.url || (item.id && (h.id === item.id || h.itemId === item.id))) &&
-            h.filePath &&
-            fs.existsSync(h.filePath)
-        );
+        const normItemId = item.id ? String(item.id).replace(/^series_/, 'ep_') : '';
+        const existingInHistory = this.history.find(h => {
+            if (!h.filePath || !fs.existsSync(h.filePath)) return false;
+            const hItemId = h.itemId ? String(h.itemId).replace(/^series_/, 'ep_') : '';
+            if (h.url === item.url) return true;
+            if (item.id && (h.id === item.id || h.itemId === item.id || (hItemId && hItemId === normItemId))) return true;
+            if (item.seriesName && item.season != null && item.episode != null && h.seriesName) {
+                const sameSeries = h.seriesName.trim().toLowerCase() === String(item.seriesName).trim().toLowerCase();
+                const sameSeason = String(h.season) === String(item.season);
+                const sameEp = String(h.episode) === String(item.episode);
+                if (sameSeries && sameSeason && sameEp) return true;
+            }
+            return false;
+        });
         if (existingInHistory && !options.forceRedownload) {
             console.log('[Downloader] File already downloaded on disk: ' + existingInHistory.filePath);
             return { alreadyDownloaded: true, filePath: existingInHistory.filePath, id: existingInHistory.id };
@@ -367,58 +344,11 @@ class Downloader {
         baseDir = baseDir || this.settings.saveDirectory;
         this._ensureDir(baseDir);
 
-        // Nested folder structure:
-        // For Series: <saveDirectory>/<Series Name>/Season <XX>/<Episode File>
-        let targetDir = baseDir;
-        if (item.seriesName) {
-            const cleanSeriesName = this._sanitizeFileName(item.seriesName);
-            const sNum = String(item.season || '1').padStart(2, '0');
-            const seasonFolder = `Season ${sNum}`;
-            targetDir = path.join(baseDir, cleanSeriesName, seasonFolder);
-            this._ensureDir(targetDir);
-        }
-
-        let ext = item.ext;
-        if (!ext) {
-            try {
-                const parsedUrl = new URL(item.url);
-                const match = parsedUrl.pathname.match(/\.([a-zA-Z0-9]{2,5})$/);
-                if (match) ext = match[1];
-            } catch (e) {}
-        }
-        ext = ext || 'mp4';
-
-        let baseName = options.customFileName || item.title || item.name || 'Media';
-        if (item.seriesName && (item.season != null || item.episode != null)) {
-            const sNum = String(item.season || '1').padStart(2, '0');
-            const eNum = String(item.episode || '1').padStart(2, '0');
-            baseName = `${this._sanitizeFileName(item.seriesName)} - S${sNum}E${eNum} - ${this._sanitizeFileName(item.title || 'Episode ' + eNum)}`;
-        } else {
-            baseName = this._sanitizeFileName(baseName);
-        }
-
-        let finalFileName = `${baseName}.${ext}`;
-        let targetPath = path.join(targetDir, finalFileName);
-        let counter = 1;
-        while (fs.existsSync(targetPath)) {
-            finalFileName = `${baseName} (${counter}).${ext}`;
-            targetPath = path.join(targetDir, finalFileName);
-            counter++;
-        }
-
-        const partPath = targetPath + '.part';
+        const { targetDir, finalFileName, targetPath, partPath } = resolveDownloadTarget(baseDir, item, options);
         const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
 
-        // Check active downloads against concurrency limit
-        let runningCount = 0;
-        for (const t of this.activeDownloads.values()) {
-            if (t.status === 'downloading' || t.status === 'converting') {
-                runningCount++;
-            }
-        }
-
         const maxParallel = Math.max(1, parseInt(this.settings.maxConcurrent, 10) || 1);
-        const shouldQueue = runningCount >= maxParallel;
+        const shouldQueue = this._runningCount() >= maxParallel;
 
         const task = {
             id: downloadId,
@@ -458,9 +388,6 @@ class Downloader {
         return { canceled: false, task: this._serializeTask(task) };
     }
 
-    /**
-     * Start a batch of downloads (e.g. an entire series or season)
-     */
     async startBatchDownloads(items, options = {}) {
         if (!Array.isArray(items) || items.length === 0) {
             return { canceled: false, count: 0 };
@@ -476,7 +403,14 @@ class Downloader {
 
         const added = [];
         for (const item of items) {
-            if (this.isDownloading(item.url || item.id) || this.isCompleted(item.url || item.id)) continue;
+            if (
+                this.isDownloading(item.url) ||
+                (item.id && this.isDownloading(item.id)) ||
+                this.isCompleted(item.url) ||
+                (item.id && this.isCompleted(item.id))
+            ) {
+                continue;
+            }
             const res = await this.startDownload(item, { ...options, targetDir: baseDir, skipPrompt: true });
             if (res && res.task) {
                 added.push(res.task);
@@ -488,39 +422,19 @@ class Downloader {
     }
 
     _serializeTask(task) {
-        return {
-            id: task.id,
-            itemId: task.itemId,
-            title: task.title,
-            seriesName: task.seriesName,
-            season: task.season,
-            episode: task.episode,
-            fileName: task.fileName,
-            filePath: task.filePath,
-            url: task.url,
-            poster: task.poster,
-            type: task.type,
-            status: task.status,
-            totalBytes: task.totalBytes,
-            receivedBytes: task.receivedBytes,
-            percent: task.percent,
-            speedBps: task.speedBps,
-            speedFormatted: task.speedFormatted,
-            receivedFormatted: this._formatBytes(task.receivedBytes),
-            totalFormatted: this._formatBytes(task.totalBytes),
-            error: task.error
-        };
+        return serializeTask(task);
     }
 
-    _executeDownload(task, redirectCount = 0) {
+    _executeDownload(task, redirectCount = 0, currentUrl = null) {
         if (redirectCount > 6) {
             this._handleError(task, new Error('Too many HTTP redirects'));
             return;
         }
 
+        const fetchUrl = currentUrl || task.url;
         let parsedUrl;
         try {
-            parsedUrl = new URL(task.url);
+            parsedUrl = new URL(fetchUrl);
         } catch (e) {
             this._handleError(task, new Error('Invalid download URL: ' + e.message));
             return;
@@ -536,25 +450,19 @@ class Downloader {
         let flags = 'w';
         if (task.receivedBytes > 0 && fs.existsSync(task.partPath)) {
             const stat = fs.statSync(task.partPath);
-            if (stat.size === task.receivedBytes) {
-                headers['Range'] = `bytes=${task.receivedBytes}-`;
-                flags = 'a';
-            } else {
-                task.receivedBytes = stat.size;
-                headers['Range'] = `bytes=${stat.size}-`;
-                flags = 'a';
-            }
+            task.receivedBytes = stat.size;
+            headers['Range'] = `bytes=${task.receivedBytes}-`;
+            flags = 'a';
         }
 
-        const req = protocol.get(task.url, { headers }, (res) => {
+        const req = protocol.get(fetchUrl, { headers }, (res) => {
             if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
                 let nextUrl = res.headers.location;
                 if (!nextUrl.startsWith('http')) {
-                    nextUrl = new URL(nextUrl, task.url).toString();
+                    nextUrl = new URL(nextUrl, fetchUrl).toString();
                 }
                 console.log(`[Downloader] Redirecting to: ${nextUrl}`);
-                task.url = nextUrl;
-                return this._executeDownload(task, redirectCount + 1);
+                return this._executeDownload(task, redirectCount + 1, nextUrl);
             }
 
             if (res.statusCode >= 400) {
@@ -563,11 +471,7 @@ class Downloader {
 
             const contentLength = parseInt(res.headers['content-length'], 10);
             if (!isNaN(contentLength) && contentLength > 0) {
-                if (res.statusCode === 206) {
-                    task.totalBytes = task.receivedBytes + contentLength;
-                } else {
-                    task.totalBytes = contentLength;
-                }
+                task.totalBytes = res.statusCode === 206 ? task.receivedBytes + contentLength : contentLength;
             }
 
             try {
@@ -640,6 +544,8 @@ class Downloader {
                             poster: task.poster,
                             type: task.type,
                             url: task.url,
+                            status: 'completed',
+                            percent: 100,
                             completedAt: Date.now(),
                             existsOnDisk: true,
                             isUniversalMp4: path.extname(finalPath).toLowerCase() === '.mp4'
@@ -653,7 +559,6 @@ class Downloader {
                         this._sendToRenderer('download-completed', historyItem);
                         console.log(`[Downloader] Download completed & ready: ${historyItem.fileName}`);
 
-                        // Trigger next queued download
                         this._processQueue();
                     };
 
@@ -662,7 +567,7 @@ class Downloader {
                         task.speedFormatted = 'Optimizing for TV/Receiver (MP4)...';
                         this._sendToRenderer('download-progress', this._serializeTask(task));
 
-                        this._remuxToMp4(task.filePath, (err, convertedPath) => {
+                        this._remuxToMp4(task.filePath, (_err, convertedPath) => {
                             finalizeHistory(convertedPath);
                         });
                     } else {
@@ -701,7 +606,6 @@ class Downloader {
         this.activeDownloads.delete(task.id);
         this._sendToRenderer('download-failed', serialized);
 
-        // Advance queue
         this._processQueue();
     }
 
@@ -731,15 +635,8 @@ class Downloader {
         const task = this.activeDownloads.get(id);
         if (!task || (task.status !== 'paused' && task.status !== 'queued')) return false;
 
-        let runningCount = 0;
-        for (const t of this.activeDownloads.values()) {
-            if (t.status === 'downloading' || t.status === 'converting') {
-                runningCount++;
-            }
-        }
-
         const maxParallel = Math.max(1, parseInt(this.settings.maxConcurrent, 10) || 1);
-        if (runningCount < maxParallel) {
+        if (this._runningCount() < maxParallel) {
             task.status = 'downloading';
             task.speedFormatted = 'Resuming...';
             this._sendToRenderer('download-resumed', this._serializeTask(task));
@@ -774,7 +671,6 @@ class Downloader {
         this.activeDownloads.delete(id);
         this._sendToRenderer('download-cancelled', { id });
 
-        // Advance queue to start next pending item
         this._processQueue();
         return true;
     }

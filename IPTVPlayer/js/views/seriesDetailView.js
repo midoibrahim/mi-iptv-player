@@ -17,7 +17,7 @@ window.IPTV.SeriesDetailView = {
         if (favBtn) {
             favBtn.addEventListener('click', () => {
                 if (this.currentSeries) {
-                    this.app.toggleFavorite(this.currentSeries);
+                    window.IPTV.CatalogStore.toggleFavorite(this.currentSeries);
                     this.updateFavoriteState();
                 }
             });
@@ -47,7 +47,7 @@ window.IPTV.SeriesDetailView = {
         const favBtn = document.getElementById('series-fav-btn');
         const favText = document.getElementById('series-fav-text');
         if (!favBtn || !this.currentSeries) return;
-        const isFav = this.app.isFavorite(this.currentSeries);
+        const isFav = window.IPTV.CatalogStore.isFavorite(this.currentSeries);
         favBtn.classList.toggle('active', isFav);
         if (favText) {
             favText.textContent = isFav ? 'Remove from Favorites' : 'Add to Favorites';
@@ -61,8 +61,8 @@ window.IPTV.SeriesDetailView = {
             let seasonsData = {};
             let seriesInfo = { ...item };
 
-            if (this.app.connection && this.app.connection.type === 'xtream') {
-                const resp = await window.IPTV.XtreamService.getSeriesInfo(this.app.connection, item.id);
+            if (window.IPTV.CatalogStore.getConnection() && window.IPTV.CatalogStore.getConnection().type === 'xtream') {
+                const resp = await window.IPTV.XtreamService.getSeriesInfo(window.IPTV.CatalogStore.getConnection(), item.id);
                 if (resp) {
                     if (resp.info) {
                         seriesInfo.name = resp.info.name || item.name;
@@ -95,7 +95,7 @@ window.IPTV.SeriesDetailView = {
             this.renderScreen(seriesInfo, seasonsData);
         } catch(err) {
             this.app.hideLoading();
-            this.app.toast('Failed to load series details');
+            window.IPTV.EventBus.toast('Failed to load series details');
             console.error('Series detail error:', err);
         }
     },
@@ -233,14 +233,9 @@ window.IPTV.SeriesDetailView = {
         if (!episodes || !episodes[epIndex]) return null;
         const ep = episodes[epIndex];
 
-        const base = (connection && connection.type === 'xtream')
-            ? connection.server.replace(/\/+$/, '')
-            : '';
-        let streamUrl = ep.url;
-        if (!streamUrl && connection && connection.type === 'xtream') {
-            const ext = ep.container_extension || 'mp4';
-            streamUrl = `${base}/series/${connection.user}/${connection.pass}/${ep.id}.${ext}`;
-        }
+        const streamUrl = window.IPTV.XtreamService
+            ? window.IPTV.XtreamService.resolveEpisodeUrl(connection, ep)
+            : (ep.url || '');
         if (!streamUrl) return null;
 
         const epNum = ep.episode_num || ep.episode || (epIndex + 1);
@@ -319,6 +314,8 @@ window.IPTV.SeriesDetailView = {
             card.className = 'episode-card';
             card.tabIndex = 0;
             card.dataset.episodeId = String(ep.id || '');
+            const epRecId = `ep_${seriesInfo.id}_${ep.id}`;
+            card.dataset.episodeRecordId = epRecId;
 
             const epNum = ep.episode_num || ep.episode || (epIndex + 1);
             const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
@@ -348,9 +345,13 @@ window.IPTV.SeriesDetailView = {
                 epDlBtn.title = 'Download Episode to PC';
                 epDlBtn.innerHTML = window.IPTV.Icons ? window.IPTV.Icons.get('download') : '⬇';
 
-                const epStreamUrl = ep.url;
-                const epRecId = `ep_${seriesInfo.id}_${ep.id}`;
-                if (window.IPTV.DownloadManager.isCompleted(epStreamUrl) || window.IPTV.DownloadManager.isCompleted(epRecId) || window.IPTV.DownloadManager.isCompleted(String(ep.id))) {
+                const conn = window.IPTV.CatalogStore ? window.IPTV.CatalogStore.getConnection() : null;
+                const epStreamUrl = window.IPTV.XtreamService
+                    ? window.IPTV.XtreamService.resolveEpisodeUrl(conn, ep)
+                    : (ep.url || '');
+                card.dataset.episodeUrl = epStreamUrl || '';
+                const epLookup = { id: epRecId, url: epStreamUrl, seriesName: seriesInfo.name, season: seasonNum, episode: epNum };
+                if (window.IPTV.DownloadManager.isCompleted(epLookup) || window.IPTV.DownloadManager.isCompleted(epRecId) || window.IPTV.DownloadManager.isCompleted(String(ep.id))) {
                     epDlBtn.classList.add('downloaded');
                     epDlBtn.title = 'Downloaded to PC';
                     epDlBtn.innerHTML = window.IPTV.Icons ? window.IPTV.Icons.get('check') : '✓';
@@ -389,14 +390,14 @@ window.IPTV.SeriesDetailView = {
 
             card.addEventListener('click', () => {
                 const playItem = this.buildEpisodePlayItem(
-                    this.app.connection,
+                    window.IPTV.CatalogStore.getConnection(),
                     seriesInfo,
                     this.seasonsData,
                     seasonNum,
                     epIndex
                 );
                 if (!playItem) {
-                    this.app.toast('No episode stream URL available');
+                    window.IPTV.EventBus.toast('No episode stream URL available');
                     return;
                 }
                 this.app.playerService.play(playItem);

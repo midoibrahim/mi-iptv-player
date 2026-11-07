@@ -259,6 +259,7 @@ log(`processed ${cssFiles.length} CSS files`);
     }
     const acorn = await import('acorn');
     acorn.parse(fs.readFileSync(path.join(SVC_OUT, 'service.js'), 'utf8'), { ecmaVersion: 5 });
+    acorn.parse(fs.readFileSync(path.join(SVC_OUT, 'companionCore.js'), 'utf8'), { ecmaVersion: 5 });
     log('service ->', SVC_OUT);
 }
 log('done');

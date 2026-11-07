@@ -324,7 +324,7 @@ window.IPTV.KeyHandler = {
             if (this.isPlayerActive() && this.app.playerService && this.app.playerService.currentItem) {
                 e.preventDefault();
                 e.stopPropagation();
-                this.app.toggleFavorite(this.app.playerService.currentItem);
+                window.IPTV.CatalogStore.toggleFavorite(this.app.playerService.currentItem);
                 if (this.app.playerService.updateFavoriteState) {
                     this.app.playerService.updateFavoriteState();
                 }
@@ -336,7 +336,7 @@ window.IPTV.KeyHandler = {
             if (seriesScreen && seriesScreen.classList.contains('active') && this.app.seriesDetailView && this.app.seriesDetailView.currentSeries) {
                 e.preventDefault();
                 e.stopPropagation();
-                this.app.toggleFavorite(this.app.seriesDetailView.currentSeries);
+                window.IPTV.CatalogStore.toggleFavorite(this.app.seriesDetailView.currentSeries);
                 if (this.app.seriesDetailView.updateFavoriteState) {
                     this.app.seriesDetailView.updateFavoriteState();
                 }
@@ -347,8 +347,8 @@ window.IPTV.KeyHandler = {
             if (active && active.classList.contains('card') && active._item) {
                 e.preventDefault();
                 e.stopPropagation();
-                this.app.toggleFavorite(active._item);
-                const nowFav = this.app.isFavorite(active._item);
+                window.IPTV.CatalogStore.toggleFavorite(active._item);
+                const nowFav = window.IPTV.CatalogStore.isFavorite(active._item);
                 if (active._favBtn) active._favBtn.classList.toggle('active', nowFav);
                 active.classList.toggle('is-favorited', nowFav);
                 return;
@@ -401,6 +401,10 @@ window.IPTV.KeyHandler = {
     },
 
     exitApp() {
+        if (window.IPTV.Platform) {
+            window.IPTV.Platform.exitApp();
+            return;
+        }
         if (typeof webOS !== 'undefined') {
             try {
                 webOS.platformBack();

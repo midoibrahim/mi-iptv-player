@@ -61,13 +61,13 @@ window.IPTV.SettingsView = {
         const btnChange = dlGroup.querySelector('#btn-setting-change-folder');
         if (btnChange) {
             btnChange.addEventListener('click', async () => {
-                const res = await window.electronDesktop.downloads.selectDirectory();
+                const res = await window.IPTV.Platform.downloads.selectDirectory();
                 if (!res.canceled && res.path) {
                     dm.settings.saveDirectory = res.path;
                     const pathEl = document.getElementById('setting-dl-path');
                     if (pathEl) pathEl.textContent = res.path;
                     dm._updatePathDisplay();
-                    if (this.app) this.app.toast('Downloads folder updated');
+                    window.IPTV.EventBus.toast('Downloads folder updated');
                 }
             });
         }
@@ -75,7 +75,7 @@ window.IPTV.SettingsView = {
         const btnOpen = dlGroup.querySelector('#btn-setting-open-folder');
         if (btnOpen) {
             btnOpen.addEventListener('click', () => {
-                window.electronDesktop.downloads.openFolder(dm.settings.saveDirectory);
+                window.IPTV.Platform.downloads.openFolder(dm.settings.saveDirectory);
             });
         }
 
@@ -85,9 +85,9 @@ window.IPTV.SettingsView = {
             selParallel.addEventListener('change', async (e) => {
                 const val = parseInt(e.target.value, 10) || 1;
                 dm.settings.maxConcurrent = val;
-                await window.electronDesktop.downloads.updateSettings({ maxConcurrent: val });
+                await window.IPTV.Platform.downloads.updateSettings({ maxConcurrent: val });
                 dm._updatePathDisplay();
-                if (this.app) this.app.toast(`Parallel downloads set to ${val}`);
+                window.IPTV.EventBus.toast(`Parallel downloads set to ${val}`);
             });
         }
     },
@@ -166,8 +166,8 @@ window.IPTV.SettingsView = {
             const themeSelect = document.getElementById('setting-theme');
             if (themeSelect) themeSelect.value = applied;
 
-            if (this.app && typeof this.app.toast === 'function') {
-                this.app.toast(`Theme applied: ${activeObj.name}`);
+            if (window.IPTV.EventBus) {
+                window.IPTV.EventBus.toast(`Theme applied: ${activeObj.name}`);
             }
         };
 
@@ -188,16 +188,9 @@ window.IPTV.SettingsView = {
     _bindUI() {
         if (this.disconnectBtn) {
             this.disconnectBtn.addEventListener('click', () => {
-                window.IPTV.Storage.clearConnection();
-                this.app.liveChannels = [];
-                this.app.movies = [];
-                this.app.series = [];
-                document.getElementById('main-shell').classList.remove('active');
-                document.getElementById('login-screen').classList.add('active');
-                if (this.app.loginView) {
-                    this.app.loginView.renderProfiles();
+                if (window.IPTV.EventBus) {
+                    window.IPTV.EventBus.emit('session:disconnect');
                 }
-                this.app.toast('Disconnected from server');
             });
         }
 

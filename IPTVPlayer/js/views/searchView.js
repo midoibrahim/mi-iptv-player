@@ -85,9 +85,9 @@ window.IPTV.SearchView = {
         const maxPerGroup = 36;
 
         const groups = [
-            { title: 'Live Channels', type: 'live', items: this._collectPoolMatches(this.app.liveChannels, q, maxPerGroup) },
-            { title: 'Movies',        type: 'movie', items: this._collectPoolMatches(this.app.movies, q, maxPerGroup) },
-            { title: 'Series',        type: 'series', items: this._collectPoolMatches(this.app.series, q, maxPerGroup) }
+            { title: 'Live Channels', type: 'live', items: this._collectPoolMatches(window.IPTV.CatalogStore.getLive(), q, maxPerGroup) },
+            { title: 'Movies',        type: 'movie', items: this._collectPoolMatches(window.IPTV.CatalogStore.getMovies(), q, maxPerGroup) },
+            { title: 'Series',        type: 'series', items: this._collectPoolMatches(window.IPTV.CatalogStore.getSeries(), q, maxPerGroup) }
         ].filter(g => g.items.length > 0);
 
         if (window.IPTV.Card && window.IPTV.Card.clearLazyQueue) {
@@ -134,7 +134,7 @@ window.IPTV.SearchView = {
             for (let i = 0; i < grp.items.length; i++) {
                 const item = grp.items[i];
                 const card = window.IPTV.Card.create(item, grp.type, {
-                    isFavorite: this.app.isFavorite(item),
+                    isFavorite: window.IPTV.CatalogStore.isFavorite(item),
                     onClick: (selectedItem, itemType) => this.app.onItemClick(selectedItem, itemType)
                 });
                 gridEl.appendChild(card);

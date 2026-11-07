@@ -14,10 +14,35 @@ window.IPTV.Storage = {
         VIEW_MODE: 'iptv_view_mode',
         MIGRATED: 'iptv_profiles_migrated',
         STREAM_STRATEGIES: 'iptv_stream_strategies',
-        WATCH_PROGRESS: 'iptv_watch_progress'
+        WATCH_PROGRESS: 'iptv_watch_progress',
+        THEME: 'iptv_theme'
     },
 
     // ---- Profiles ----
+    createProfile(data = {}) {
+        const type = data.type === 'm3u' ? 'm3u' : 'xtream';
+        const id = data.id || ('prof_' + Date.now());
+        if (type === 'm3u') {
+            return {
+                id,
+                name: (data.name && String(data.name).trim()) || 'M3U Playlist',
+                type: 'm3u',
+                url: String(data.url || '').trim()
+            };
+        }
+        const server = String(data.server || '').trim();
+        const defaultName = server.replace(/^https?:\/\//i, '').split('/')[0] || 'Xtream Service';
+        return {
+            id,
+            name: (data.name && String(data.name).trim()) || defaultName,
+            type: 'xtream',
+            server,
+            user: String(data.user !== undefined ? data.user : (data.username || '')).trim(),
+            pass: String(data.pass !== undefined ? data.pass : (data.password || '')).trim(),
+            url: String(data.url || '')
+        };
+    },
+
     getProfiles() {
         let profiles = [];
         try {
@@ -30,21 +55,15 @@ window.IPTV.Storage = {
         if (!alreadyMigrated && (!Array.isArray(profiles) || profiles.length === 0)) {
             const legacy = this.getConnection();
             if (legacy && (legacy.server || legacy.url)) {
-                let name = 'Saved Server';
-                if (legacy.type === 'xtream' && legacy.server) {
-                    name = legacy.server.replace(/^https?:\/\//i, '').split('/')[0] || 'Xtream Server';
-                } else if (legacy.url) {
-                    name = 'M3U Playlist';
-                }
-                const profile = {
+                const profile = this.createProfile({
                     id: 'prof_migrated_' + Date.now(),
-                    name: name,
-                    type: legacy.type || 'xtream',
+                    name: legacy.name || (legacy.type === 'xtream' && legacy.server ? '' : 'Saved Server'),
+                    type: legacy.type || (legacy.server ? 'xtream' : 'm3u'),
                     server: legacy.server || '',
                     user: legacy.user || '',
                     pass: legacy.pass || '',
                     url: legacy.url || ''
-                };
+                });
                 profiles = [profile];
                 this.saveProfiles(profiles);
             }
@@ -79,7 +98,6 @@ window.IPTV.Storage = {
     },
 
     deleteProfile(id) {
-        // Prevent auto-migration from ever re-creating deleted profile
         try {
             localStorage.setItem(this.KEYS.MIGRATED, 'true');
         } catch(e) {}
@@ -99,7 +117,6 @@ window.IPTV.Storage = {
             }
         }
 
-        // If the deleted profile matches current active connection, clear it
         const current = this.getConnection();
         if (current && target) {
             const matches = target.type === 'xtream'
@@ -208,6 +225,22 @@ window.IPTV.Storage = {
         return `m3u:${conn.url || ''}`;
     },
 
+    _deduplicateWatchProgress(list) {
+        const seenSeries = new Set();
+        const deduplicated = [];
+        const source = Array.isArray(list) ? list : [];
+        for (const item of source) {
+            const sId = item.seriesId || (item.type === 'series' ? (item.id || '').replace(/^series_/, '') : null);
+            if (sId) {
+                const norm = String(sId);
+                if (seenSeries.has(norm)) continue;
+                seenSeries.add(norm);
+            }
+            deduplicated.push(item);
+        }
+        return deduplicated.slice(0, 10);
+    },
+
     getWatchProgress(conn) {
         const connKey = this.getConnectionKey(conn);
         if (!connKey) return [];
@@ -215,21 +248,7 @@ window.IPTV.Storage = {
             const raw = localStorage.getItem(`${this.KEYS.WATCH_PROGRESS}_${connKey}`);
             if (!raw) return [];
             const list = JSON.parse(raw);
-            if (!Array.isArray(list)) return [];
-
-            // Deduplicate series so there is strictly at most ONE continue-watching entry per series
-            const seenSeries = new Set();
-            const deduplicated = [];
-            for (const item of list) {
-                const sId = item.seriesId || (item.type === 'series' ? (item.id || '').replace(/^series_/, '') : null);
-                if (sId) {
-                    const norm = String(sId);
-                    if (seenSeries.has(norm)) continue;
-                    seenSeries.add(norm);
-                }
-                deduplicated.push(item);
-            }
-            return deduplicated.slice(0, 10);
+            return this._deduplicateWatchProgress(list);
         } catch(e) {
             return [];
         }
@@ -239,20 +258,7 @@ window.IPTV.Storage = {
         const connKey = this.getConnectionKey(conn);
         if (!connKey) return;
         try {
-            // Deduplicate series and cap at 10 items, newest first
-            const seenSeries = new Set();
-            const deduplicated = [];
-            const source = Array.isArray(list) ? list : [];
-            for (const item of source) {
-                const sId = item.seriesId || (item.type === 'series' ? (item.id || '').replace(/^series_/, '') : null);
-                if (sId) {
-                    const norm = String(sId);
-                    if (seenSeries.has(norm)) continue;
-                    seenSeries.add(norm);
-                }
-                deduplicated.push(item);
-            }
-            const capped = deduplicated.slice(0, 10);
+            const capped = this._deduplicateWatchProgress(list);
             localStorage.setItem(`${this.KEYS.WATCH_PROGRESS}_${connKey}`, JSON.stringify(capped));
         } catch(e) {
             console.warn('[Storage] Failed to save watch progress (ignored):', e);
@@ -266,7 +272,6 @@ window.IPTV.Storage = {
             const isSeries = record.type === 'series' || !!record.seriesId;
             const targetSeriesId = record.seriesId || (isSeries ? String(record.id).replace(/^series_/, '') : null);
 
-            // Replace any existing episode of the exact same series or same item ID
             const idx = list.findIndex(item => {
                 if (isSeries && targetSeriesId) {
                     const itemSeriesId = item.seriesId || (item.type === 'series' ? String(item.id).replace(/^series_/, '') : null);
@@ -313,11 +318,7 @@ window.IPTV.CatalogCache = {
     _dbPromise: null,
 
     _key(conn) {
-        if (!conn) return '';
-        if (conn.type === 'xtream') {
-            return `xtream:${(conn.server || '').replace(/\/+$/, '')}:${conn.user || ''}`;
-        }
-        return `m3u:${conn.url || ''}`;
+        return window.IPTV.Storage ? window.IPTV.Storage.getConnectionKey(conn) : '';
     },
 
     _open() {
@@ -373,7 +374,6 @@ window.IPTV.CatalogCache = {
                 const tx = db.transaction(this.STORE_NAME, 'readwrite');
                 const store = tx.objectStore(this.STORE_NAME);
 
-                // Lean serialization to protect TV flash storage quota
                 const leanLive = (data.liveChannels || []).map(ch => ({
                     id: ch.id,
                     name: ch.name,

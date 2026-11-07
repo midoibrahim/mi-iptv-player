@@ -8,12 +8,7 @@ window.IPTV = window.IPTV || {};
 
 class IPTVApp {
     constructor() {
-        this.connection = null;
-        this.liveChannels = [];
-        this.movies = [];
-        this.series = [];
-        this.categories = { live: [], movies: [], series: [] };
-        this.favorites = new Set();
+        this.store = window.IPTV.CatalogStore;
         this.currentSection = 'home';
         this.currentChannelIndex = -1;
         this.sectionHistory = [];
@@ -26,16 +21,28 @@ class IPTVApp {
         this.searchView = window.IPTV.SearchView;
         this.settingsView = window.IPTV.SettingsView;
 
-        // Reusable Browse Views
+        // Reusable Browse Views & Section Lifecycle Hooks
         this.browseViews = {};
+        this.sectionHooks = {};
 
         this._init();
     }
 
     _init() {
-        // 1. Initialize Theme & Settings
+        if (window.IPTV.EventBus) {
+            window.IPTV.EventBus.on('ui:toast', ({ message, duration }) => this.toast(message, duration));
+        }
+        if (window.IPTV.EventBus) {
+            window.IPTV.EventBus.on('session:disconnect', () => this.disconnect());
+        }
+        // 1. Initialize Platform, Theme & Settings
+        if (window.IPTV.Platform) {
+            window.IPTV.Platform.init();
+        }
         window.IPTV.ThemeManager.init();
-        this.favorites = window.IPTV.Storage.getFavorites();
+        if (this.store) {
+            this.store.init();
+        }
 
         // Initialize Desktop Download Manager early so isDesktop is true for all views
         if (window.IPTV.DownloadManager) {
@@ -71,8 +78,20 @@ class IPTVApp {
             app: this
         });
 
-        // 4. Initialize Navigation & Remote Controls
+        // Register section lifecycle hooks (OCP)
+        ['live', 'movies', 'series'].forEach(sec => {
+            this.registerSectionHook(sec, () => {
+                if (this.browseViews[sec]) this.browseViews[sec].ensureRendered();
+            });
+        });
+        this.registerSectionHook('favorites', () => this.renderFavorites());
+        this.registerSectionHook('downloads', () => {
+            if (window.IPTV.DownloadManager) window.IPTV.DownloadManager._refreshData();
+        });
+
+        // 4. Initialize Navigation, BackStack & Remote Controls
         this._bindNavigation();
+        this._registerBackGuards();
         window.IPTV.KeyHandler.init(this);
 
         // 5. Initialize Login/Profiles View
@@ -101,6 +120,12 @@ class IPTVApp {
         }
     }
 
+    registerSectionHook(section, onActivate) {
+        if (section && typeof onActivate === 'function') {
+            this.sectionHooks[section] = onActivate;
+        }
+    }
+
     navigateTo(section, pushHistory = true) {
         const contentArea = document.getElementById('content-area');
         const prevSec = this.currentSection ? document.getElementById(`section-${this.currentSection}`) : null;
@@ -109,7 +134,6 @@ class IPTVApp {
         }
 
         if (pushHistory && this.currentSection && this.currentSection !== section) {
-            // Push previous section to history stack
             this.sectionHistory.push(this.currentSection);
         }
 
@@ -126,18 +150,8 @@ class IPTVApp {
         if (sec) {
             sec.classList.add('active');
 
-            // Ensure lazy-rendered browse view is populated when navigated to
-            if (this.browseViews[section]) {
-                this.browseViews[section].ensureRendered();
-            }
-
-            // If navigating to favorites, refresh favorites list
-            if (section === 'favorites') {
-                this.renderFavorites();
-            }
-
-            if (section === 'downloads' && window.IPTV.DownloadManager) {
-                window.IPTV.DownloadManager._refreshData();
+            if (typeof this.sectionHooks[section] === 'function') {
+                this.sectionHooks[section]();
             }
 
             // Restore section scroll position (or default to top)
@@ -146,7 +160,6 @@ class IPTVApp {
             }
 
             // Restore last focused item in section or focus first non-input focusable item
-            // NEVER auto-focus input elements so the TV virtual keyboard never pops up automatically
             setTimeout(() => {
                 const activeRoot = window.IPTV.SpatialNav ? window.IPTV.SpatialNav.getActiveRoot() : document.body;
                 let target = null;
@@ -169,75 +182,112 @@ class IPTVApp {
         }
     }
 
-    goBack() {
-        // -1. If Continue Watching resume modal is open, close it and restore focus
-        const cwModal = document.getElementById('continue-watching-modal');
-        if (cwModal && !cwModal.classList.contains('hidden')) {
-            if (this.homeView && typeof this.homeView.closeResumeModal === 'function') {
-                this.homeView.closeResumeModal();
-            } else {
-                cwModal.classList.add('hidden');
+    _registerBackGuards() {
+        const bs = window.IPTV.BackStack;
+        if (!bs) return;
+
+        bs.register({
+            id: 'continue-watching-modal',
+            priority: 60,
+            isActive: () => {
+                const m = document.getElementById('continue-watching-modal');
+                return Boolean(m && !m.classList.contains('hidden'));
+            },
+            onBack: () => {
+                if (this.homeView && typeof this.homeView.closeResumeModal === 'function') {
+                    this.homeView.closeResumeModal();
+                } else {
+                    const m = document.getElementById('continue-watching-modal');
+                    if (m) m.classList.add('hidden');
+                }
             }
-            return true;
-        }
+        });
 
-        // 0. If profile delete confirmation modal is open, close it and restore focus
-        const confirmModal = document.getElementById('profile-delete-modal');
-        if (confirmModal && !confirmModal.classList.contains('hidden')) {
-            if (this.loginView && typeof this.loginView.closeDeleteModal === 'function') {
-                this.loginView.closeDeleteModal();
-            } else {
-                confirmModal.classList.add('hidden');
+        bs.register({
+            id: 'profile-delete-modal',
+            priority: 50,
+            isActive: () => {
+                const m = document.getElementById('profile-delete-modal');
+                return Boolean(m && !m.classList.contains('hidden'));
+            },
+            onBack: () => {
+                if (this.loginView && typeof this.loginView.closeDeleteModal === 'function') {
+                    this.loginView.closeDeleteModal();
+                } else {
+                    const m = document.getElementById('profile-delete-modal');
+                    if (m) m.classList.add('hidden');
+                }
             }
-            return true;
-        }
+        });
 
-        // 1. If video player is visible, exit drawer or player back to the originating screen
-        const playerScreen = document.getElementById('player-screen');
-        const isPlayerOpen = (this.playerService && this.playerService.isVisible()) ||
-                             (playerScreen && playerScreen.classList.contains('active')) ||
-                             document.body.classList.contains('player-active');
-        if (isPlayerOpen) {
-            if (this.playerService && this.playerService.isChannelDrawerOpen) {
-                this.playerService.closeChannelDrawer();
-                return true;
+        bs.register({
+            id: 'player-screen',
+            priority: 40,
+            isActive: () => {
+                const playerScreen = document.getElementById('player-screen');
+                return Boolean(
+                    (this.playerService && this.playerService.isVisible()) ||
+                    (playerScreen && playerScreen.classList.contains('active')) ||
+                    document.body.classList.contains('player-active')
+                );
+            },
+            onBack: () => {
+                if (this.playerService && this.playerService.isChannelDrawerOpen) {
+                    this.playerService.closeChannelDrawer();
+                    return;
+                }
+                if (this.playerService) {
+                    this.playerService.close();
+                } else {
+                    const playerScreen = document.getElementById('player-screen');
+                    if (playerScreen) playerScreen.classList.remove('active');
+                    document.body.classList.remove('player-active');
+                }
             }
-            if (this.playerService) {
-                this.playerService.close();
-            } else {
-                if (playerScreen) playerScreen.classList.remove('active');
-                document.body.classList.remove('player-active');
+        });
+
+        bs.register({
+            id: 'series-detail-screen',
+            priority: 30,
+            isActive: () => {
+                const s = document.getElementById('series-detail-screen');
+                return Boolean(s && s.classList.contains('active'));
+            },
+            onBack: () => {
+                this.seriesDetailView.close();
             }
-            return true;
-        }
+        });
 
-        // 2. If series detail screen is active, close series detail back to browsing
-        const seriesScreen = document.getElementById('series-detail-screen');
-        if (seriesScreen && seriesScreen.classList.contains('active')) {
-            this.seriesDetailView.close();
-            return true;
-        }
+        bs.register({
+            id: 'login-form-page',
+            priority: 20,
+            isActive: () => {
+                const f = document.getElementById('login-form-page');
+                return Boolean(f && f.classList.contains('active'));
+            },
+            onBack: () => {
+                this.loginView.showProfilesPage();
+            }
+        });
 
-        // 3. If login form page is active, go back to saved profiles
-        const formPage = document.getElementById('login-form-page');
-        if (formPage && formPage.classList.contains('active')) {
-            this.loginView.showProfilesPage();
-            return true;
-        }
-
-        // 4. Any page/section other than home in main-shell returns directly to home
-        const mainShell = document.getElementById('main-shell');
-        if (mainShell && mainShell.classList.contains('active')) {
-            if (this.currentSection !== 'home') {
-                this.sectionHistory = [];
-                this.navigateTo('home', false);
-                return true;
-            } else {
-                // If already at Home screen: return to saved playlist profiles
+        bs.register({
+            id: 'main-shell',
+            priority: 10,
+            isActive: () => {
+                const m = document.getElementById('main-shell');
+                return Boolean(m && m.classList.contains('active'));
+            },
+            onBack: () => {
+                if (this.currentSection !== 'home') {
+                    this.sectionHistory = [];
+                    this.navigateTo('home', false);
+                    return;
+                }
                 if (this.loginView) {
                     this.loginView.showProfilesPage();
                 }
-                mainShell.classList.remove('active');
+                const mainShell = document.getElementById('main-shell');
+                if (mainShell) mainShell.classList.remove('active');
                 const loginScreen = document.getElementById('login-screen');
                 if (loginScreen) {
                     loginScreen.classList.add('active');
@@ -246,20 +296,31 @@ class IPTVApp {
                         if (first) first.focus();
                     }, 100);
                 }
-                return true;
             }
-        }
+        });
+    }
 
-        // 5. At login screen profiles (root level): Exit app
+    goBack() {
+        if (window.IPTV.BackStack && window.IPTV.BackStack.handleBack()) {
+            return true;
+        }
         window.IPTV.KeyHandler.exitApp();
         return false;
     }
 
+    disconnect() {
+        window.IPTV.Storage.clearConnection();
+        this.store.clear();
+        const mainShell = document.getElementById('main-shell');
+        const loginScreen = document.getElementById('login-screen');
+        if (mainShell) mainShell.classList.remove('active');
+        if (loginScreen) loginScreen.classList.add('active');
+        if (this.loginView) this.loginView.renderProfiles();
+        this.toast('Disconnected from server');
+    }
+
     _applyCatalogData(conn, data, navigateHome = true) {
-        this.liveChannels = data.liveChannels || [];
-        this.movies = data.movies || [];
-        this.series = data.series || [];
-        this.categories = data.categories || { live: [], movies: [], series: [] };
+        this.store.setCatalog(conn, data);
 
         const navUser = document.getElementById('nav-user-info');
         if (navUser) {
@@ -271,15 +332,20 @@ class IPTVApp {
         document.getElementById('main-shell').classList.add('active');
 
         // Populate Sub-views
-        this.homeView.render(this.liveChannels, this.movies, this.series);
-        this.browseViews.live.setData(this.liveChannels, this.categories.live);
-        this.browseViews.movies.setData(this.movies, this.categories.movies);
-        this.browseViews.series.setData(this.series, this.categories.series);
+        this.homeView.render(this.store.getLive(), this.store.getMovies(), this.store.getSeries());
+        this._refreshBrowseViews();
         this.settingsView.updateInfo(conn);
 
         if (navigateHome) {
             this.navigateTo('home');
         }
+    }
+
+    _refreshBrowseViews() {
+        const cats = this.store.getCategories();
+        this.browseViews.live.setData(this.store.getLive(), cats.live);
+        this.browseViews.movies.setData(this.store.getMovies(), cats.movies);
+        this.browseViews.series.setData(this.store.getSeries(), cats.series);
     }
 
     async _fetchCatalogFromNetwork(conn, onProgress) {
@@ -294,7 +360,7 @@ class IPTVApp {
         if (this.loginView && typeof this.loginView.stopRemotePolling === 'function') {
             this.loginView.stopRemotePolling();
         }
-        this.connection = conn;
+        this.store.setConnection(conn);
         this.showLoading('Connecting...');
 
         try {
@@ -313,17 +379,12 @@ class IPTVApp {
 
                 // Silently revalidate in the background without blocking UI
                 this._fetchCatalogFromNetwork(conn, null).then((freshData) => {
-                    if (this.connection !== conn || !freshData) return;
+                    if (this.store.getConnection() !== conn || !freshData) return;
                     if (window.IPTV.CatalogCache) {
                         window.IPTV.CatalogCache.set(conn, freshData);
                     }
-                    this.liveChannels = freshData.liveChannels || [];
-                    this.movies = freshData.movies || [];
-                    this.series = freshData.series || [];
-                    this.categories = freshData.categories || { live: [], movies: [], series: [] };
-                    this.browseViews.live.setData(this.liveChannels, this.categories.live);
-                    this.browseViews.movies.setData(this.movies, this.categories.movies);
-                    this.browseViews.series.setData(this.series, this.categories.series);
+                    this.store.setCatalog(conn, freshData);
+                    this._refreshBrowseViews();
                 }).catch((bgErr) => {
                     console.warn('Background catalog refresh skipped:', bgErr);
                 });
@@ -367,15 +428,16 @@ class IPTVApp {
         item.type = 'live';
         if (typeof item._idx === 'number') {
             this.currentChannelIndex = item._idx;
-        } else if (this.liveChannels && this.liveChannels.length > 0) {
-            const idx = this.liveChannels.findIndex(c => c === item || c.id === item.id);
+        } else {
+            const idx = this.store.getLive().findIndex(c => c === item || c.id === item.id);
             if (idx >= 0) this.currentChannelIndex = idx;
         }
         this.playerService.play(item);
     }
 
-    prevChannel() {
-        if (!this.liveChannels || this.liveChannels.length === 0) return;
+    _stepChannel(delta) {
+        const channels = this.store.getLive();
+        if (channels.length === 0) return;
         // Do NOT switch live channels if playing a movie or series
         if (this.playerService && this.playerService.currentItem && this.playerService.currentItem.type !== 'live') {
             return;
@@ -384,76 +446,33 @@ class IPTVApp {
             const cur = this.playerService.currentItem;
             this.currentChannelIndex = (typeof cur._idx === 'number')
                 ? cur._idx
-                : this.liveChannels.findIndex(c => c === cur || (c.type === 'live' && c.id === cur.id));
+                : channels.findIndex(c => c === cur || (c.type === 'live' && c.id === cur.id));
         }
-        if (this.currentChannelIndex <= 0) {
-            this.currentChannelIndex = this.liveChannels.length - 1;
+        const len = channels.length;
+        if (delta < 0) {
+            this.currentChannelIndex = this.currentChannelIndex <= 0 ? len - 1 : this.currentChannelIndex - 1;
         } else {
-            this.currentChannelIndex--;
+            this.currentChannelIndex = (this.currentChannelIndex < 0 || this.currentChannelIndex >= len - 1) ? 0 : this.currentChannelIndex + 1;
         }
-        const item = this.liveChannels[this.currentChannelIndex];
+        const item = channels[this.currentChannelIndex];
         if (item && this.playerService) this.playerService.play(item);
+    }
+
+    prevChannel() {
+        this._stepChannel(-1);
     }
 
     nextChannel() {
-        if (!this.liveChannels || this.liveChannels.length === 0) return;
-        // Do NOT switch live channels if playing a movie or series
-        if (this.playerService && this.playerService.currentItem && this.playerService.currentItem.type !== 'live') {
-            return;
-        }
-        if (this.currentChannelIndex < 0 && this.playerService && this.playerService.currentItem) {
-            const cur = this.playerService.currentItem;
-            this.currentChannelIndex = (typeof cur._idx === 'number')
-                ? cur._idx
-                : this.liveChannels.findIndex(c => c === cur || (c.type === 'live' && c.id === cur.id));
-        }
-        if (this.currentChannelIndex < 0 || this.currentChannelIndex >= this.liveChannels.length - 1) {
-            this.currentChannelIndex = 0;
-        } else {
-            this.currentChannelIndex++;
-        }
-        const item = this.liveChannels[this.currentChannelIndex];
-        if (item && this.playerService) this.playerService.play(item);
+        this._stepChannel(1);
     }
 
 
-    // ---- Favorites Management ----
-    _favKey(item) {
-        if (!item) return '';
-        if (typeof item === 'string' || typeof item === 'number') return String(item);
-        const t = item.type || 'live';
-        return `${t}:${item.id}`;
-    }
-
-    isFavorite(itemOrId) {
-        if (!itemOrId) return false;
-        if (typeof itemOrId === 'object') {
-            return this.favorites.has(this._favKey(itemOrId)) || this.favorites.has(String(itemOrId.id));
-        }
-        return this.favorites.has(String(itemOrId));
-    }
-
-    toggleFavorite(item) {
-        if (!item) return;
-        const key = this._favKey(item);
-        const rawId = String(item.id);
-        if (this.favorites.has(key) || this.favorites.has(rawId)) {
-            this.favorites.delete(key);
-            this.favorites.delete(rawId);
-            this.toast('Removed from favorites');
-        } else {
-            this.favorites.add(key);
-            this.toast('Added to favorites');
-        }
-        window.IPTV.Storage.saveFavorites(this.favorites);
-    }
-
+    // ---- Favorites ----
     renderFavorites() {
         const container = document.getElementById('favorites-content');
         if (!container) return;
 
-        const allItems = [...this.liveChannels, ...this.movies, ...this.series];
-        const favItems = allItems.filter(i => this.isFavorite(i));
+        const favItems = this.store.getFavoriteItems();
 
         container.innerHTML = '';
         if (favItems.length === 0) {

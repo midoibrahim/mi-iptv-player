@@ -1,7 +1,7 @@
 /* ============================================================
    IPTV Player — Download Manager Component (Windows Desktop)
-   Integrates with Electron backend for background downloading,
-   folder selection, real-time progress, and media management.
+   Renders the Downloads section, active/completed cards, and
+   delegates state & payload construction to DownloadStore.
    Gracefully deactivated on Smart TVs (webOS/Tizen).
    ============================================================ */
 
@@ -9,20 +9,34 @@ window.IPTV = window.IPTV || {};
 
 window.IPTV.DownloadManager = {
     app: null,
-    isDesktop: Boolean(typeof window !== 'undefined' && window.electronDesktop && window.electronDesktop.downloads),
-    activeTasks: new Map(), // id -> task
-    history: [],
-    settings: {
-        saveDirectory: '',
-        askEveryTime: false
-    },
+    isDesktop: Boolean(typeof window !== 'undefined' && window.electronDesktop && window.IPTV.Platform && window.IPTV.Platform.downloads),
     sectionEl: null,
     badgeEl: null,
 
+    get store() {
+        return window.IPTV.DownloadStore;
+    },
+    get activeTasks() {
+        return this.store ? this.store.activeTasks : (this._fallbackActive || (this._fallbackActive = new Map()));
+    },
+    get history() {
+        return this.store ? this.store.history : (this._fallbackHistory || []);
+    },
+    set history(v) {
+        if (this.store) this.store.history = v;
+        else this._fallbackHistory = v;
+    },
+    get settings() {
+        return this.store ? this.store.settings : (this._fallbackSettings || { saveDirectory: '', askEveryTime: false });
+    },
+    set settings(v) {
+        if (this.store) this.store.settings = v;
+        else this._fallbackSettings = v;
+    },
+
     init(app) {
         this.app = app;
-        // Verify Electron Desktop Download API is available
-        if (!window.electronDesktop || !window.electronDesktop.downloads) {
+        if (!(window.IPTV.Platform ? window.IPTV.Platform.hasDownloads() : (window.electronDesktop && window.IPTV.Platform.downloads))) {
             this.isDesktop = false;
             return;
         }
@@ -100,6 +114,14 @@ window.IPTV.DownloadManager = {
                     </div>
                     <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                         <label class="downloads-checkbox-label">
+                            <span>Parallel downloads:</span>
+                            <select id="dl-select-parallel" class="dl-select" tabindex="0">
+                                <option value="1">1 (Sequential)</option>
+                                <option value="2">2 Simultaneous</option>
+                                <option value="3">3 Simultaneous</option>
+                            </select>
+                        </label>
+                        <label class="downloads-checkbox-label">
                             <input type="checkbox" id="dl-check-auto-mp4" tabindex="0">
                             <span title="Automatically copies video to MP4 and converts audio to AAC 48kHz for older receivers & TVs">Universal TV Compatibility (MP4 + AAC 48kHz)</span>
                         </label>
@@ -111,19 +133,16 @@ window.IPTV.DownloadManager = {
                 </div>
 
                 <div class="downloads-content">
-                    <!-- Active Downloads Group -->
                     <div class="downloads-group" id="dl-active-group">
                         <h3 class="downloads-group-title">Active Downloads</h3>
                         <div class="downloads-list" id="dl-active-list"></div>
                     </div>
 
-                    <!-- Completed Downloads Group -->
                     <div class="downloads-group" id="dl-completed-group">
                         <h3 class="downloads-group-title">Completed</h3>
                         <div class="downloads-list" id="dl-completed-list"></div>
                     </div>
 
-                    <!-- Empty State -->
                     <div class="downloads-empty hidden" id="dl-empty-state">
                         <div class="downloads-empty-icon">${window.IPTV.Icons ? window.IPTV.Icons.get('download') : '⬇'}</div>
                         <h3>No Downloads Yet</h3>
@@ -144,11 +163,11 @@ window.IPTV.DownloadManager = {
         const btnChangeFolder = this.sectionEl.querySelector('#dl-btn-change-folder');
         if (btnChangeFolder) {
             btnChangeFolder.addEventListener('click', async () => {
-                const res = await window.electronDesktop.downloads.selectDirectory();
+                const res = await window.IPTV.Platform.downloads.selectDirectory();
                 if (!res.canceled && res.path) {
                     this.settings.saveDirectory = res.path;
                     this._updatePathDisplay();
-                    if (this.app) this.app.toast('Downloads folder updated');
+                    window.IPTV.EventBus.toast('Downloads folder updated');
                 }
             });
         }
@@ -156,17 +175,17 @@ window.IPTV.DownloadManager = {
         const btnOpenFolder = this.sectionEl.querySelector('#dl-btn-open-folder');
         if (btnOpenFolder) {
             btnOpenFolder.addEventListener('click', () => {
-                window.electronDesktop.downloads.openFolder(this.settings.saveDirectory);
+                window.IPTV.Platform.downloads.openFolder(this.settings.saveDirectory);
             });
         }
 
         const btnClear = this.sectionEl.querySelector('#dl-btn-clear-history');
         if (btnClear) {
             btnClear.addEventListener('click', async () => {
-                await window.electronDesktop.downloads.clearHistory();
+                await window.IPTV.Platform.downloads.clearHistory();
                 this.history = [];
                 this._render();
-                if (this.app) this.app.toast('Download history cleared');
+                window.IPTV.EventBus.toast('Download history cleared');
             });
         }
 
@@ -175,8 +194,8 @@ window.IPTV.DownloadManager = {
             checkAutoMp4.addEventListener('change', async (e) => {
                 const val = Boolean(e.target.checked);
                 this.settings.autoConvertToMp4 = val;
-                await window.electronDesktop.downloads.updateSettings({ autoConvertToMp4: val });
-                if (this.app) this.app.toast(val ? 'Universal TV Compatibility enabled (MP4 + AAC 48kHz)' : 'Universal TV Compatibility disabled');
+                await window.IPTV.Platform.downloads.updateSettings({ autoConvertToMp4: val });
+                window.IPTV.EventBus.toast(val ? 'Universal TV Compatibility enabled (MP4 + AAC 48kHz)' : 'Universal TV Compatibility disabled');
             });
         }
 
@@ -185,8 +204,8 @@ window.IPTV.DownloadManager = {
             selectParallel.addEventListener('change', async (e) => {
                 const val = parseInt(e.target.value, 10) || 1;
                 this.settings.maxConcurrent = val;
-                await window.electronDesktop.downloads.updateSettings({ maxConcurrent: val });
-                if (this.app) this.app.toast(`Parallel downloads set to ${val}`);
+                await window.IPTV.Platform.downloads.updateSettings({ maxConcurrent: val });
+                window.IPTV.EventBus.toast(`Parallel downloads set to ${val}`);
             });
         }
 
@@ -195,20 +214,20 @@ window.IPTV.DownloadManager = {
             checkAsk.addEventListener('change', async (e) => {
                 const val = Boolean(e.target.checked);
                 this.settings.askEveryTime = val;
-                await window.electronDesktop.downloads.updateSettings({ askEveryTime: val });
+                await window.IPTV.Platform.downloads.updateSettings({ askEveryTime: val });
             });
         }
     },
 
     _bindEvents() {
-        const api = window.electronDesktop.downloads;
+        const api = window.IPTV.Platform.downloads;
         if (!api) return;
 
         api.onStarted((task) => {
             this.activeTasks.set(task.id, task);
             this._updateBadge();
             this._render();
-            if (this.app) this.app.toast(`Downloading: ${task.title}`);
+            window.IPTV.EventBus.toast(`Downloading: ${task.title}`);
         });
 
         api.onProgress((task) => {
@@ -222,14 +241,14 @@ window.IPTV.DownloadManager = {
             this._updateBadge();
             this._render();
             this._refreshVisibleCardStates();
-            if (this.app) this.app.toast(`Download complete: ${historyItem.title}`);
+            window.IPTV.EventBus.toast(`Download complete: ${historyItem.title}`);
         });
 
         api.onFailed((task) => {
             this.activeTasks.delete(task.id);
             this._updateBadge();
             this._render();
-            if (this.app) this.app.toast(`Download failed: ${task.title} (${task.error || 'Network error'})`);
+            window.IPTV.EventBus.toast(`Download failed: ${task.title} (${task.error || 'Network error'})`);
         });
 
         api.onPaused((task) => {
@@ -258,14 +277,9 @@ window.IPTV.DownloadManager = {
     async _refreshData() {
         if (!this.isDesktop) return;
         try {
-            const data = await window.electronDesktop.downloads.getAll();
-            if (data) {
-                this.settings = data.settings || this.settings;
-                this.history = data.history || [];
-                this.activeTasks.clear();
-                if (Array.isArray(data.active)) {
-                    data.active.forEach(t => this.activeTasks.set(t.id, t));
-                }
+            const data = await window.IPTV.Platform.downloads.getAll();
+            if (this.store) {
+                this.store.applySnapshot(data);
             }
             this._updatePathDisplay();
             this._updateBadge();
@@ -327,7 +341,6 @@ window.IPTV.DownloadManager = {
         completedGroup.style.display = hasCompleted ? 'block' : 'none';
         emptyState.classList.toggle('hidden', hasActive || hasCompleted);
 
-        // Render Active List
         if (activeList) {
             activeList.innerHTML = '';
             activeArray.forEach(task => {
@@ -335,7 +348,6 @@ window.IPTV.DownloadManager = {
             });
         }
 
-        // Render Completed List
         if (completedList) {
             completedList.innerHTML = '';
             this.history.forEach(item => {
@@ -401,16 +413,16 @@ window.IPTV.DownloadManager = {
         pauseBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (task.status === 'paused') {
-                window.electronDesktop.downloads.resume(task.id);
+                window.IPTV.Platform.downloads.resume(task.id);
             } else {
-                window.electronDesktop.downloads.pause(task.id);
+                window.IPTV.Platform.downloads.pause(task.id);
             }
         });
 
         const cancelBtn = card.querySelector('.dl-btn-cancel');
         cancelBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            window.electronDesktop.downloads.cancel(task.id);
+            window.IPTV.Platform.downloads.cancel(task.id);
         });
 
         return card;
@@ -466,7 +478,6 @@ window.IPTV.DownloadManager = {
             playBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (this.app && this.app.playerService) {
-                    // Play in the app player using local file path
                     this.app.playerService.play({
                         id: item.itemId || item.id,
                         name: item.title,
@@ -475,7 +486,7 @@ window.IPTV.DownloadManager = {
                         logo: item.poster
                     });
                 } else {
-                    window.electronDesktop.downloads.openFile(item.filePath);
+                    window.IPTV.Platform.downloads.openFile(item.filePath);
                 }
             });
         }
@@ -484,7 +495,7 @@ window.IPTV.DownloadManager = {
         if (showBtn) {
             showBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                window.electronDesktop.downloads.showInFolder(item.filePath);
+                window.IPTV.Platform.downloads.showInFolder(item.filePath);
             });
         }
 
@@ -494,12 +505,12 @@ window.IPTV.DownloadManager = {
                 e.stopPropagation();
                 convertBtn.textContent = 'Converting...';
                 convertBtn.disabled = true;
-                if (this.app) this.app.toast('Remuxing to Universal MP4 (AAC 48kHz)...');
-                const res = await window.electronDesktop.downloads.convertToMp4(item.id);
+                window.IPTV.EventBus.toast('Remuxing to Universal MP4 (AAC 48kHz)...');
+                const res = await window.IPTV.Platform.downloads.convertToMp4(item.id);
                 if (res && res.success) {
-                    if (this.app) this.app.toast('Successfully converted to Universal TV MP4!');
+                    window.IPTV.EventBus.toast('Successfully converted to Universal TV MP4!');
                 } else {
-                    if (this.app) this.app.toast('Conversion failed: ' + (res ? res.error : 'Unknown error'));
+                    window.IPTV.EventBus.toast('Conversion failed: ' + (res ? res.error : 'Unknown error'));
                     convertBtn.textContent = 'Convert to TV MP4';
                     convertBtn.disabled = false;
                 }
@@ -510,8 +521,8 @@ window.IPTV.DownloadManager = {
         if (deleteBtn) {
             deleteBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                await window.electronDesktop.downloads.deleteFile(item.id);
-                if (this.app) this.app.toast('Download deleted');
+                await window.IPTV.Platform.downloads.deleteFile(item.id);
+                window.IPTV.EventBus.toast('Download deleted');
             });
         }
 
@@ -549,51 +560,12 @@ window.IPTV.DownloadManager = {
     },
 
     isDownloading(urlOrId) {
-        if (!urlOrId) return false;
-        for (const task of this.activeTasks.values()) {
-            if (task.id === urlOrId || task.itemId === urlOrId || task.url === urlOrId) {
-                return true;
-            }
-        }
-        return false;
+        return this.store ? this.store.isDownloading(urlOrId) : false;
     },
 
     getDownloadedItem(target) {
-        if (!this.isDesktop || !target) return null;
-        if (typeof target === 'string') {
-            return this.history.find(h =>
-                (h.status === 'completed' || h.percent === 100) &&
-                h.existsOnDisk &&
-                (h.id === target || h.itemId === target || h.url === target || h.filePath === target)
-            ) || null;
-        }
-
-        const targetUrl = target.url || target.hlsUrl;
-        const targetId = target.id;
-        const targetItemId = target.itemId;
-        const targetSeriesContext = target.seriesContext;
-
-        return this.history.find(h => {
-            if ((h.status !== 'completed' && h.percent !== 100) || !h.existsOnDisk || !h.filePath) return false;
-
-            // 1. Exact URL match
-            if (targetUrl && h.url === targetUrl) return true;
-
-            // 2. Exact ID or ItemId match
-            if (targetId && (h.id === targetId || h.itemId === targetId)) return true;
-            if (targetItemId && (h.id === targetItemId || h.itemId === targetItemId)) return true;
-
-            // 3. Series episode match by series name + season + episode
-            if (targetSeriesContext && h.type === 'series') {
-                const sameSeries = h.seriesName && targetSeriesContext.seriesName &&
-                    h.seriesName.trim().toLowerCase() === targetSeriesContext.seriesName.trim().toLowerCase();
-                const sameSeason = String(h.seasonNum || h.season) === String(targetSeriesContext.currentSeason);
-                const sameEp = String(h.episodeNum || h.episode) === String(targetSeriesContext.currentEpisodeNum || (targetSeriesContext.currentEpisodeIndex + 1));
-                if (sameSeries && sameSeason && sameEp) return true;
-            }
-
-            return false;
-        }) || null;
+        if (!this.isDesktop) return null;
+        return this.store ? this.store.getDownloadedItem(target) : null;
     },
 
     isCompleted(target) {
@@ -622,41 +594,53 @@ window.IPTV.DownloadManager = {
         document.querySelectorAll('.episode-card').forEach(card => {
             const epBtn = card.querySelector('.ep-download-btn');
             const epId = card.dataset.episodeId;
-            if (epBtn && epId) {
-                if (this.isCompleted(epId)) {
+            const epRecId = card.dataset.episodeRecordId;
+            const epUrl = card.dataset.episodeUrl;
+            if (epBtn && (epId || epRecId || epUrl)) {
+                const isDone = (epRecId && this.isCompleted(epRecId)) ||
+                    (epUrl && this.isCompleted(epUrl)) ||
+                    (epId && this.isCompleted(epId));
+                const isActive = (epRecId && this.isDownloading(epRecId)) ||
+                    (epUrl && this.isDownloading(epUrl)) ||
+                    (epId && this.isDownloading(epId));
+                if (isDone) {
                     epBtn.classList.remove('downloading');
                     epBtn.classList.add('downloaded');
                     epBtn.title = 'Downloaded to PC';
                     if (window.IPTV.Icons) epBtn.innerHTML = window.IPTV.Icons.get('check');
+                } else if (isActive) {
+                    epBtn.classList.add('downloading');
+                    epBtn.classList.remove('downloaded');
+                    epBtn.title = 'Downloading...';
+                } else {
+                    epBtn.classList.remove('downloading', 'downloaded');
+                    epBtn.title = 'Download Episode to PC';
+                    if (window.IPTV.Icons) epBtn.innerHTML = window.IPTV.Icons.get('download');
                 }
             }
         });
     },
 
-    /**
-     * Download a Movie
-     */
     async downloadMovie(movieItem) {
         if (!this.isDesktop) return;
         if (!movieItem || !movieItem.url) {
-            if (this.app) this.app.toast('Unable to download: Stream URL unavailable');
+            window.IPTV.EventBus.toast('Unable to download: Stream URL unavailable');
             return;
         }
 
         if (this.isDownloading(movieItem.url) || this.isDownloading(movieItem.id)) {
-            if (this.app) this.app.toast('Already downloading this movie');
+            window.IPTV.EventBus.toast('Already downloading this movie');
             return;
         }
 
-        const downloadedMovie = this.getDownloadedItem(movieItem);
-        if (downloadedMovie) {
-            if (this.app) this.app.toast('Movie already downloaded to PC! Available in Downloads.');
+        if (this.getDownloadedItem(movieItem)) {
+            window.IPTV.EventBus.toast('Movie already downloaded to PC! Available in Downloads.');
             this._refreshVisibleCardStates();
             return;
         }
 
         try {
-            await window.electronDesktop.downloads.start({
+            await window.IPTV.Platform.downloads.start({
                 id: movieItem.id,
                 title: movieItem.name || 'Movie',
                 name: movieItem.name,
@@ -667,159 +651,66 @@ window.IPTV.DownloadManager = {
             });
         } catch (err) {
             console.error('[DownloadManager] Download movie error:', err);
-            if (this.app) this.app.toast('Failed to start download');
+            window.IPTV.EventBus.toast('Failed to start download');
         }
     },
 
-    /**
-     * Download a Series Episode
-     */
-    /**
-     * Download all episodes of an entire series (all seasons)
-     */
     async downloadEntireSeries(seriesInfo, seasonsData) {
-        if (!this.isDesktop || !seriesInfo || !seasonsData) return;
+        if (!this.isDesktop || !seriesInfo || !seasonsData || !this.store) return;
 
         const episodesToDownload = [];
-        const conn = this.app ? this.app.connection : null;
-        const base = (conn && conn.type === 'xtream') ? conn.server.replace(/\/+$/, '') : '';
-
         const seasonKeys = Object.keys(seasonsData).sort((a, b) => Number(a) - Number(b));
         seasonKeys.forEach(sNum => {
-            const episodes = seasonsData[sNum];
-            if (!Array.isArray(episodes)) return;
-            episodes.forEach((ep, epIndex) => {
-                let streamUrl = ep.url;
-                if (!streamUrl && conn && conn.type === 'xtream') {
-                    const ext = ep.container_extension || 'mp4';
-                    streamUrl = `${base}/series/${conn.user}/${conn.pass}/${ep.id}.${ext}`;
-                }
-                if (!streamUrl || this.isDownloading(streamUrl) || this.isCompleted(streamUrl)) return;
-
-                const epNum = ep.episode_num || ep.episode || (epIndex + 1);
-                const epTitle = (window.IPTV.SeriesDetailView && window.IPTV.SeriesDetailView._formatEpisodeTitle)
-                    ? window.IPTV.SeriesDetailView._formatEpisodeTitle(ep.title, seriesInfo.name, sNum, epNum)
-                    : (ep.title || `Episode ${epNum}`);
-                const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
-
-                episodesToDownload.push({
-                    id: `ep_${seriesInfo.id}_${ep.id}`,
-                    title: epTitle,
-                    seriesName: seriesInfo.name,
-                    season: sNum,
-                    episode: epNum,
-                    url: streamUrl,
-                    poster: thumb,
-                    type: 'series'
-                });
-            });
+            episodesToDownload.push(...this.store.collectPendingEpisodes(seriesInfo, sNum, seasonsData[sNum]));
         });
 
         if (episodesToDownload.length === 0) {
-            if (this.app) this.app.toast('All episodes are already downloading or downloaded');
+            window.IPTV.EventBus.toast('All episodes are already downloading or downloaded');
             return;
         }
 
-        if (this.app) this.app.toast(`Queued ${episodesToDownload.length} episodes of "${seriesInfo.name}"`);
-        await window.electronDesktop.downloads.startBatch(episodesToDownload);
+        window.IPTV.EventBus.toast(`Queued ${episodesToDownload.length} episodes of "${seriesInfo.name}"`);
+        await window.IPTV.Platform.downloads.startBatch(episodesToDownload);
     },
 
-    /**
-     * Download all episodes in a specific season
-     */
     async downloadSeason(seriesInfo, seasonNum, episodes) {
-        if (!this.isDesktop || !seriesInfo || !episodes || !Array.isArray(episodes)) return;
+        if (!this.isDesktop || !seriesInfo || !Array.isArray(episodes) || !this.store) return;
 
-        const episodesToDownload = [];
-        const conn = this.app ? this.app.connection : null;
-        const base = (conn && conn.type === 'xtream') ? conn.server.replace(/\/+$/, '') : '';
-
-        episodes.forEach((ep, epIndex) => {
-            let streamUrl = ep.url;
-            if (!streamUrl && conn && conn.type === 'xtream') {
-                const ext = ep.container_extension || 'mp4';
-                streamUrl = `${base}/series/${conn.user}/${conn.pass}/${ep.id}.${ext}`;
-            }
-            if (!streamUrl || this.isDownloading(streamUrl) || this.isCompleted(streamUrl)) return;
-
-            const epNum = ep.episode_num || ep.episode || (epIndex + 1);
-            const epTitle = (window.IPTV.SeriesDetailView && window.IPTV.SeriesDetailView._formatEpisodeTitle)
-                ? window.IPTV.SeriesDetailView._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum)
-                : (ep.title || `Episode ${epNum}`);
-            const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
-
-            episodesToDownload.push({
-                id: `ep_${seriesInfo.id}_${ep.id}`,
-                title: epTitle,
-                seriesName: seriesInfo.name,
-                season: seasonNum,
-                episode: epNum,
-                url: streamUrl,
-                poster: thumb,
-                type: 'series'
-            });
-        });
-
+        const episodesToDownload = this.store.collectPendingEpisodes(seriesInfo, seasonNum, episodes);
         if (episodesToDownload.length === 0) {
-            if (this.app) this.app.toast(`All episodes in Season ${seasonNum} are already downloading or downloaded`);
+            window.IPTV.EventBus.toast(`All episodes in Season ${seasonNum} are already downloading or downloaded`);
             return;
         }
 
-        if (this.app) this.app.toast(`Queued ${episodesToDownload.length} episodes of Season ${seasonNum}`);
-        await window.electronDesktop.downloads.startBatch(episodesToDownload);
+        window.IPTV.EventBus.toast(`Queued ${episodesToDownload.length} episodes of Season ${seasonNum}`);
+        await window.IPTV.Platform.downloads.startBatch(episodesToDownload);
     },
 
     async downloadEpisode(seriesInfo, episode, seasonNum, epIndex) {
-        if (!this.isDesktop) return;
+        if (!this.isDesktop || !this.store) return;
 
-        let streamUrl = episode.url;
-        const conn = this.app ? this.app.connection : null;
-        if (!streamUrl && conn && conn.type === 'xtream') {
-            const base = conn.server.replace(/\/+$/, '');
-            const ext = episode.container_extension || 'mp4';
-            streamUrl = `${base}/series/${conn.user}/${conn.pass}/${episode.id}.${ext}`;
-        }
-
-        if (!streamUrl) {
-            if (this.app) this.app.toast('Unable to download episode: stream URL unavailable');
+        const payload = this.store.buildEpisodePayload(seriesInfo, seasonNum, episode, epIndex);
+        if (!payload || !payload.url) {
+            window.IPTV.EventBus.toast('Unable to download episode: stream URL unavailable');
             return;
         }
 
-        const epRecordId = `ep_${seriesInfo.id}_${episode.id}`;
-        if (this.isDownloading(streamUrl) || this.isDownloading(epRecordId)) {
-            if (this.app) this.app.toast('Already downloading this episode');
+        if (this.isDownloading(payload.url) || this.isDownloading(payload.id)) {
+            window.IPTV.EventBus.toast('Already downloading this episode');
             return;
         }
 
-        const downloadedEp = this.getDownloadedItem(streamUrl) || this.getDownloadedItem(epRecordId);
-        if (downloadedEp) {
-            if (this.app) this.app.toast('Episode already downloaded to PC! Available in Downloads.');
+        if (this.getDownloadedItem(payload)) {
+            window.IPTV.EventBus.toast('Episode already downloaded to PC! Available in Downloads.');
             this._refreshVisibleCardStates();
             return;
         }
 
-        const epNum = episode.episode_num || episode.episode || (epIndex + 1);
-        const epTitle = (window.IPTV.SeriesDetailView && window.IPTV.SeriesDetailView._formatEpisodeTitle)
-            ? window.IPTV.SeriesDetailView._formatEpisodeTitle(episode.title, seriesInfo.name, seasonNum, epNum)
-            : (episode.title || `Episode ${epNum}`);
-
-        const thumb = (episode.info && episode.info.movie_image) || (episode.info && episode.info.cover) || seriesInfo.poster || '';
-
         try {
-            await window.electronDesktop.downloads.start({
-                id: `ep_${seriesInfo.id}_${episode.id}`,
-                title: epTitle,
-                seriesName: seriesInfo.name,
-                season: seasonNum,
-                episode: epNum,
-                url: streamUrl,
-                poster: thumb,
-                type: 'series'
-            });
+            await window.IPTV.Platform.downloads.start(payload);
         } catch (err) {
             console.error('[DownloadManager] Download episode error:', err);
-            if (this.app) this.app.toast('Failed to start episode download');
+            window.IPTV.EventBus.toast('Failed to start episode download');
         }
     }
 };
-

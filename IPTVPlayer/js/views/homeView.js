@@ -96,13 +96,13 @@ window.IPTV.HomeView = {
         const startPosition = isResume ? (record.position || 0) : 0;
 
         if (record.type === 'movie') {
-            const movie = (this.app.movies || []).find(m => String(m.id) === String(record.id));
+            const movie = (window.IPTV.CatalogStore.getMovies() || []).find(m => String(m.id) === String(record.id));
             if (!movie) {
-                if (window.IPTV.Storage && this.app.connection) {
-                    window.IPTV.Storage.removeWatchProgress(this.app.connection, record.id);
+                if (window.IPTV.Storage && window.IPTV.CatalogStore.getConnection()) {
+                    window.IPTV.Storage.removeWatchProgress(window.IPTV.CatalogStore.getConnection(), record.id);
                 }
-                this.render(this.app.liveChannels, this.app.movies, this.app.series);
-                this.app.toast('Movie is no longer available in the catalog');
+                this.render(window.IPTV.CatalogStore.getLive(), window.IPTV.CatalogStore.getMovies(), window.IPTV.CatalogStore.getSeries());
+                window.IPTV.EventBus.toast('Movie is no longer available in the catalog');
                 return;
             }
             this.app.playerService.play({
@@ -114,13 +114,13 @@ window.IPTV.HomeView = {
 
         if (record.type === 'series') {
             const seriesId = record.seriesId || String(record.id).replace(/^series_/, '');
-            const series = (this.app.series || []).find(s => String(s.id) === String(seriesId));
+            const series = (window.IPTV.CatalogStore.getSeries() || []).find(s => String(s.id) === String(seriesId));
             if (!series) {
-                if (window.IPTV.Storage && this.app.connection) {
-                    window.IPTV.Storage.removeWatchProgress(this.app.connection, seriesId);
+                if (window.IPTV.Storage && window.IPTV.CatalogStore.getConnection()) {
+                    window.IPTV.Storage.removeWatchProgress(window.IPTV.CatalogStore.getConnection(), seriesId);
                 }
-                this.render(this.app.liveChannels, this.app.movies, this.app.series);
-                this.app.toast('Series is no longer available in the catalog');
+                this.render(window.IPTV.CatalogStore.getLive(), window.IPTV.CatalogStore.getMovies(), window.IPTV.CatalogStore.getSeries());
+                window.IPTV.EventBus.toast('Series is no longer available in the catalog');
                 return;
             }
 
@@ -129,8 +129,8 @@ window.IPTV.HomeView = {
                 let seasonsData = {};
                 let seriesInfo = { ...series };
 
-                if (this.app.connection && this.app.connection.type === 'xtream') {
-                    const resp = await window.IPTV.XtreamService.getSeriesInfo(this.app.connection, series.id);
+                if (window.IPTV.CatalogStore.getConnection() && window.IPTV.CatalogStore.getConnection().type === 'xtream') {
+                    const resp = await window.IPTV.XtreamService.getSeriesInfo(window.IPTV.CatalogStore.getConnection(), series.id);
                     if (resp) {
                         if (resp.info) {
                             seriesInfo.name = resp.info.name || series.name;
@@ -169,16 +169,16 @@ window.IPTV.HomeView = {
 
                 if (epIndex === -1) {
                     this.app.hideLoading();
-                    if (window.IPTV.Storage && this.app.connection) {
-                        window.IPTV.Storage.removeWatchProgress(this.app.connection, record.id);
+                    if (window.IPTV.Storage && window.IPTV.CatalogStore.getConnection()) {
+                        window.IPTV.Storage.removeWatchProgress(window.IPTV.CatalogStore.getConnection(), record.id);
                     }
-                    this.render(this.app.liveChannels, this.app.movies, this.app.series);
-                    this.app.toast('Episode is no longer available in the catalog');
+                    this.render(window.IPTV.CatalogStore.getLive(), window.IPTV.CatalogStore.getMovies(), window.IPTV.CatalogStore.getSeries());
+                    window.IPTV.EventBus.toast('Episode is no longer available in the catalog');
                     return;
                 }
 
                 const playItem = this.app.seriesDetailView.buildEpisodePlayItem(
-                    this.app.connection,
+                    window.IPTV.CatalogStore.getConnection(),
                     seriesInfo,
                     seasonsData,
                     seasonNum,
@@ -187,14 +187,14 @@ window.IPTV.HomeView = {
                 this.app.hideLoading();
 
                 if (!playItem) {
-                    this.app.toast('No episode stream URL available');
+                    window.IPTV.EventBus.toast('No episode stream URL available');
                     return;
                 }
 
                 this.app.playerService.play(playItem, { initialSeekTime: startPosition });
             } catch(err) {
                 this.app.hideLoading();
-                this.app.toast('Failed to load series details');
+                window.IPTV.EventBus.toast('Failed to load series details');
                 console.error('[HomeView] Resume series error:', err);
             }
         }
@@ -226,7 +226,7 @@ window.IPTV.HomeView = {
             const favBtn = document.getElementById('hero-fav');
             if (favBtn) {
                 const updateHeroFav = () => {
-                    const isFav = this.app.isFavorite(heroItem);
+                    const isFav = window.IPTV.CatalogStore.isFavorite(heroItem);
                     favBtn.classList.toggle('active', isFav);
                     const iconSpan = favBtn.querySelector('.btn-icon');
                     const label = isFav ? ' Favorited' : ' Add to Favorites';
@@ -241,15 +241,15 @@ window.IPTV.HomeView = {
                 };
                 updateHeroFav();
                 favBtn.onclick = () => {
-                    this.app.toggleFavorite(heroItem);
+                    window.IPTV.CatalogStore.toggleFavorite(heroItem);
                     updateHeroFav();
                 };
             }
         }
 
         // Continue Watching Row (Owner decision: top of Home, max 10 items, scoped per connection)
-        const cwItems = (window.IPTV.Storage && this.app.connection)
-            ? window.IPTV.Storage.getWatchProgress(this.app.connection)
+        const cwItems = (window.IPTV.Storage && window.IPTV.CatalogStore.getConnection())
+            ? window.IPTV.Storage.getWatchProgress(window.IPTV.CatalogStore.getConnection())
             : [];
         if (cwItems && cwItems.length > 0) {
             this._addContinueWatchingRow(cwItems);
@@ -317,7 +317,7 @@ window.IPTV.HomeView = {
             }
 
             const card = window.IPTV.Card.create(record, record.type, {
-                isFavorite: this.app.isFavorite(record),
+                isFavorite: window.IPTV.CatalogStore.isFavorite(record),
                 progress: { position: record.position, duration: record.duration },
                 subtitle: subText,
                 onClick: (item, type) => this.showResumeModal(record, card)
@@ -344,7 +344,7 @@ window.IPTV.HomeView = {
         const frag = document.createDocumentFragment();
         items.forEach(item => {
             const card = window.IPTV.Card.create(item, type, {
-                isFavorite: this.app.isFavorite(item),
+                isFavorite: window.IPTV.CatalogStore.isFavorite(item),
                 onClick: (selectedItem, itemType) => this.app.onItemClick(selectedItem, itemType)
             });
             frag.appendChild(card);

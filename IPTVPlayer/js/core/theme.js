@@ -77,7 +77,8 @@ window.IPTV.ThemeManager = {
 
     getSavedTheme() {
         try {
-            const raw = localStorage.getItem('iptv_theme');
+            const key = (window.IPTV.Storage && window.IPTV.Storage.KEYS && window.IPTV.Storage.KEYS.THEME) || 'iptv_theme';
+            const raw = localStorage.getItem(key);
             return this._resolveThemeId(raw);
         } catch (e) {
             return this.DEFAULT_THEME;
@@ -92,7 +93,8 @@ window.IPTV.ThemeManager = {
             document.body.setAttribute('data-theme', activeTheme);
         }
         try {
-            localStorage.setItem('iptv_theme', activeTheme);
+            const key = (window.IPTV.Storage && window.IPTV.Storage.KEYS && window.IPTV.Storage.KEYS.THEME) || 'iptv_theme';
+            localStorage.setItem(key, activeTheme);
         } catch (e) {}
         return activeTheme;
     },

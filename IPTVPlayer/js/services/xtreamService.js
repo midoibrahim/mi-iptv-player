@@ -11,6 +11,25 @@ window.IPTV.XtreamService = {
         return new Promise((resolve) => setTimeout(resolve, 0));
     },
 
+    streamUrl(conn, kind, streamId, ext) {
+        if (!conn || conn.type !== 'xtream' || !conn.server || streamId === undefined || streamId === null) {
+            return '';
+        }
+        const base = conn.server.replace(/\/+$/, '');
+        if (kind === 'raw') {
+            return `${base}/${conn.user}/${conn.pass}/${streamId}`;
+        }
+        const defaultExt = kind === 'live' ? 'ts' : 'mp4';
+        const cleanExt = ext || defaultExt;
+        return `${base}/${kind}/${conn.user}/${conn.pass}/${streamId}.${cleanExt}`;
+    },
+
+    resolveEpisodeUrl(conn, ep) {
+        if (!ep) return '';
+        if (ep.url) return ep.url;
+        return this.streamUrl(conn, 'series', ep.id, ep.container_extension || 'mp4');
+    },
+
     async fetchJson(url) {
         const resp = await fetch(url);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -86,9 +105,9 @@ window.IPTV.XtreamService = {
                 logo: ch.stream_icon || '',
                 category: catName,
                 categoryId: ch.category_id,
-                url: `${base}/live/${conn.user}/${conn.pass}/${sid}.ts`,
-                hlsUrl: `${base}/live/${conn.user}/${conn.pass}/${sid}.m3u8`,
-                fallbackUrl: `${base}/${conn.user}/${conn.pass}/${sid}`,
+                url: this.streamUrl(conn, 'live', sid, 'ts'),
+                hlsUrl: this.streamUrl(conn, 'live', sid, 'm3u8'),
+                fallbackUrl: this.streamUrl(conn, 'raw', sid),
                 hd: /hd|fhd|uhd|4k/i.test(name)
             };
         }
@@ -112,7 +131,7 @@ window.IPTV.XtreamService = {
                 poster: m.stream_icon || '',
                 category: catName,
                 categoryId: m.category_id,
-                url: `${base}/movie/${conn.user}/${conn.pass}/${sid}.${m.container_extension || 'mp4'}`,
+                url: this.streamUrl(conn, 'movie', sid, m.container_extension || 'mp4'),
                 plot: i < 15 ? (m.plot || '') : '',
                 rating: m.rating || '',
                 year: m.year || ''

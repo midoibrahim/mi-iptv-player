@@ -272,10 +272,16 @@ window.IPTV.SpatialNav = {
             }
         }
 
-        // ---- 2b. Series Detail Predictable Focus Order (Back -> Favorite -> Season Tabs -> Episodes) ----
+        // ---- 2b. Series Detail Predictable Focus Order (Back -> Favorite -> Download Series -> Season Tabs -> Download Season -> Episodes) ----
         if (activeRoot && activeRoot.id === 'series-detail-screen') {
-            if (current.id === 'series-back-btn' || current.id === 'series-fav-btn') {
+            if (current.id === 'series-back-btn' || current.id === 'series-fav-btn' || current.id === 'series-download-all-btn') {
                 if (dir === 'right' && current.id === 'series-back-btn') {
+                    const favBtn = document.getElementById('series-fav-btn');
+                    if (favBtn && this.isFocusable(favBtn, activeRoot)) return this.focusElement(favBtn);
+                } else if (dir === 'right' && current.id === 'series-fav-btn') {
+                    const dlAllBtn = document.getElementById('series-download-all-btn');
+                    if (dlAllBtn && this.isFocusable(dlAllBtn, activeRoot)) return this.focusElement(dlAllBtn);
+                } else if (dir === 'left' && current.id === 'series-download-all-btn') {
                     const favBtn = document.getElementById('series-fav-btn');
                     if (favBtn && this.isFocusable(favBtn, activeRoot)) return this.focusElement(favBtn);
                 } else if (dir === 'left' && current.id === 'series-fav-btn') {
@@ -291,6 +297,16 @@ window.IPTV.SpatialNav = {
                 if (dir === 'up') {
                     const backBtn = document.getElementById('series-back-btn');
                     if (backBtn && this.isFocusable(backBtn, activeRoot)) return this.focusElement(backBtn);
+                } else if (dir === 'down') {
+                    const sDlBtn = document.getElementById('season-download-btn');
+                    if (sDlBtn && this.isFocusable(sDlBtn, activeRoot)) return this.focusElement(sDlBtn);
+                    const firstEp = activeRoot.querySelector('.episode-card');
+                    if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
+                }
+            } else if (current.id === 'season-download-btn') {
+                if (dir === 'up') {
+                    const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
+                    if (activeSeason && this.isFocusable(activeSeason, activeRoot)) return this.focusElement(activeSeason);
                 } else if (dir === 'down') {
                     const firstEp = activeRoot.querySelector('.episode-card');
                     if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);

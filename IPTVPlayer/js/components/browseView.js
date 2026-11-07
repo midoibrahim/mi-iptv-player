@@ -322,7 +322,7 @@ window.IPTV.BrowseView = class {
         for (let i = start; i < end; i++) {
             const item = this._filteredItems[i];
             const card = window.IPTV.Card.create(item, this.cardType, {
-                isFavorite: this.app.isFavorite(item),
+                isFavorite: window.IPTV.CatalogStore.isFavorite(item),
                 onClick: (selectedItem, type) => this.app.onItemClick(selectedItem, type)
             });
             frag.appendChild(card);
@@ -365,7 +365,7 @@ window.IPTV.BrowseView = class {
             for (let j = 0; j < rowItems.length; j++) {
                 const item = rowItems[j];
                 const card = window.IPTV.Card.create(item, this.cardType, {
-                    isFavorite: this.app.isFavorite(item),
+                    isFavorite: window.IPTV.CatalogStore.isFavorite(item),
                     onClick: (selectedItem, type) => this.app.onItemClick(selectedItem, type)
                 });
                 scroll.appendChild(card);

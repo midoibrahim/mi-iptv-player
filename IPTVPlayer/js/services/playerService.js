@@ -1,5 +1,5 @@
 /* ============================================================
-   IPTV Player — Video Player & HLS Streaming Coordinator
+   IPTV Player â€” Video Player & HLS Streaming Coordinator
    Coordinates PlaybackEngine, StreamResolver, PlayerOsd,
    ChannelDrawer, and WatchProgressTracker.
    ============================================================ */
@@ -207,10 +207,15 @@ window.IPTV.PlayerService = {
         this.seriesContext = item.seriesContext || null;
         this._userPaused = false;
         this._localToastShown = false;
+        this._avplayTried = false;
         this._initialSeekPending = (options && typeof options.initialSeekTime === 'number' && options.initialSeekTime > 0)
             ? options.initialSeekTime
             : null;
         this._lastProgressSaveTime = 0;
+
+        if (window.IPTV.Platform && typeof window.IPTV.Platform.setKeepScreenOn === 'function') {
+            window.IPTV.Platform.setKeepScreenOn(true);
+        }
 
         if (this.isChannelDrawerOpen) {
             this.closeChannelDrawer();
@@ -262,6 +267,9 @@ window.IPTV.PlayerService = {
         }
 
         this._destroyPlayers();
+        if (window.IPTV.Platform && typeof window.IPTV.Platform.setKeepScreenOn === 'function') {
+            window.IPTV.Platform.setKeepScreenOn(false);
+        }
         if (this.video) {
             this.video.pause();
             this.video.removeAttribute('src');
@@ -412,7 +420,7 @@ window.IPTV.PlayerService = {
         if (rawCandidateUrl && String(rawCandidateUrl).startsWith('file:///')) {
             if (window.IPTV.EventBus && !this._localToastShown) {
                 this._localToastShown = true;
-                window.IPTV.EventBus.toast('✓ Playing from downloaded local file (Offline)', 3000);
+                window.IPTV.EventBus.toast('âœ“ Playing from downloaded local file (Offline)', 3000);
             }
         }
         if (this.isLiveStream() && window.IPTV.CatalogStore && window.IPTV.CatalogStore.getConnection() && window.IPTV.Storage && window.IPTV.Storage.saveStreamStrategy) {
@@ -459,10 +467,27 @@ window.IPTV.PlayerService = {
         if (window.IPTV.PlayerOsd) window.IPTV.PlayerOsd.updatePlayPauseIcon(isPlaying);
     },
 
+    getCurrentTime() {
+        if (this._avplayActive) return this._avplayCurrentTime || 0;
+        return (this.video && this.video.currentTime) ? this.video.currentTime : 0;
+    },
+
+    getDuration() {
+        if (this._avplayActive) return this._avplayDuration || 0;
+        return (this.video && this.video.duration) ? this.video.duration : 0;
+    },
+
     playVideo() {
         if (!this.video) return;
         this._userPaused = false;
-        this.video.play().catch(e => console.warn('Play blocked:', e));
+        if (this._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                window.webapis.avplay.play();
+                this._avplayPaused = false;
+            } catch (e) {}
+        } else {
+            this.video.play().catch(e => console.warn('Play blocked:', e));
+        }
         this._updatePlayPauseIcon(true);
         this.showSeekHUD('play', 'Play', '');
         this.showOSD();
@@ -471,7 +496,15 @@ window.IPTV.PlayerService = {
     pauseVideo() {
         if (!this.video) return;
         this._userPaused = true;
-        this.video.pause();
+        if (this._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                window.webapis.avplay.pause();
+                this._avplayPaused = true;
+            } catch (e) {}
+            this._recordWatchProgress();
+        } else {
+            this.video.pause();
+        }
         this._updatePlayPauseIcon(false);
         this.showSeekHUD('pause', 'Pause', '');
         this.showOSD();
@@ -479,7 +512,8 @@ window.IPTV.PlayerService = {
 
     togglePlay() {
         if (!this.video) return;
-        if (this.video.paused) {
+        const isPaused = this._avplayActive ? !!this._avplayPaused : this.video.paused;
+        if (isPaused) {
             this.playVideo();
         } else {
             this.pauseVideo();
@@ -487,19 +521,20 @@ window.IPTV.PlayerService = {
     },
 
     hasValidDuration() {
+        const dur = this.getDuration();
         return !!(
-            this.video &&
-            this.video.duration &&
-            !isNaN(this.video.duration) &&
-            isFinite(this.video.duration) &&
-            this.video.duration > 0 &&
-            this.video.duration !== Infinity
+            dur &&
+            !isNaN(dur) &&
+            isFinite(dur) &&
+            dur > 0 &&
+            dur !== Infinity
         );
     },
 
     canSeek() {
         if (!this.video || this.isLiveStream()) return false;
         if (!this.hasValidDuration()) return false;
+        if (this._avplayActive) return true;
         try {
             const seekable = this.video.seekable;
             if (!seekable || seekable.length === 0) {
@@ -521,11 +556,29 @@ window.IPTV.PlayerService = {
 
     seekTo(targetSeconds, startPlaying = true) {
         if (!this.video || !this.canSeek()) return;
-        const duration = this.video.duration;
+        const duration = this.getDuration();
         const clamped = Math.max(0, Math.min(duration - 0.5, targetSeconds));
 
         this._updateProgressUI(clamped, duration);
         this.showOSD();
+
+        if (this._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                window.webapis.avplay.seekTo(Math.floor(clamped * 1000), () => {
+                    this._avplayCurrentTime = clamped;
+                    if (startPlaying) {
+                        this._userPaused = false;
+                        this._avplayPaused = false;
+                        try { window.webapis.avplay.play(); } catch (e) {}
+                        this._updatePlayPauseIcon(true);
+                    }
+                    this._updateProgress();
+                }, () => {});
+            } catch (err) {
+                console.warn('[PlayerService] AVPlay seek error:', err);
+            }
+            return;
+        }
 
         if (this.hls && typeof this.hls.startLoad === 'function') {
             try { this.hls.startLoad(clamped); } catch(e) {}
@@ -575,14 +628,15 @@ window.IPTV.PlayerService = {
             this.showOSD();
             return;
         }
-        const current = this.video.currentTime || 0;
-        const target = Math.max(0, Math.min(this.video.duration - 0.5, current + delta));
+        const current = this.getCurrentTime();
+        const duration = this.getDuration();
+        const target = Math.max(0, Math.min(duration - 0.5, current + delta));
         this.seekTo(target, true);
         const sign = delta > 0 ? '+' : '';
         this.showSeekHUD(
             delta > 0 ? 'ff' : 'rw',
             `${sign}${delta}s`,
-            `${this._fmtTime(target)} / ${this._fmtTime(this.video.duration)}`
+            `${this._fmtTime(target)} / ${this._fmtTime(duration)}`
         );
     },
 
@@ -631,7 +685,7 @@ window.IPTV.PlayerService = {
     },
 
     _fmtTime(sec) {
-        const dur = (this.video && this.video.duration) ? this.video.duration : 0;
+        const dur = this.getDuration();
         return window.IPTV.PlayerOsd ? window.IPTV.PlayerOsd.fmtTime(sec, dur) : '00:00';
     },
 
@@ -737,8 +791,8 @@ window.IPTV.PlayerService = {
         if (window.IPTV.WatchProgressTracker) {
             window.IPTV.WatchProgressTracker.recordProgress(
                 this.currentItem,
-                this.video.currentTime || 0,
-                this.video.duration,
+                this.getCurrentTime(),
+                this.getDuration(),
                 isCompleted
             );
         }

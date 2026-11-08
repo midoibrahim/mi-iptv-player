@@ -1,5 +1,5 @@
 /* ============================================================
-   IPTV Player — Login & Profile View
+   IPTV Player â€” Login & Profile View
    Manages Saved Profiles grid, Delete Confirmation Modal,
    Xtream/M3U input form with inline validation & QR setup
    ============================================================ */
@@ -200,11 +200,11 @@ window.IPTV.LoginView = {
             card.tabIndex = 0;
 
             const iconSvg = prof.type === 'xtream'
-                ? (window.IPTV.Icons ? window.IPTV.Icons.get('live', 'profile-svg') : '📺')
-                : (window.IPTV.Icons ? window.IPTV.Icons.get('brand', 'profile-svg') : '📄');
+                ? (window.IPTV.Icons ? window.IPTV.Icons.get('live', 'profile-svg') : 'ðŸ“º')
+                : (window.IPTV.Icons ? window.IPTV.Icons.get('brand', 'profile-svg') : 'ðŸ“„');
             const badgeText = prof.type === 'xtream' ? 'Xtream' : 'M3U';
             const sub = prof.type === 'xtream' ? (prof.user ? `User: ${prof.user}` : prof.server) : prof.url;
-            const trashSvg = window.IPTV.Icons ? window.IPTV.Icons.get('trash', 'delete-svg') : '✕';
+            const trashSvg = window.IPTV.Icons ? window.IPTV.Icons.get('trash', 'delete-svg') : 'âœ•';
 
             card.innerHTML = `
                 <div class="profile-card-top">
@@ -338,6 +338,21 @@ window.IPTV.LoginView = {
                 this.stopRemotePolling();
                 return;
             }
+
+            // On Samsung Tizen TV (where no local Node HTTP companion server runs on 127.0.0.1:8089),
+            // display clean direct-remote instructions instead of an unreachable localhost QR code.
+            const hasCompanionServer = Boolean(
+                (info && info.apiBase) ||
+                (window.IPTV.TvServer && window.IPTV.TvServer.isWebOS())
+            );
+            if (!hasCompanionServer && window.IPTV.Platform && window.IPTV.Platform.isTizen()) {
+                if (urlText) urlText.textContent = 'Samsung Smart TV Direct Input';
+                const statusText = document.getElementById('remote-poll-status');
+                if (statusText) statusText.textContent = 'Select any field on the left and press OK on your remote';
+                qrContainer.innerHTML = '<div style="padding:24px 18px;text-align:center;color:#CBD5E1;font-size:19px;line-height:1.5;">Use your <strong style="color:#fff;">Samsung TV Remote</strong> or USB keyboard to enter your Xtream Codes or M3U URL on the left.</div>';
+                return;
+            }
+
             const setupUrl = (info && info.setupUrl) ? info.setupUrl : 'http://127.0.0.1:8089/setup.html';
 
             if (urlText) {

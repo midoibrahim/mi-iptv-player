@@ -1,5 +1,5 @@
 /* ============================================================
-   IPTV Player — Video Player, OSD & Channel Banner
+   IPTV Player â€” Video Player, OSD & Channel Banner
    Follows TV Navigation Architecture Media Player OSD specs
    10-Foot UI Standards (1920x1080 Native Canvas, Always-Dark Video Overlay)
    ============================================================ */
@@ -7,6 +7,18 @@
 #player-screen {
     background: #000000;
     z-index: 200;
+}
+
+/* Samsung Tizen AVPlay hardware plane hole-punching */
+body.avplay-active,
+body.avplay-active #app,
+body.avplay-active #player-screen {
+    background: transparent !important;
+}
+body.avplay-active #main-shell,
+body.avplay-active #series-detail-screen,
+body.avplay-active #login-screen {
+    visibility: hidden !important;
 }
 
 body.player-active #main-shell,

@@ -1,5 +1,5 @@
 /* ============================================================
-   IPTV Player — Cross-Platform Runtime Adapter
+   IPTV Player â€” Cross-Platform Runtime Adapter
    Centralizes capability detection (webOS, Electron Desktop,
    Tizen, Browser), native lifecycle bridges, and desktop
    viewport/fullscreen controls.
@@ -25,6 +25,19 @@ window.IPTV.Platform = {
 
     isTizen() {
         return !!(window.tizen && window.tizen.application);
+    },
+
+    setKeepScreenOn(enabled) {
+        try {
+            if (window.webapis && window.webapis.appcommon && typeof window.webapis.appcommon.setScreenSaver === 'function') {
+                const state = enabled
+                    ? window.webapis.appcommon.AppCommonScreenSaverState.SCREEN_SAVER_OFF
+                    : window.webapis.appcommon.AppCommonScreenSaverState.SCREEN_SAVER_ON;
+                window.webapis.appcommon.setScreenSaver(state, () => {}, () => {});
+            }
+        } catch (err) {
+            // Ignore screensaver lock errors on unsupported platforms
+        }
     },
 
     get downloads() {

@@ -1,8 +1,18 @@
-# MI IPTV Player for LG webOS TV
+# MI IPTV Player
 
-A high-performance, 10-foot Smart TV IPTV player engineered for **LG webOS TVs** — fully compatible across **legacy webOS 3.x (Chromium 38)**, **webOS 4.x / 5.x (Chromium 53–68)**, **webOS 6.x (Chromium 79)**, and **modern webOS 22 / 23 / 24 / 25 (Chromium 87–108+)**.
+A modern, high-performance Smart TV & Desktop IPTV player designed for **10-foot viewing experiences**. Built with clean architecture, zero-dependency 2D spatial navigation, and hardware-accelerated streaming pipelines across **LG webOS TVs**, **Samsung Tizen TVs**, and **Windows Desktop PCs**.
 
-Supports **Xtream Codes API** and **M3U / M3U8 playlists**, Live TV, Movies (VOD), Series with multi-season episode browsers, phone QR code credential setup, and hardware-friendly D-pad & LG Magic Remote spatial navigation.
+Supports **Xtream Codes API** and **M3U / M3U8 playlists**, Live TV with side-drawer channel browsing, Movies (VOD), Series with multi-season episode navigation & auto-advance, smartphone QR code credential setup, and offline desktop downloads.
+
+---
+
+## Supported Platforms
+
+| Platform | Target OS / Runtime | Output Package | Guide |
+|---|---|---|---|
+| **LG Smart TVs** | webOS 3.0 – 25+ (Chromium 38 – 108+) | `dist/com.miiptv.player_1.0.0_all.ipk` | [LG webOS Guide](docs/WEBOS.md) |
+| **Samsung Smart TVs** | Tizen 2.4 – 8.0+ (Firmware v1510+) | `dist/MIIPTVPlayer.wgt` & USB `userwidget/` | [Samsung Tizen Guide](docs/TIZEN.md) |
+| **Windows Desktop** | Windows 10 & 11 x64 (Electron) | `dist/windows/MI IPTV Player-win32-x64/` | [Windows Desktop Guide](docs/WINDOWS.md) |
 
 ---
 
@@ -18,126 +28,60 @@ Supports **Xtream Codes API** and **M3U / M3U8 playlists**, Live TV, Movies (VOD
 
 ---
 
-## LG webOS Compatibility Matrix (`webOS 3.0` – `webOS 25`)
+## Key Features Across All Platforms
 
-| LG webOS Version | TV Model Years | Chromium Engine | Node.js Service | Support & Optimizations |
-| :--- | :--- | :--- | :--- | :--- |
-| **webOS 3.0 – 3.9** | 2016 – 2017 | Chromium 38 | Node `0.12` | Babel ES5 transpilation, `core-js` + `regenerator` polyfills, static PostCSS theme compilation, hardware GStreamer HLS/TS |
-| **webOS 4.0 – 4.9** | 2018 – 2019 | Chromium 53 | Node `6.x` | Native `flex-wrap` 10-foot layout, hardware HLS/TS + MSE fallback |
-| **webOS 5.0+** | 2020 | Chromium 68 | Node `8.12` | Native CSS variables + static fallbacks, Hardware HLS + `hls.js` / `mpegts.js` MSE fallbacks, `Buffer.from` safe service |
-| **webOS 6.0** | 2021 | Chromium 79 | Node `12.x` | Full hardware & MSE streaming pipeline, Magic Remote cursor + wheel + D-pad navigation |
-| **webOS 22 / 23 / 24 / 25** | 2022 – 2025+ | Chromium 87 – 108+ | Node `14.x` – `18.x` | Native `1920x1080` canvas auto-upscaled to 4K UHD by TV compositor, 60fps progressive rendering |
-
----
-
-## Key Features
-
-- **Universal LG webOS Compatibility (`webOS 3.x`, `webOS 5.x`, through `webOS 25`)**
-  - Automated ES5 transpilation (`Babel` + `core-js` + `regenerator-runtime`) and static CSS custom-property / theme compilation (`PostCSS` + `Autoprefixer`) while preserving native CSS variables for modern TVs.
-- **10-Foot Native Full HD (`1920x1080`) TV Interface**
-  - Designed specifically for TV viewing distance with zero CSS `zoom` distortion, hardware-accelerated transitions, and cross-TV `flex-wrap` grids that never clip text or buttons.
-  - **4 Built-in TV Themes**: *OLED Black (Default)*, *Midnight Blue*, *Emerald Teal*, and *Crimson Indigo*.
-- **Fast On-TV Phone Setup via QR Code (`com.miiptv.player.service`)**
-  - Bundled Node.js background service (`IPTVService`) starts an HTTP server on `<TV_LAN_IP>:8089` **only while the QR Code setup screen is open** and automatically shuts down the moment you leave the setup screen.
-  - Scan the QR code with your phone to enter Xtream Codes or M3U credentials without typing on the TV remote.
-- **High-FPS Large Playlist Engine**
-  - `O(1)` category-to-stream lookup maps, lazy section rendering, `DocumentFragment` batching, and 36-card progressive scroll pagination handle 20,000+ channels/movies smoothly.
-- **Multi-Stage Stream Playback Pipeline**
-  - Prioritizes native LG webOS hardware HLS (`.m3u8`) and MPEG-TS decoding, with automatic fallbacks to `hls.js` MSE, `mpegts.js` MSE, and the local stream proxy (`http://127.0.0.1:8089/api/proxy`).
-- **Deterministic 2D & 1D Remote Navigation + Magic Remote Support**
-  - Full support for LG Magic Remote (cursor hover, scroll wheel, OK click) & standard IR D-pad (`ArrowKeys`, `Enter/OK`, `Back` button `keyCode 461` / `webOSBack`, `CH+/CH-`, and media transport keys).
+- **Unified 10-Foot TV User Interface (`1920x1080` Canvas)**
+  - Designed specifically for TV viewing distances with zero CSS `zoom` distortion, smooth focus rings, and responsive grid layouts.
+  - **4 Built-in TV Themes**: *Midnight Signal (Default)*, *Graphite Amber*, *OLED Mint*, and *Daylight Slate*.
+- **Multi-Stage Playback Pipeline with Automatic Fallbacks**
+  - **LG webOS**: Native GStreamer hardware HLS/TS → `Hls.js` MSE → `mpegts.js` MSE → local proxy.
+  - **Samsung Tizen**: Native HTML5 `<video>` + MSE → Samsung Hardware `webapis.avplay` (HEVC 4K, Dolby AC-3/E-AC-3 audio, raw MKV/TS).
+  - **Windows Desktop**: GPU-accelerated Chromium media engine + offline local file playback (`file:///...`).
+- **Fast Mobile Setup via QR Code**
+  - Instant pairing: scan the on-screen QR code from your phone to input server URL, username, and password without typing via a TV remote.
+- **Hardware Remote Control Protocol**
+  - Seamless support for standard IR remotes, LG Magic Remote (cursor + scroll wheel), and Samsung Smart Remote.
+  - LIFO Back button management: dismisses modals, channel drawers, and player overlays sequentially before exiting the app.
+  - Dedicated `CH+ / CH-` buttons for rapid live channel switching and `+10s / -10s` seeking for movies/series.
+- **Series Episode Management & 95% Auto-Advance**
+  - Multi-season episode browser with watched episode tracking, adjacent episode calculation, and automatic next episode playback upon 95% completion.
+- **Windows Offline Background Downloader**
+  - Queue individual movies, series episodes, full seasons, or complete series to disk for offline viewing.
+  - Supports pause, resume, parallel downloads, and automatic remuxing to universal MP4 (AAC 48kHz).
 
 ---
 
-## Prerequisites & Step-by-Step `.ipk` Installation Guide
+## Quick Start & Packaging Commands
 
-Follow these steps to install [`dist/com.miiptv.player_1.0.0_all.ipk`](dist/com.miiptv.player_1.0.0_all.ipk) (or the `.ipk` downloaded from **[GitHub Releases](https://github.com/midoibrahim/mi-iptv-player-webos/releases)**) onto any LG webOS Smart TV.
-
-### Step 1: Prerequisites on Your PC
-1. **Install Node.js** (v16 or newer): [https://nodejs.org](https://nodejs.org)
-2. **Install the Official LG webOS CLI (`@webos-tools/cli`)**:
-   ```bash
-   npm install -g @webos-tools/cli
-   ```
-3. Verify the CLI tools are available:
-   ```bash
-   ares -V
-   ```
-
-### Step 2: Prepare Your LG Smart TV (Developer Mode)
-1. Create a free LG Developer account at [https://webostv.developer.lge.com](https://webostv.developer.lge.com).
-2. On your LG TV, open the **LG Content Store** (or **Apps** on webOS 5 / 6 / 22+), search for **Developer Mode**, and install it.
-3. Launch the **Developer Mode** app on the TV and sign in with your LG Developer account.
-4. Toggle **Dev Mode Status** to **ON** (the TV will reboot).
-5. After the TV reboots, open the **Developer Mode** app again and toggle **Key Server** to **ON**.
-6. Note the **TV IP Address** and the **6-character Passphrase** shown on the Developer Mode screen.
-
-### Step 3: Connect Your PC to the LG TV (One-Time Setup)
-1. Ensure your PC and LG TV are on the same local network (Wi-Fi or Ethernet).
-2. Register your TV with `ares-setup-device` (replace `<TV_IP>` with your TV's IP address, e.g., `192.168.1.107`):
-   ```bash
-   ares-setup-device --add lgtv --info "{'host':'<TV_IP>','port':'9922','username':'prisoner','description':'LG webOS TV'}"
-   ```
-   *(Or run `ares-setup-device` interactively and follow the prompts: Device Name `lgtv`, IP `<TV_IP>`, Port `9922`, User `prisoner`).*
-3. Fetch the SSH Developer Key from the TV and enter the **6-character Passphrase** displayed on the TV screen when prompted:
-   ```bash
-   ares-novacom --device lgtv --getkey
-   ```
-4. Verify connectivity to your TV:
-   ```bash
-   ares-device -i --device lgtv
-   ```
-
-### Step 4: Install & Launch the `.ipk` Package
-
-#### Option A: One-Click Windows Script (`install-webos.bat`)
-Make sure your TV is turned on, then run:
+### 1. LG webOS TV (`.ipk`)
+Detailed instructions: [docs/WEBOS.md](docs/WEBOS.md)
 ```cmd
-install-webos.bat
-```
-*(If your device name is not `lgtv`, pass it as an argument: `install-webos.bat myTV`).*
-
-#### Option B: Direct CLI Commands
-1. **Install the `.ipk` onto the TV**:
-   ```bash
-   ares-install --device lgtv dist/com.miiptv.player_1.0.0_all.ipk
-   ```
-2. **Launch MI IPTV Player on the TV**:
-   ```bash
-   ares-launch --device lgtv com.miiptv.player
-   ```
-
-#### Useful Management Commands
-- **List installed apps on TV**:
-  ```bash
-  ares-install --device lgtv --list
-  ```
-- **Close the running app**:
-  ```bash
-  ares-launch --device lgtv --close com.miiptv.player
-  ```
-- **Open Chrome Web Inspector for live debugging**:
-  ```bash
-  ares-inspect --device lgtv --app com.miiptv.player --open
-  ```
-
----
-
-## Building the `.ipk` from Source
-
-Run the packaging script from the repository root:
-```cmd
+# Build the IPK package
 package-webos.bat
+
+# Install onto your LG TV over LAN
+install-webos.bat <TV_IP_ADDRESS>
 ```
-Or run the steps manually:
-```bash
-npm --prefix webos-build install
-npm --prefix webos-build run build
-ares-package build/IPTVPlayer build/IPTVService -o dist
+
+### 2. Samsung Tizen TV (`.wgt` & USB)
+Detailed instructions: [docs/TIZEN.md](docs/TIZEN.md)
+```cmd
+# Build both LAN and USB packages
+package-tizen.bat
+
+# Option A: Copy dist/tizen-usb/userwidget to a FAT32 USB drive and plug into TV
+# Option B: Install onto your Samsung TV over LAN
+install-tizen.bat <TV_IP_ADDRESS>
 ```
-This outputs the ready-to-install package at:
-```text
-dist/com.miiptv.player_1.0.0_all.ipk
+
+### 3. Windows Desktop (`.exe`)
+Detailed instructions: [docs/WINDOWS.md](docs/WINDOWS.md)
+```cmd
+# Package the portable Windows executable
+package-windows.bat
+
+# Launch the player
+start "" "dist\windows\MI IPTV Player-win32-x64\MI IPTV Player.exe"
 ```
 
 ---
@@ -145,54 +89,81 @@ dist/com.miiptv.player_1.0.0_all.ipk
 ## Repository Structure
 
 ```text
-├── IPTVPlayer/                  # Main LG webOS Web Application (com.miiptv.player)
-│   ├── appinfo.json             # webOS application manifest (1920x1080)
-│   ├── index.html               # App shell & screens (Login, Home, Browse, Series, Player)
-│   ├── setup.html               # Companion phone web UI served on port 8089 during QR setup
-│   ├── server.py                # Optional local Python dev server for PC browser testing
-│   ├── icon.png / largeicon.png # webOS launcher icons
-│   ├── css/                     # Modular 10-foot UI stylesheets
-│   │   ├── theme.css            # Design tokens & 4 color themes
-│   │   ├── base.css             # 1920x1080 viewport, focus rings, screen layout
-│   │   ├── navigation.css       # Collapsible side navigation rail (104px -> 360px)
-│   │   ├── components.css       # Buttons, login cards, QR card, media cards, hero banner
-│   │   ├── browse.css           # Category sidebar + progressive grid/row layouts
-│   │   ├── series.css           # Series detail view, season tabs & episode cards
-│   │   └── player.css           # Fullscreen video player OSD, progress bar & channel banner
+├── IPTVPlayer/                  # Shared 10-foot UI Application Shell
+│   ├── appinfo.json             # LG webOS application manifest
+│   ├── index.html               # Main application DOM & screen layouts
+│   ├── setup.html               # Mobile companion setup web page
+│   ├── server.py                # Standalone Python HTTP test server
+│   ├── icon.png / largeicon.png # Application icons
+│   ├── css/                     # Modular 10-foot stylesheets
+│   │   ├── theme.css            # Central design tokens & theme definitions
+│   │   ├── base.css             # 1080p canvas, focus states & reset
+│   │   ├── navigation.css       # Collapsible side navigation rail
+│   │   ├── components.css       # Cards, modals, buttons & forms
+│   │   ├── browse.css           # Category lists & virtualized grid layout
+│   │   ├── series.css           # Series detail view & episode lists
+│   │   ├── player.css           # Video player OSD, channel banner & HUD
+│   │   └── downloads.css        # Desktop download manager UI
 │   ├── js/
-│   │   ├── app.js               # Main application coordinator
-│   │   ├── hls.min.js           # HLS MSE fallback engine
-│   │   ├── mpegts.js            # MPEG-TS MSE fallback engine
-│   │   ├── core/                # Polyfills, 2D spatial navigation, key handler, storage, themes, icons
-│   │   ├── services/            # Xtream API client, M3U parser, player service, on-TV server bridge
-│   │   ├── components/          # Reusable media card & lazy-rendered browse view
-│   │   └── views/               # Login, Home, Series Detail, Search & Settings views
-│   ├── fonts/lineicons/         # Icon font & CSS assets
-│   └── webOSTVjs-1.2.13/        # Official LG webOSTV.js SDK library
+│   │   ├── app.js               # Application coordinator & routing
+│   │   ├── core/                # SpatialNav, KeyHandler, BackStack, Storage, Theme, Platform
+│   │   ├── services/            # PlaybackEngine, PlayerService, StreamResolver, Xtream, M3U
+│   │   ├── components/          # Card, BrowseView, ChannelDrawer, PlayerOsd, DownloadManager
+│   │   └── views/               # HomeView, SeriesDetailView, SearchView, SettingsView, LoginView
+│   └── fonts/lineicons/         # Vector icon font assets
 │
-├── IPTVService/                 # Bundled webOS JS Service (com.miiptv.player.service)
-│   ├── services.json            # Luna bus service definition
-│   ├── package.json             # Service package manifest
-│   └── service.js               # Node 0.12 - 18+ HTTP setup server, LAN IP detector & CORS proxy
+├── IPTVService/                 # LG webOS Node.js Companion Background Service
+│   ├── service.js               # HTTP setup server on port 8089 & Luna bus handler
+│   └── companionCore.js         # Shared ES5 companion server implementation
 │
-├── webos-build/                 # Build & Transpilation Pipeline for webOS 3.x - 25+
-│   ├── package.json             # Babel, esbuild, PostCSS, Autoprefixer, core-js dependencies
-│   └── build.mjs                # Produces ES5 + static-theme CSS build in build/
+├── webos-build/                 # LG webOS Build Pipeline
+│   └── build.mjs                # Babel ES5 transpiler & PostCSS fallback compiler
 │
-├── docs/screenshots/            # Application UI screenshots for documentation
-├── dist/                        # Packaged LG webOS Installers (.ipk)
-│   └── com.miiptv.player_1.0.0_all.ipk
+├── tizen-build/                 # Samsung Tizen Build Pipeline
+│   ├── config.xml               # Samsung Tizen W3C widget manifest
+│   └── build.mjs                # Tizen ES5 build & dual-target WGT packager (LAN + USB)
 │
-├── package-webos.bat            # One-click Windows build & ares-package script
-└── install-webos.bat            # One-click Windows TV installer & launcher script
+├── windows/                     # Windows Desktop Electron Engine
+│   ├── main.js                  # Electron main process & IPC coordinator
+│   ├── preload.js               # Secure context bridge API
+│   ├── downloader.js            # Background HTTP streaming & queue manager
+│   ├── downloadUtils.js         # Path resolver, sanitizer & MP4 remuxer
+│   └── build.js                 # Electron packager & distribution builder
+│
+├── docs/                        # Platform Documentation
+│   ├── WEBOS.md                 # LG webOS installation, pairing & debugging guide
+│   ├── TIZEN.md                 # Samsung Tizen USB & LAN deployment guide
+│   ├── WINDOWS.md               # Windows desktop setup, shortcuts & downloader guide
+│   └── screenshots/             # Application UI screenshots
+│
+├── tests/                       # Automated Characterization & Unit Test Suite
+│   └── characterization.test.js # 16 node:test platform & service assertions
+│
+├── dist/                        # Built Distribution Artifacts
+│   ├── com.miiptv.player_1.0.0_all.ipk            # LG webOS TV package
+│   ├── MIIPTVPlayer.wgt                           # Samsung Tizen LAN package
+│   ├── tizen-usb/userwidget/MIIPTVPlayer.wgt      # Samsung Tizen USB flash drive package
+│   └── windows/MI IPTV Player-win32-x64/          # Windows Desktop portable application
+│
+├── package-webos.bat            # Build & package LG webOS .ipk
+├── install-webos.bat            # Install .ipk onto LG TV over LAN
+├── package-tizen.bat            # Build & package Samsung Tizen .wgt (LAN + USB)
+├── install-tizen.bat            # Install .wgt onto Samsung TV over LAN
+└── package-windows.bat          # Build & package Windows x64 .exe
 ```
 
 ---
 
-## Local PC Browser Development
+## Running Characterization Tests
 
-To test in a desktop browser with the phone QR setup endpoint (`http://localhost:8089`):
+To run the built-in 16-test characterization suite covering all parsers, stream resolver strategies, watch progress, and platform adapters:
+
 ```bash
-python IPTVPlayer/server.py
+node --test tests/characterization.test.js
 ```
-Then open `http://localhost:8089` in Chrome or Edge.
+
+---
+
+## License
+
+This project is licensed under the Apache 2.0 License.

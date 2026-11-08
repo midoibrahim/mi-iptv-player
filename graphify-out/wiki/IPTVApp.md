@@ -1,37 +1,36 @@
 # IPTVApp
 
-> God node · 21 connections · `IPTVPlayer/js/app.js`
+> God node · 22 connections · `IPTVPlayer/js/app.js`
 
-**Community:** [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md)
+**Community:** [Community 13](Community_13.md)
 
 ## Connections by Relation
 
 ### contains
 - app.js `EXTRACTED`
 
-### implements
-- 10-Foot TV User Interface Architecture `INFERRED`
-
 ### method
 - .connect() `EXTRACTED`
-- .navigateTo() `EXTRACTED`
-- .renderFavorites() `EXTRACTED`
-- ._applyCatalogData() `EXTRACTED`
 - ._init() `EXTRACTED`
-- ._favKey() `EXTRACTED`
-- .isFavorite() `EXTRACTED`
-- .toggleFavorite() `EXTRACTED`
+- ._applyCatalogData() `EXTRACTED`
+- .navigateTo() `EXTRACTED`
 - .toast() `EXTRACTED`
 - ._bindNavigation() `EXTRACTED`
+- .disconnect() `EXTRACTED`
+- ._refreshBrowseViews() `EXTRACTED`
+- ._registerBackGuards() `EXTRACTED`
+- .renderFavorites() `EXTRACTED`
+- ._stepChannel() `EXTRACTED`
 - .constructor() `EXTRACTED`
-- .goBack() `EXTRACTED`
 - ._fetchCatalogFromNetwork() `EXTRACTED`
-- .onItemClick() `EXTRACTED`
-- .showLoading() `EXTRACTED`
 - .hideLoading() `EXTRACTED`
-- .setLoadingText() `EXTRACTED`
-- .prevChannel() `EXTRACTED`
 - .nextChannel() `EXTRACTED`
+- .onItemClick() `EXTRACTED`
+- .prevChannel() `EXTRACTED`
+- .registerSectionHook() `EXTRACTED`
+- .setLoadingText() `EXTRACTED`
+- .showLoading() `EXTRACTED`
+- *…and 1 more `method` connection(s) not listed (lowest-degree first to go)*
 
 ---
 

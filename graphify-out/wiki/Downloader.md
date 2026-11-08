@@ -1,8 +1,8 @@
 # Downloader
 
-> God node · 33 connections · `windows/downloader.js`
+> God node · 34 connections · `windows/downloader.js`
 
-**Community:** [Electron Background Downloader](Electron_Background_Downloader.md)
+**Community:** [Community 7](Community_7.md)
 
 ## Connections by Relation
 
@@ -15,22 +15,22 @@
 - ._processQueue() `EXTRACTED`
 - .startDownload() `EXTRACTED`
 - ._serializeTask() `EXTRACTED`
-- .updateSettings() `EXTRACTED`
 - .startBatchDownloads() `EXTRACTED`
+- .updateSettings() `EXTRACTED`
 - .convertItemToMp4() `EXTRACTED`
-- ._handleError() `EXTRACTED`
-- ._saveHistory() `EXTRACTED`
-- ._formatBytes() `EXTRACTED`
-- .selectDirectory() `EXTRACTED`
-- .constructor() `EXTRACTED`
 - ._ensureDir() `EXTRACTED`
-- .pauseDownload() `EXTRACTED`
+- ._handleError() `EXTRACTED`
 - .resumeDownload() `EXTRACTED`
-- .getSettings() `EXTRACTED`
-- .getAll() `EXTRACTED`
-- .isDownloading() `EXTRACTED`
+- ._saveHistory() `EXTRACTED`
+- .constructor() `EXTRACTED`
+- ._formatBytes() `EXTRACTED`
+- .pauseDownload() `EXTRACTED`
 - ._remuxToMp4() `EXTRACTED`
-- *…and 12 more `method` connection(s) not listed (lowest-degree first to go)*
+- ._runningCount() `EXTRACTED`
+- .selectDirectory() `EXTRACTED`
+- .cancelDownload() `EXTRACTED`
+- .clearHistory() `EXTRACTED`
+- *…and 13 more `method` connection(s) not listed (lowest-degree first to go)*
 
 ---
 

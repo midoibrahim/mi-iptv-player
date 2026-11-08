@@ -2,7 +2,7 @@
 
 > God node · 27 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [HLS.js MSE Streaming Engine (Part 8)](HLS.js_MSE_Streaming_Engine_Part_8.md)
+**Community:** [Community 19](Community_19.md)
 
 ## Connections by Relation
 
@@ -31,10 +31,10 @@
 - t() `EXTRACTED`
 
 ### indirect_call
-- [e()](e.md) `INFERRED`
+- [e()](e_2.md) `INFERRED`
 - [n()](n.md) `INFERRED`
-- a() `INFERRED`
-- o() `INFERRED`
+- [a()](a.md) `INFERRED`
+- [o()](o.md) `INFERRED`
 - l() `INFERRED`
 - s() `INFERRED`
 - Oi() `INFERRED`

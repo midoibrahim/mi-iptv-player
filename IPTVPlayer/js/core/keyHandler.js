@@ -1,5 +1,5 @@
 /* ============================================================
-   IPTV Player — Hardware Remote Key Handler & Back Button Stack
+   IPTV Player â€” Hardware Remote Key Handler & Back Button Stack
    Adheres to TV Navigation Architecture Back Button Protocol
    Supports LG webOS, Samsung Tizen & Standard Remote Keys
    ============================================================ */
@@ -38,9 +38,10 @@ window.IPTV.KeyHandler = {
         // Register keys for Samsung Tizen TV remote (Do NOT register Volume keys - let TV OS handle audio)
         if (typeof tizen !== 'undefined' && tizen.tvinputdevice) {
             const keys = [
-                "ChannelUp", "ChannelDown", 
+                "ChannelUp", "ChannelDown", "ChannelList", "Guide",
                 "MediaPlay", "MediaPause", "MediaPlayPause",
-                "MediaFastForward", "MediaRewind", "MediaStop"
+                "MediaFastForward", "MediaRewind", "MediaStop",
+                "ColorF0Red", "ColorF1Green", "ColorF2Yellow", "ColorF3Blue"
             ];
             keys.forEach(k => {
                 try { tizen.tvinputdevice.registerKey(k); } catch(e) {}
@@ -173,8 +174,9 @@ window.IPTV.KeyHandler = {
             key === ' ' || // Spacebar
             key === 'k' ||
             key === 'K' ||
-            code === 179 || // MediaPlayPause
-            code === 32     // Space
+            code === 10252 || // Samsung Tizen MediaPlayPause
+            code === 179 ||   // MediaPlayPause
+            code === 32       // Space
         );
     },
 
@@ -227,8 +229,10 @@ window.IPTV.KeyHandler = {
             key === 'g' || key === 'G' ||
             key === 'ChannelList' ||
             key === 'Guide' ||
-            code === 458 || // webOS Guide
-            code === 10140  // webOS ChannelList
+            code === 458 ||   // webOS & Tizen Guide
+            code === 10190 || // Samsung Tizen ChannelList
+            code === 10073 || // Samsung Tizen ChannelList (alt)
+            code === 10140    // webOS ChannelList
         );
     },
 

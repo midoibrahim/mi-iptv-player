@@ -3,9 +3,12 @@
 node_modules/
 **/node_modules/
 
-# Ignore extra/legacy IPKs, zips, and store icon drafts in dist/, keep only the final IPK
+# Ignore extra/legacy IPKs, zips, and store icon drafts in dist/, keep only final packages
 /dist/*
 !/dist/com.miiptv.player_1.0.0_all.ipk
+!/dist/MIIPTVPlayer.wgt
+!/dist/tizen-usb/
+!/dist/tizen-usb/**
 
 # Ignore workspace-level scratch folders, design exports, and temporary scripts
 /.agents/

@@ -1,5 +1,5 @@
 /* ============================================================
-   IPTV Player — Media Player On-Screen Display (OSD) Component
+   IPTV Player â€” Media Player On-Screen Display (OSD) Component
    Handles OSD rendering, playbar scrubbing, 3-tier D-pad focus
    navigation, seek HUD, channel banner, and time formatting.
    ============================================================ */
@@ -38,7 +38,7 @@ window.IPTV.PlayerOsd = {
         if (window.IPTV && window.IPTV.Icons) {
             pp.innerHTML = window.IPTV.Icons.get(isPlaying ? 'pause' : 'play', 'osd-svg-icon');
         } else {
-            pp.textContent = isPlaying ? '⏸' : '▶';
+            pp.textContent = isPlaying ? 'â¸' : 'â–¶';
         }
     },
 
@@ -97,7 +97,13 @@ window.IPTV.PlayerOsd = {
             return;
         }
 
-        this.updateProgressUI(player, player.video.currentTime || 0, player.video.duration);
+        const curTime = typeof player.getCurrentTime === 'function'
+            ? player.getCurrentTime()
+            : (player.video.currentTime || 0);
+        const totDur = typeof player.getDuration === 'function'
+            ? player.getDuration()
+            : player.video.duration;
+        this.updateProgressUI(player, curTime, totDur);
     },
 
     showSeekHUD(player, icon, text, time) {
@@ -109,10 +115,10 @@ window.IPTV.PlayerOsd = {
 
         if (iconEl) {
             if (window.IPTV && window.IPTV.Icons) {
-                const mapped = icon === '⏩' ? 'ff' : (icon === '⏪' ? 'rw' : (icon === '▶' ? 'play' : (icon === '⏸' ? 'pause' : icon)));
+                const mapped = icon === 'â©' ? 'ff' : (icon === 'âª' ? 'rw' : (icon === 'â–¶' ? 'play' : (icon === 'â¸' ? 'pause' : icon)));
                 iconEl.innerHTML = window.IPTV.Icons.get(mapped, 'hud-svg-icon');
             } else {
-                iconEl.textContent = icon || '⏩';
+                iconEl.textContent = icon || 'â©';
             }
         }
         if (textEl) textEl.textContent = text || '';
@@ -369,10 +375,13 @@ window.IPTV.PlayerOsd = {
             return Math.max(0, Math.min(1, (clientX - rect.left) / (rect.width || 1)));
         };
 
+        const getDur = () => (typeof player.getDuration === 'function' ? player.getDuration() : player.video.duration);
+
         const updateScrubPreview = (ratio) => {
             if (!player.canSeek()) return;
-            const targetTime = ratio * player.video.duration;
-            player._updateProgressUI(targetTime, player.video.duration);
+            const dur = getDur();
+            const targetTime = ratio * dur;
+            player._updateProgressUI(targetTime, dur);
             const bubble = document.getElementById('osd-scrub-bubble');
             if (bubble) {
                 bubble.textContent = player._fmtTime(targetTime);
@@ -381,7 +390,7 @@ window.IPTV.PlayerOsd = {
             player.showSeekHUD(
                 'seekPin',
                 player._fmtTime(targetTime),
-                `${player._fmtTime(targetTime)} / ${player._fmtTime(player.video.duration)}`
+                `${player._fmtTime(targetTime)} / ${player._fmtTime(dur)}`
             );
         };
 
@@ -417,7 +426,7 @@ window.IPTV.PlayerOsd = {
                 if (bubble) bubble.style.opacity = '';
 
                 if (pendingRatio !== null && player.canSeek()) {
-                    const targetTime = pendingRatio * player.video.duration;
+                    const targetTime = pendingRatio * getDur();
                     pendingRatio = null;
                     player.seekTo(targetTime, true);
                 }
@@ -436,7 +445,7 @@ window.IPTV.PlayerOsd = {
         progressBar.addEventListener('click', (e) => {
             if (!player.canSeek()) return;
             const ratio = getRatioFromEvent(e);
-            const targetTime = ratio * player.video.duration;
+            const targetTime = ratio * getDur();
             player.seekTo(targetTime, true);
             player.autoHideOSD();
         });
@@ -445,7 +454,7 @@ window.IPTV.PlayerOsd = {
             if (!isDragging && player.canSeek()) {
                 player.autoHideOSD();
                 const ratio = getRatioFromEvent(e);
-                const targetTime = ratio * player.video.duration;
+                const targetTime = ratio * getDur();
                 const bubble = document.getElementById('osd-scrub-bubble');
                 if (bubble) {
                     bubble.textContent = player._fmtTime(targetTime);

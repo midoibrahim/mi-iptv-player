@@ -1,5 +1,5 @@
 /* ============================================================
-   IPTV Player — Multi-Stage Playback Engine
+   IPTV Player â€” Multi-Stage Playback Engine
    Manages <video>, Hls.js MSE, mpegts.js MSE, candidate
    watchdog timers, and automatic fallback sequencing.
    ============================================================ */
@@ -34,7 +34,9 @@ window.IPTV.PlaybackEngine = {
         player._candidateWatchdog = setTimeout(() => {
             if (player._loadSessionId !== sessionId) return;
             if (!player.visible || player.currentItem !== item) return;
-            const hasVideoData = player.video && (player.video.readyState >= 2 || player.video.currentTime > 0);
+            const hasVideoData = player._avplayActive
+            ? (player._avplayCurrentTime > 0)
+            : (player.video && (player.video.readyState >= 2 || player.video.currentTime > 0));
             if (!hasVideoData) {
                 console.warn('[PlaybackEngine] Candidate timed out waiting for data, trying next...');
                 this.tryNextCandidate(player, item, sessionId);
@@ -64,6 +66,142 @@ window.IPTV.PlaybackEngine = {
                 player.mpegtsPlayer.destroy();
             } catch (e) {}
             player.mpegtsPlayer = null;
+        }
+        if (player._avplayActive) {
+            this.destroyTizenAvPlay(player);
+        }
+    },
+
+    isTizenAvPlayAvailable() {
+        return !!(
+            window.IPTV.Platform &&
+            window.IPTV.Platform.isTizen() &&
+            window.webapis &&
+            window.webapis.avplay &&
+            typeof window.webapis.avplay.open === 'function'
+        );
+    },
+
+    destroyTizenAvPlay(player) {
+        if (!player) return;
+        player._avplayActive = false;
+        player._avplayPaused = false;
+        player._avplayCurrentTime = 0;
+        player._avplayDuration = 0;
+        if (window.webapis && window.webapis.avplay) {
+            try { window.webapis.avplay.stop(); } catch (e) {}
+            try { window.webapis.avplay.close(); } catch (e) {}
+        }
+        document.body.classList.remove('avplay-active');
+        if (player.video) {
+            player.video.style.visibility = '';
+        }
+    },
+
+    playTizenAvPlay(player, url, item, sessionId) {
+        if (!player || !this.isTizenAvPlayAvailable()) return false;
+        try {
+            const avplay = window.webapis.avplay;
+            let avObj = document.getElementById('av-player');
+            if (!avObj && player.playerScreen) {
+                avObj = document.createElement('object');
+                avObj.id = 'av-player';
+                avObj.setAttribute('type', 'application/avplayer');
+                avObj.style.cssText = 'position:absolute;top:0;left:0;width:1920px;height:1080px;z-index:1;pointer-events:none;';
+                player.playerScreen.insertBefore(avObj, player.playerScreen.firstChild);
+            }
+
+            try { avplay.stop(); } catch (e) {}
+            try { avplay.close(); } catch (e) {}
+
+            player._avplayActive = true;
+            player._avplayPaused = false;
+            player._avplayCurrentTime = 0;
+            player._avplayDuration = 0;
+            document.body.classList.add('avplay-active');
+            if (player.video) {
+                player.video.style.visibility = 'hidden';
+            }
+
+            const isLive = player.isLiveStream();
+            this.startWatchdog(player, item, sessionId, isLive ? 10000 : 15000);
+
+            avplay.open(url);
+            try { avplay.setDisplayRect(0, 0, 1920, 1080); } catch (e) {}
+            try { avplay.setDisplayMethod('PLAYER_DISPLAY_MODE_LETTER_BOX'); } catch (e) {}
+
+            avplay.setListener({
+                onbufferingstart: () => {},
+                onbufferingprogress: () => {},
+                onbufferingcomplete: () => {
+                    if (player._loadSessionId !== sessionId) return;
+                    this.clearWatchdog(player);
+                },
+                oncurrentplaytime: (currentTimeMs) => {
+                    if (player._loadSessionId !== sessionId || !player._avplayActive) return;
+                    player._avplayCurrentTime = (currentTimeMs || 0) / 1000;
+                    if (!player._avplayDuration && !isLive) {
+                        try {
+                            const durMs = avplay.getDuration();
+                            if (durMs > 0) player._avplayDuration = durMs / 1000;
+                        } catch (e) {}
+                    }
+                    player._updateProgress();
+                },
+                onstreamcompleted: () => {
+                    if (player._loadSessionId !== sessionId || !player._avplayActive) return;
+                    try { avplay.stop(); } catch (e) {}
+                    player._recordWatchProgress(true);
+                    if (player.currentItem && player.currentItem.type === 'series') {
+                        const settings = window.IPTV.Storage ? window.IPTV.Storage.getSettings() : null;
+                        const autoplay = !settings || settings.autoplay !== false;
+                        if (autoplay && player.hasNextEpisode()) {
+                            player.nextEpisode();
+                        }
+                    }
+                },
+                onerror: (eventType) => {
+                    if (player._loadSessionId !== sessionId || !player._avplayActive) return;
+                    console.warn('[PlaybackEngine] Tizen AVPlay error:', eventType);
+                    this.destroyTizenAvPlay(player);
+                    if (window.IPTV.EventBus) {
+                        window.IPTV.EventBus.toast('Unable to play stream. Server unreachable or format unsupported.');
+                    }
+                }
+            });
+
+            avplay.prepareAsync(() => {
+                if (player._loadSessionId !== sessionId || !player._avplayActive) return;
+                this.clearWatchdog(player);
+                player._markCandidateSuccess(url);
+                if (!isLive) {
+                    try {
+                        const durMs = avplay.getDuration();
+                        if (durMs > 0) player._avplayDuration = durMs / 1000;
+                    } catch (e) {}
+                }
+                try {
+                    avplay.play();
+                    player._avplayPaused = false;
+                    player._updatePlayPauseIcon(true);
+                    player._checkPendingInitialSeek();
+                } catch (playErr) {
+                    console.warn('[PlaybackEngine] AVPlay play() failed:', playErr);
+                }
+            }, (prepErr) => {
+                if (player._loadSessionId !== sessionId || !player._avplayActive) return;
+                console.warn('[PlaybackEngine] AVPlay prepareAsync failed:', prepErr);
+                this.destroyTizenAvPlay(player);
+                if (window.IPTV.EventBus) {
+                    window.IPTV.EventBus.toast('Unable to play stream. Server unreachable or format unsupported.');
+                }
+            });
+
+            return true;
+        } catch (err) {
+            console.warn('[PlaybackEngine] Tizen AVPlay exception:', err);
+            this.destroyTizenAvPlay(player);
+            return false;
         }
     },
 
@@ -239,6 +377,18 @@ window.IPTV.PlaybackEngine = {
             const nextUrl = player.currentCandidates[player.currentCandidateIndex];
             this.loadCandidate(player, nextUrl, item);
         } else {
+            // Last-resort fallback on Samsung Tizen TVs: try hardware webapis.avplay
+            if (!player._avplayTried && this.isTizenAvPlayAvailable()) {
+                player._avplayTried = true;
+                const rawUrl = item && (item.url || item.hlsUrl || item.fallbackUrl);
+                if (rawUrl) {
+                    console.log('[PlaybackEngine] Falling back to Samsung Tizen AVPlay hardware decoder:', rawUrl);
+                    player._loadSessionId = (player._loadSessionId || 0) + 1;
+                    if (this.playTizenAvPlay(player, rawUrl, item, player._loadSessionId)) {
+                        return;
+                    }
+                }
+            }
             console.error('[PlaybackEngine] All stream candidates failed for:', item ? item.name : 'Unknown');
             if (window.IPTV.EventBus) {
                 window.IPTV.EventBus.toast('Unable to play stream. Server unreachable or format unsupported.');

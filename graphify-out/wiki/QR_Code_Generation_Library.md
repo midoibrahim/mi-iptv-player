@@ -1,19 +1,20 @@
 # QR Code Generation Library
 
-> 10 nodes · cohesion 0.42
+> 11 nodes · cohesion 0.47
 
 ## Key Concepts
 
-- **homeView.js** (9 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_addContinueWatchingRow()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **render()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **resumeItem()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **showResumeModal()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **closeResumeModal()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_fmtRemaining()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_addRow()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_fmtTime()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
+- **playbackEngine.js** (10 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **loadCandidate()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **playTizenAvPlay()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **tryNextCandidate()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **startWatchdog()** (5 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **clearWatchdog()** (4 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **destroy()** (4 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **destroyTizenAvPlay()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **isTizenAvPlayAvailable()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **playNativeDirect()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **loadScriptOnce()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 
 ## Relationships
 
@@ -21,11 +22,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/views/homeView.js`
+- `IPTVPlayer/js/services/playbackEngine.js`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
+- EXTRACTED: 26 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

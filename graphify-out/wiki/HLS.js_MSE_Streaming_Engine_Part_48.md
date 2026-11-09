@@ -4,9 +4,9 @@
 
 ## Key Concepts
 
-- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
-- **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
-- **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **streamResolver.js** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
+- **buildCandidates()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
+- **getStrategy()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
 
 ## Relationships
 
@@ -14,7 +14,7 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/watchProgressTracker.js`
+- `IPTVPlayer/js/services/streamResolver.js`
 
 ## Audit Trail
 

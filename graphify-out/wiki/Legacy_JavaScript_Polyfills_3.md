@@ -9,7 +9,7 @@
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (2 shared connections)
 
 ## Source Files
 

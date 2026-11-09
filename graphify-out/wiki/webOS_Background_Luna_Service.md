@@ -1,40 +1,39 @@
 # webOS Background Luna Service
 
-> 18 nodes · cohesion 0.12
+> 18 nodes · cohesion 0.11
 
 ## Key Concepts
 
-- **windows/package.json** (11 connections) — `windows/package.json`
-- **electron** (5 connections) — `windows/package.json`
-- **devDependencies** (3 connections) — `windows/package.json`
-- **scripts** (3 connections) — `windows/package.json`
-- **@electron/packager** (2 connections) — `windows/package.json`
-- **electron@^33.2.1** (2 connections) — `windows/package.json`
-- **@electron/packager@^18.3.6** (2 connections) — `windows/package.json`
-- **preload.js** (2 connections) — `windows/preload.js`
-- **author** (1 connections) — `windows/package.json`
-- **description** (1 connections) — `windows/package.json`
-- **keywords** (1 connections) — `windows/package.json`
-- **license** (1 connections) — `windows/package.json`
-- **main** (1 connections) — `windows/package.json`
-- **name** (1 connections) — `windows/package.json`
-- **build** (1 connections) — `windows/package.json`
-- **start** (1 connections) — `windows/package.json`
-- **version** (1 connections) — `windows/package.json`
-- **{ contextBridge, ipcRenderer }** (1 connections) — `windows/preload.js`
+- **package.json** (9 connections) — `package.json`
+- **scripts** (9 connections) — `package.json`
+- **author** (1 connections) — `package.json`
+- **description** (1 connections) — `package.json`
+- **keywords** (1 connections) — `package.json`
+- **license** (1 connections) — `package.json`
+- **name** (1 connections) — `package.json`
+- **private** (1 connections) — `package.json`
+- **build:all** (1 connections) — `package.json`
+- **build:tizen** (1 connections) — `package.json`
+- **build:webos** (1 connections) — `package.json`
+- **build:windows** (1 connections) — `package.json`
+- **setup** (1 connections) — `package.json`
+- **start:server** (1 connections) — `package.json`
+- **start:windows** (1 connections) — `package.json`
+- **test** (1 connections) — `package.json`
+- **version** (1 connections) — `package.json`
+- **workspaces** (1 connections) — `package.json`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (2 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `windows/package.json`
-- `windows/preload.js`
+- `package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 21 (100%)
+- EXTRACTED: 17 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

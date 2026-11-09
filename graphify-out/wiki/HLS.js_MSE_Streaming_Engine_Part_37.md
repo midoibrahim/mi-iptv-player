@@ -1,15 +1,17 @@
 # HLS.js MSE Streaming Engine (Part 37)
 
-> 6 nodes · cohesion 0.40
+> 8 nodes · cohesion 0.43
 
 ## Key Concepts
 
-- **backStack.js** (5 connections) — `IPTVPlayer/js/core/backStack.js`
-- **pop()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
-- **push()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
-- **handleBack()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
-- **register()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
+- **downloadStore.js** (7 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **collectPendingEpisodes()** (4 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **getDownloadedItem()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isCompleted()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **buildEpisodePayload()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDesktop()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDownloading()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **applySnapshot()** (1 connections) — `IPTVPlayer/js/services/downloadStore.js`
 
 ## Relationships
 
@@ -17,11 +19,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/backStack.js`
+- `IPTVPlayer/js/services/downloadStore.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 12 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

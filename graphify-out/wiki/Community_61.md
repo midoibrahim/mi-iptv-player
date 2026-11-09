@@ -1,22 +1,23 @@
 # Community 61
 
-> 1 nodes · cohesion 1.00
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **.abort()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **qi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ui()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (2 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/polyfills.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 0 (0%)
+- EXTRACTED: 3 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

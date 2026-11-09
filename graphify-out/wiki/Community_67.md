@@ -4,19 +4,19 @@
 
 ## Key Concepts
 
-- **resolveVarsWithMap()** (3 connections) — `tizen-build/build.mjs`
+- **LG webOS CLI Installation Guide** (0 connections) — `README.md`
 
 ## Relationships
 
-- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `tizen-build/build.mjs`
+- `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 2 (100%)
+- EXTRACTED: 0 (0%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

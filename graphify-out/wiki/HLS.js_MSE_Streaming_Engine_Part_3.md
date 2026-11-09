@@ -35,7 +35,7 @@
 
 - [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (2 shared connections)
 - [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (1 shared connections)
+- [Storage & Profile Persistence](Storage_&_Profile_Persistence.md) (1 shared connections)
 
 ## Source Files
 

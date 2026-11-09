@@ -1,25 +1,26 @@
 # HLS.js MSE Streaming Engine (Part 43)
 
-> 4 nodes · cohesion 0.50
+> 5 nodes · cohesion 0.40
 
 ## Key Concepts
 
-- **Fl()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ar()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **kn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **xl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **IPTVService/package.json** (4 connections) — `IPTVService/package.json`
+- **description** (1 connections) — `IPTVService/package.json`
+- **main** (1 connections) — `IPTVService/package.json`
+- **name** (1 connections) — `IPTVService/package.json`
+- **version** (1 connections) — `IPTVService/package.json`
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (4 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVService/package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 7 (100%)
+- EXTRACTED: 4 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

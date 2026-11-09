@@ -1,19 +1,19 @@
 # Theme Engine & Design Tokens
 
-> 10 nodes · cohesion 0.40
+> 10 nodes · cohesion 0.42
 
 ## Key Concepts
 
-- **seriesDetailView.js** (9 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderEpisodesList()** (5 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderScreen()** (4 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **buildEpisodePlayItem()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **_formatEpisodeTitle()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **updateFavoriteState()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **close()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **focusEpisodeCard()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **open()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **channelDrawer.js** (9 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **appendChunk()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **close()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **handleKey()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **open()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **renderChannels()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **focusItem()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **renderCategories()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **toggle()** (2 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **init()** (1 connections) — `IPTVPlayer/js/components/channelDrawer.js`
 
 ## Relationships
 
@@ -21,11 +21,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/views/seriesDetailView.js`
+- `IPTVPlayer/js/components/channelDrawer.js`
 
 ## Audit Trail
 
-- EXTRACTED: 18 (100%)
+- EXTRACTED: 19 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

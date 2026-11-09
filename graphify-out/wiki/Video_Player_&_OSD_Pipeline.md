@@ -1,59 +1,57 @@
 # Video Player & OSD Pipeline
 
-> 62 nodes · cohesion 0.03
+> 57 nodes · cohesion 0.06
 
 ## Key Concepts
 
-- **hls.min.js** (248 connections) — `IPTVPlayer/js/hls.min.js`
-- **aa()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **Bd()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **Bl()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **Bn()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **bufferingAsset()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **bufferingIndex()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **bufferingItem()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **ca()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **cr()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **cu()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **di()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **du()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **er()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **Eu()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **events()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **fu()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **gr()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ha()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **hi()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **hn()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **hr()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **Id()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **ir()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ji()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- *... and 37 more nodes in this community*
+- **downloader.js** (22 connections) — `windows/downloader.js`
+- **downloadUtils.js** (16 connections) — `windows/downloadUtils.js`
+- **IPTVService/companionCore.js** (14 connections) — `IPTVService/companionCore.js`
+- **main.js** (14 connections) — `windows/main.js`
+- **windows/companionCore.js** (13 connections) — `windows/companionCore.js`
+- **service.js** (10 connections) — `IPTVService/service.js`
+- **ref_path** (7 connections)
+- **ref_fs** (6 connections)
+- **handle()** (5 connections) — `IPTVService/companionCore.js`
+- **proxyStream()** (5 connections) — `IPTVService/companionCore.js`
+- **ref_http** (5 connections)
+- **handle()** (5 connections) — `windows/companionCore.js`
+- **proxyStream()** (5 connections) — `windows/companionCore.js`
+- **resolveDownloadTarget()** (5 connections) — `windows/downloadUtils.js`
+- **log()** (4 connections) — `IPTVService/service.js`
+- **ref_url** (4 connections)
+- **ensureDir()** (4 connections) — `windows/downloadUtils.js`
+- **formatBytes()** (4 connections) — `windows/downloadUtils.js`
+- **sanitizeFileName()** (4 connections) — `windows/downloadUtils.js`
+- **serializeTask()** (4 connections) — `windows/downloadUtils.js`
+- **Windows Desktop Offline Download System** (3 connections) — `windows/main.js`
+- **createCompanionHandler()** (3 connections) — `IPTVService/companionCore.js`
+- **getLanIp()** (3 connections) — `IPTVService/companionCore.js`
+- **sendJson()** (3 connections) — `IPTVService/companionCore.js`
+- **ensureServer()** (3 connections) — `IPTVService/service.js`
+- *... and 32 more nodes in this community*
 
 ## Relationships
 
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (30 shared connections)
-- [Download UI & Task Management](Download_UI_&_Task_Management.md) (25 shared connections)
-- [Login View & Profile Selector](Login_View_&_Profile_Selector.md) (19 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (17 shared connections)
-- [Package Configuration & Dependencies (17)](Package_Configuration_&_Dependencies_17.md) (16 shared connections)
-- [Legacy JavaScript Polyfills](Legacy_JavaScript_Polyfills.md) (13 shared connections)
-- [Home View & Content Rows](Home_View_&_Content_Rows.md) (13 shared connections)
-- [Settings & Preferences View](Settings_&_Preferences_View.md) (12 shared connections)
-- [HLS.js MSE Streaming Engine (Part 33)](HLS.js_MSE_Streaming_Engine_Part_33.md) (9 shared connections)
-- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (8 shared connections)
-- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (4 shared connections)
-- [HLS.js MSE Streaming Engine (Part 43)](HLS.js_MSE_Streaming_Engine_Part_43.md) (4 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (7 shared connections)
+- [Storage & Profile Persistence](Storage_&_Profile_Persistence.md) (4 shared connections)
+- [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (2 shared connections)
+- [Package Configuration & Dependencies (17)](Package_Configuration_&_Dependencies_17.md) (2 shared connections)
+- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVService/companionCore.js`
+- `IPTVService/service.js`
+- `windows/companionCore.js`
+- `windows/downloadUtils.js`
+- `windows/downloader.js`
+- `windows/main.js`
 
 ## Audit Trail
 
-- EXTRACTED: 240 (97%)
-- INFERRED: 8 (3%)
+- EXTRACTED: 98 (83%)
+- INFERRED: 20 (17%)
 - AMBIGUOUS: 0 (0%)
 
 ---

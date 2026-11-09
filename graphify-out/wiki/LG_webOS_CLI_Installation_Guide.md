@@ -4,13 +4,12 @@
 
 ## Key Concepts
 
-- **Za()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ja()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ht()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **pa()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (2 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (2 shared connections)
 
 ## Source Files
 
@@ -18,7 +17,7 @@
 
 ## Audit Trail
 
-- EXTRACTED: 4 (100%)
+- EXTRACTED: 3 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

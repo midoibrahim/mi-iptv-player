@@ -1,0 +1,29 @@
+{
+  "name": "mi-iptv-player-workspace",
+  "version": "1.0.0",
+  "description": "MI IPTV Player - 10-foot Smart TV & Desktop Player (LG webOS, Samsung Tizen, Windows Desktop)",
+  "private": true,
+  "workspaces": [
+    "webos-build",
+    "windows"
+  ],
+  "scripts": {
+    "setup": "install-dependencies.bat",
+    "test": "node --test tests/characterization.test.js",
+    "build:webos": "node webos-build/build.mjs",
+    "build:tizen": "node tizen-build/build.mjs",
+    "build:windows": "node windows/build.js",
+    "build:all": "node webos-build/build.mjs && node tizen-build/build.mjs && node windows/build.js",
+    "start:windows": "electron windows",
+    "start:server": "python server.py"
+  },
+  "keywords": [
+    "iptv",
+    "smart-tv",
+    "webos",
+    "tizen",
+    "electron"
+  ],
+  "author": "Mohamed Ibrahim",
+  "license": "Apache-2.0"
+}

@@ -1,6 +1,6 @@
 # Electron Background Downloader
 
-> 34 nodes · cohesion 0.15
+> 33 nodes · cohesion 0.16
 
 ## Key Concepts
 
@@ -29,21 +29,20 @@
 - **.getAll()** (3 connections) — `windows/downloader.js`
 - **.getSettings()** (3 connections) — `windows/downloader.js`
 - **.isDownloading()** (3 connections) — `windows/downloader.js`
-- *... and 9 more nodes in this community*
+- *... and 8 more nodes in this community*
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (8 shared connections)
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (7 shared connections)
 
 ## Source Files
 
-- `windows/downloadUtils.js`
 - `windows/downloader.js`
 
 ## Audit Trail
 
-- EXTRACTED: 93 (99%)
-- INFERRED: 1 (1%)
+- EXTRACTED: 92 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

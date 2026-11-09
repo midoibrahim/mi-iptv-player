@@ -1,0 +1,9 @@
+# ========================================================
+# MI IPTV Player — Python Requirements
+# ========================================================
+
+# Knowledge graph and codebase architecture analyzer (see AGENTS.md)
+graphifyy>=0.9.103
+
+# Network and HTTP utilities (optional playlist & stream verification)
+requests>=2.31.0

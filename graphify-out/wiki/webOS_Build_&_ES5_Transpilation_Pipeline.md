@@ -33,7 +33,7 @@
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (1 shared connections)
+- [Storage & Profile Persistence](Storage_&_Profile_Persistence.md) (1 shared connections)
 
 ## Source Files
 

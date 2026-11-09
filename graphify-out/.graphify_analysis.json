@@ -1,75 +1,6 @@
 {
   "communities": {
     "0": [
-      "concept_desktop_download_system",
-      "iptvservice_companioncore",
-      "iptvservice_companioncore_createcompanionhandler",
-      "iptvservice_companioncore_createcompanionhandler_handle",
-      "iptvservice_companioncore_getlanip",
-      "iptvservice_companioncore_proxystream",
-      "iptvservice_companioncore_rationale_15",
-      "iptvservice_companioncore_sendjson",
-      "iptvservice_companioncore_servestatic",
-      "iptvservice_service",
-      "iptvservice_service_ensureserver",
-      "iptvservice_service_keepalive",
-      "iptvservice_service_log",
-      "iptvservice_service_rationale_11",
-      "iptvservice_service_shutdownserver",
-      "ref_child_process",
-      "ref_fs",
-      "ref_http",
-      "ref_https",
-      "ref_os",
-      "ref_path",
-      "ref_url",
-      "ref_webos_service",
-      "windows_build",
-      "windows_build_appdir",
-      "windows_build_execsync",
-      "windows_build_expectedexe",
-      "windows_build_fs",
-      "windows_build_iconfile",
-      "windows_build_ignored_names",
-      "windows_build_outdir",
-      "windows_build_path",
-      "windows_build_srcdir",
-      "windows_companioncore",
-      "windows_companioncore_createcompanionhandler",
-      "windows_companioncore_createcompanionhandler_handle",
-      "windows_companioncore_getlanip",
-      "windows_companioncore_proxystream",
-      "windows_companioncore_rationale_15",
-      "windows_companioncore_sendjson",
-      "windows_companioncore_servestatic",
-      "windows_downloader",
-      "windows_downloader_app_dialog_shell",
-      "windows_downloader_downloader_sanitizefilename",
-      "windows_downloader_fs",
-      "windows_downloader_http",
-      "windows_downloader_https",
-      "windows_downloader_path",
-      "windows_downloader_url",
-      "windows_downloadutils",
-      "windows_downloadutils_ensuredir",
-      "windows_downloadutils_formatbytes",
-      "windows_downloadutils_fs",
-      "windows_downloadutils_path",
-      "windows_downloadutils_resolvedownloadtarget",
-      "windows_downloadutils_sanitizefilename",
-      "windows_downloadutils_serializetask",
-      "windows_downloadutils_spawn",
-      "windows_downloadutils_url",
-      "windows_main",
-      "windows_main_app_browserwindow_menu_ipcmain",
-      "windows_main_createwindow",
-      "windows_main_fs",
-      "windows_main_http",
-      "windows_main_path",
-      "windows_main_setupipchandlers",
-      "windows_main_startcompanionserver"
-    ],
-    "1": [
       "iptvplayer_js_hls_min",
       "iptvplayer_js_hls_min_aa",
       "iptvplayer_js_hls_min_bd",
@@ -132,6 +63,65 @@
       "iptvplayer_js_hls_min_xd",
       "iptvplayer_js_hls_min_ya",
       "iptvplayer_js_hls_min_ye"
+    ],
+    "1": [
+      "concept_desktop_download_system",
+      "iptvservice_companioncore",
+      "iptvservice_companioncore_createcompanionhandler",
+      "iptvservice_companioncore_createcompanionhandler_handle",
+      "iptvservice_companioncore_getlanip",
+      "iptvservice_companioncore_proxystream",
+      "iptvservice_companioncore_rationale_15",
+      "iptvservice_companioncore_sendjson",
+      "iptvservice_companioncore_servestatic",
+      "iptvservice_service",
+      "iptvservice_service_ensureserver",
+      "iptvservice_service_keepalive",
+      "iptvservice_service_log",
+      "iptvservice_service_rationale_11",
+      "iptvservice_service_shutdownserver",
+      "ref_fs",
+      "ref_http",
+      "ref_https",
+      "ref_os",
+      "ref_path",
+      "ref_url",
+      "ref_webos_service",
+      "windows_companioncore",
+      "windows_companioncore_createcompanionhandler",
+      "windows_companioncore_createcompanionhandler_handle",
+      "windows_companioncore_getlanip",
+      "windows_companioncore_proxystream",
+      "windows_companioncore_rationale_15",
+      "windows_companioncore_sendjson",
+      "windows_companioncore_servestatic",
+      "windows_downloader",
+      "windows_downloader_app_dialog_shell",
+      "windows_downloader_downloader_sanitizefilename",
+      "windows_downloader_fs",
+      "windows_downloader_http",
+      "windows_downloader_https",
+      "windows_downloader_path",
+      "windows_downloader_url",
+      "windows_downloadutils",
+      "windows_downloadutils_ensuredir",
+      "windows_downloadutils_formatbytes",
+      "windows_downloadutils_fs",
+      "windows_downloadutils_path",
+      "windows_downloadutils_remuxtomp4",
+      "windows_downloadutils_resolvedownloadtarget",
+      "windows_downloadutils_sanitizefilename",
+      "windows_downloadutils_serializetask",
+      "windows_downloadutils_spawn",
+      "windows_downloadutils_url",
+      "windows_main",
+      "windows_main_app_browserwindow_menu_ipcmain",
+      "windows_main_createwindow",
+      "windows_main_fs",
+      "windows_main_http",
+      "windows_main_path",
+      "windows_main_setupipchandlers",
+      "windows_main_startcompanionserver"
     ],
     "2": [
       "iptvplayer_js_services_playerservice",
@@ -278,18 +268,15 @@
       "tizen_build_build_wgtpath"
     ],
     "5": [
-      "iptvplayer_js_hls_min_m",
+      "iptvplayer_js_hls_min_ku",
+      "iptvplayer_js_hls_min_ku_t",
       "iptvplayer_js_hls_min_m_a",
-      "iptvplayer_js_hls_min_v",
       "iptvplayer_js_hls_min_v_a",
       "iptvplayer_js_hls_min_v_a_c",
-      "iptvplayer_js_hls_min_v_f",
-      "iptvplayer_js_hls_min_v_l",
-      "iptvplayer_js_hls_min_v_o",
-      "iptvplayer_js_hls_min_v_u",
       "iptvplayer_js_hls_min_wu",
       "iptvplayer_js_hls_min_wu_a",
       "iptvplayer_js_hls_min_wu_n",
+      "iptvplayer_js_hls_min_zu",
       "iptvplayer_js_mpegts",
       "iptvplayer_js_mpegts_a",
       "iptvplayer_js_mpegts_b",
@@ -348,8 +335,7 @@
       "windows_downloader_downloader_showinfolder",
       "windows_downloader_downloader_startbatchdownloads",
       "windows_downloader_downloader_startdownload",
-      "windows_downloader_downloader_updatesettings",
-      "windows_downloadutils_remuxtomp4"
+      "windows_downloader_downloader_updatesettings"
     ],
     "7": [
       "iptvplayer_js_hls_min_a",
@@ -358,15 +344,18 @@
       "iptvplayer_js_hls_min_bufferedend",
       "iptvplayer_js_hls_min_currenttime",
       "iptvplayer_js_hls_min_duration",
+      "iptvplayer_js_hls_min_e",
       "iptvplayer_js_hls_min_es",
+      "iptvplayer_js_hls_min_f",
+      "iptvplayer_js_hls_min_fe",
       "iptvplayer_js_hls_min_fr",
-      "iptvplayer_js_hls_min_gt",
       "iptvplayer_js_hls_min_i",
       "iptvplayer_js_hls_min_interstitialplayer",
       "iptvplayer_js_hls_min_l",
       "iptvplayer_js_hls_min_n",
       "iptvplayer_js_hls_min_ne",
       "iptvplayer_js_hls_min_o",
+      "iptvplayer_js_hls_min_on",
       "iptvplayer_js_hls_min_playingindex",
       "iptvplayer_js_hls_min_pt",
       "iptvplayer_js_hls_min_r",
@@ -374,9 +363,8 @@
       "iptvplayer_js_hls_min_scheduleitem",
       "iptvplayer_js_hls_min_ti",
       "iptvplayer_js_hls_min_ul",
-      "iptvplayer_js_hls_min_ut",
+      "iptvplayer_js_hls_min_ve",
       "iptvplayer_js_hls_min_vr",
-      "iptvplayer_js_hls_min_vt",
       "iptvplayer_js_hls_min_xn",
       "iptvplayer_js_hls_min_y",
       "iptvplayer_js_hls_min_yr",
@@ -415,6 +403,35 @@
       "iptvplayer_js_core_spatialnav_navigate"
     ],
     "9": [
+      "concept_10foot_tv_architecture",
+      "concept_cross_platform_runtime",
+      "concept_qr_companion_setup",
+      "concept_streaming_pipeline",
+      "iptvplayer_index_html_shell",
+      "iptvplayer_js_services_tvserver",
+      "iptvplayer_js_services_tvserver_ensurestarted",
+      "iptvplayer_js_services_tvserver_getsetupinfo",
+      "iptvplayer_js_services_tvserver_isrunning",
+      "iptvplayer_js_services_tvserver_iswebos",
+      "iptvplayer_js_services_tvserver_pollcredentials",
+      "iptvplayer_js_services_tvserver_resolveapibase",
+      "iptvplayer_js_services_tvserver_stop",
+      "iptvplayer_setup_html_page",
+      "readme_compatibility_matrix",
+      "readme_mi_iptv_player",
+      "ref_child_process",
+      "windows_build",
+      "windows_build_appdir",
+      "windows_build_execsync",
+      "windows_build_expectedexe",
+      "windows_build_fs",
+      "windows_build_iconfile",
+      "windows_build_ignored_names",
+      "windows_build_outdir",
+      "windows_build_path",
+      "windows_build_srcdir"
+    ],
+    "10": [
       "iptvplayer_js_core_storage",
       "iptvplayer_js_core_storage_clearconnection",
       "iptvplayer_js_core_storage_createprofile",
@@ -442,34 +459,6 @@
       "iptvplayer_js_core_storage_savewatchprogressitem",
       "iptvplayer_js_core_storage_serverkey",
       "iptvplayer_js_core_storage_set"
-    ],
-    "10": [
-      "iptvplayer_js_hls_min_at",
-      "iptvplayer_js_hls_min_c",
-      "iptvplayer_js_hls_min_d",
-      "iptvplayer_js_hls_min_dd",
-      "iptvplayer_js_hls_min_e",
-      "iptvplayer_js_hls_min_e_r",
-      "iptvplayer_js_hls_min_ei",
-      "iptvplayer_js_hls_min_f",
-      "iptvplayer_js_hls_min_g",
-      "iptvplayer_js_hls_min_gl",
-      "iptvplayer_js_hls_min_h",
-      "iptvplayer_js_hls_min_ie",
-      "iptvplayer_js_hls_min_it",
-      "iptvplayer_js_hls_min_jr",
-      "iptvplayer_js_hls_min_nt",
-      "iptvplayer_js_hls_min_on",
-      "iptvplayer_js_hls_min_p",
-      "iptvplayer_js_hls_min_pd",
-      "iptvplayer_js_hls_min_qn",
-      "iptvplayer_js_hls_min_rt",
-      "iptvplayer_js_hls_min_st",
-      "iptvplayer_js_hls_min_tt",
-      "iptvplayer_js_hls_min_u",
-      "iptvplayer_js_hls_min_vl",
-      "iptvplayer_js_hls_min_yi",
-      "iptvplayer_js_hls_min_zn"
     ],
     "11": [
       "iptvplayer_js_components_downloadmanager",
@@ -550,6 +539,31 @@
       "iptvplayer_js_app_iptvapp_toast"
     ],
     "14": [
+      "iptvplayer_js_hls_min_an",
+      "iptvplayer_js_hls_min_be",
+      "iptvplayer_js_hls_min_c",
+      "iptvplayer_js_hls_min_ci",
+      "iptvplayer_js_hls_min_dd",
+      "iptvplayer_js_hls_min_gi",
+      "iptvplayer_js_hls_min_ie",
+      "iptvplayer_js_hls_min_ii",
+      "iptvplayer_js_hls_min_in",
+      "iptvplayer_js_hls_min_le",
+      "iptvplayer_js_hls_min_lt",
+      "iptvplayer_js_hls_min_mi",
+      "iptvplayer_js_hls_min_ni",
+      "iptvplayer_js_hls_min_oi",
+      "iptvplayer_js_hls_min_pd",
+      "iptvplayer_js_hls_min_pl",
+      "iptvplayer_js_hls_min_pu",
+      "iptvplayer_js_hls_min_t",
+      "iptvplayer_js_hls_min_t_t",
+      "iptvplayer_js_hls_min_tt",
+      "iptvplayer_js_hls_min_ue",
+      "iptvplayer_js_hls_min_vl",
+      "iptvplayer_js_hls_min_xe"
+    ],
+    "15": [
       "concept_large_playlist_engine",
       "iptvplayer_js_components_browseview",
       "iptvplayer_js_components_browseview_appendnextgridbatch",
@@ -571,29 +585,27 @@
       "iptvplayer_js_components_card_geticon",
       "iptvplayer_js_components_card_schedulelazyimg"
     ],
-    "15": [
-      "iptvplayer_js_hls_min_ba",
-      "iptvplayer_js_hls_min_fa",
-      "iptvplayer_js_hls_min_ga",
-      "iptvplayer_js_hls_min_hu",
-      "iptvplayer_js_hls_min_ju",
-      "iptvplayer_js_hls_min_ku",
-      "iptvplayer_js_hls_min_ku_t",
-      "iptvplayer_js_hls_min_ll",
-      "iptvplayer_js_hls_min_ma",
-      "iptvplayer_js_hls_min_oa",
-      "iptvplayer_js_hls_min_qu",
-      "iptvplayer_js_hls_min_rl",
-      "iptvplayer_js_hls_min_ua",
-      "iptvplayer_js_hls_min_uu",
-      "iptvplayer_js_hls_min_va",
-      "iptvplayer_js_hls_min_wa",
-      "iptvplayer_js_hls_min_xt",
-      "iptvplayer_js_hls_min_xu",
-      "iptvplayer_js_hls_min_yu",
-      "iptvplayer_js_hls_min_zu"
-    ],
     "16": [
+      "package",
+      "package_author",
+      "package_description",
+      "package_keywords",
+      "package_license",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build_all",
+      "package_scripts_build_tizen",
+      "package_scripts_build_webos",
+      "package_scripts_build_windows",
+      "package_scripts_setup",
+      "package_scripts_start_server",
+      "package_scripts_start_windows",
+      "package_scripts_test",
+      "package_version",
+      "package_workspaces"
+    ],
+    "17": [
       "ref_electron",
       "ref_electron_packager",
       "windows_package",
@@ -613,34 +625,34 @@
       "windows_preload",
       "windows_preload_contextbridge_ipcrenderer"
     ],
-    "17": [
-      "iptvplayer_js_hls_min_an",
-      "iptvplayer_js_hls_min_be",
-      "iptvplayer_js_hls_min_ci",
-      "iptvplayer_js_hls_min_gi",
-      "iptvplayer_js_hls_min_ii",
-      "iptvplayer_js_hls_min_in",
-      "iptvplayer_js_hls_min_le",
-      "iptvplayer_js_hls_min_lt",
-      "iptvplayer_js_hls_min_mi",
-      "iptvplayer_js_hls_min_ni",
-      "iptvplayer_js_hls_min_oi",
-      "iptvplayer_js_hls_min_pl",
-      "iptvplayer_js_hls_min_pu",
-      "iptvplayer_js_hls_min_t",
-      "iptvplayer_js_hls_min_t_t",
-      "iptvplayer_js_hls_min_ue",
-      "iptvplayer_js_hls_min_xe"
-    ],
     "18": [
+      "iptvplayer_js_hls_min_at",
+      "iptvplayer_js_hls_min_d",
+      "iptvplayer_js_hls_min_e_r",
+      "iptvplayer_js_hls_min_ei",
+      "iptvplayer_js_hls_min_g",
+      "iptvplayer_js_hls_min_gl",
+      "iptvplayer_js_hls_min_h",
+      "iptvplayer_js_hls_min_it",
+      "iptvplayer_js_hls_min_jr",
+      "iptvplayer_js_hls_min_nt",
+      "iptvplayer_js_hls_min_p",
+      "iptvplayer_js_hls_min_qn",
+      "iptvplayer_js_hls_min_rt",
+      "iptvplayer_js_hls_min_st",
+      "iptvplayer_js_hls_min_u",
+      "iptvplayer_js_hls_min_yi",
+      "iptvplayer_js_hls_min_zn"
+    ],
+    "19": [
       "iptvplayer_js_hls_min_b",
+      "iptvplayer_js_hls_min_ce",
       "iptvplayer_js_hls_min_ct",
+      "iptvplayer_js_hls_min_de",
       "iptvplayer_js_hls_min_dt",
       "iptvplayer_js_hls_min_ee",
-      "iptvplayer_js_hls_min_et",
-      "iptvplayer_js_hls_min_he",
       "iptvplayer_js_hls_min_j",
-      "iptvplayer_js_hls_min_je",
+      "iptvplayer_js_hls_min_ke",
       "iptvplayer_js_hls_min_me",
       "iptvplayer_js_hls_min_oe",
       "iptvplayer_js_hls_min_q",
@@ -651,7 +663,26 @@
       "iptvplayer_js_hls_min_we",
       "iptvplayer_js_hls_min_z"
     ],
-    "19": [
+    "20": [
+      "iptvplayer_js_hls_min_ba",
+      "iptvplayer_js_hls_min_fa",
+      "iptvplayer_js_hls_min_ga",
+      "iptvplayer_js_hls_min_hu",
+      "iptvplayer_js_hls_min_ju",
+      "iptvplayer_js_hls_min_ll",
+      "iptvplayer_js_hls_min_ma",
+      "iptvplayer_js_hls_min_oa",
+      "iptvplayer_js_hls_min_qu",
+      "iptvplayer_js_hls_min_rl",
+      "iptvplayer_js_hls_min_ua",
+      "iptvplayer_js_hls_min_uu",
+      "iptvplayer_js_hls_min_va",
+      "iptvplayer_js_hls_min_wa",
+      "iptvplayer_js_hls_min_xt",
+      "iptvplayer_js_hls_min_xu",
+      "iptvplayer_js_hls_min_yu"
+    ],
+    "21": [
       "iptvplayer_js_views_loginview",
       "iptvplayer_js_views_loginview_bindui",
       "iptvplayer_js_views_loginview_clearformerror",
@@ -670,25 +701,7 @@
       "iptvplayer_js_views_loginview_startremotepolling",
       "iptvplayer_js_views_loginview_stopremotepolling"
     ],
-    "20": [
-      "concept_10foot_tv_architecture",
-      "concept_cross_platform_runtime",
-      "concept_qr_companion_setup",
-      "concept_streaming_pipeline",
-      "iptvplayer_index_html_shell",
-      "iptvplayer_js_services_tvserver",
-      "iptvplayer_js_services_tvserver_ensurestarted",
-      "iptvplayer_js_services_tvserver_getsetupinfo",
-      "iptvplayer_js_services_tvserver_isrunning",
-      "iptvplayer_js_services_tvserver_iswebos",
-      "iptvplayer_js_services_tvserver_pollcredentials",
-      "iptvplayer_js_services_tvserver_resolveapibase",
-      "iptvplayer_js_services_tvserver_stop",
-      "iptvplayer_setup_html_page",
-      "readme_compatibility_matrix",
-      "readme_mi_iptv_player"
-    ],
-    "21": [
+    "22": [
       "iptvplayer_js_components_playerosd",
       "iptvplayer_js_components_playerosd_autohide",
       "iptvplayer_js_components_playerosd_bindscrubbing",
@@ -706,7 +719,7 @@
       "iptvplayer_js_components_playerosd_updateprogress",
       "iptvplayer_js_components_playerosd_updateprogressui"
     ],
-    "22": [
+    "23": [
       "iptvplayer_js_core_catalogstore",
       "iptvplayer_js_core_catalogstore_clear",
       "iptvplayer_js_core_catalogstore_favkey",
@@ -722,7 +735,7 @@
       "iptvplayer_js_core_catalogstore_setconnection",
       "iptvplayer_js_core_catalogstore_togglefavorite"
     ],
-    "23": [
+    "24": [
       "iptvplayer_webostvjs_1_2_13_webostv",
       "iptvplayer_webostvjs_1_2_13_webostv_a",
       "iptvplayer_webostvjs_1_2_13_webostv_b",
@@ -738,7 +751,7 @@
       "iptvplayer_webostvjs_1_2_13_webostv_y",
       "iptvplayer_webostvjs_1_2_13_webostv_z"
     ],
-    "24": [
+    "25": [
       "iptvplayer_webostvjs_1_2_13_webostv_dev",
       "iptvplayer_webostvjs_1_2_13_webostv_dev_b",
       "iptvplayer_webostvjs_1_2_13_webostv_dev_c",
@@ -754,7 +767,7 @@
       "iptvplayer_webostvjs_1_2_13_webostv_dev_v",
       "iptvplayer_webostvjs_1_2_13_webostv_dev_y"
     ],
-    "25": [
+    "26": [
       "iptvplayer_js_core_platform",
       "iptvplayer_js_core_platform_downloads",
       "iptvplayer_js_core_platform_exitapp",
@@ -769,7 +782,7 @@
       "iptvplayer_js_core_platform_setkeepscreenon",
       "iptvplayer_js_core_platform_togglefullscreen"
     ],
-    "26": [
+    "27": [
       "iptvplayer_js_hls_min_dn",
       "iptvplayer_js_hls_min_en",
       "iptvplayer_js_hls_min_fn",
@@ -784,7 +797,7 @@
       "iptvplayer_js_hls_min_yn",
       "iptvplayer_js_hls_min_zi"
     ],
-    "27": [
+    "28": [
       "concept_xtream_and_m3u_protocol",
       "iptvplayer_js_services_m3uparser",
       "iptvplayer_js_services_m3uparser_load",
@@ -798,7 +811,7 @@
       "iptvplayer_js_services_xtreamservice_streamurl",
       "iptvplayer_js_services_xtreamservice_yieldtomain"
     ],
-    "28": [
+    "29": [
       "iptvplayer_js_hls_min_bs",
       "iptvplayer_js_hls_min_fs",
       "iptvplayer_js_hls_min_gs",
@@ -812,7 +825,21 @@
       "iptvplayer_js_hls_min_vs",
       "iptvplayer_js_hls_min_ys"
     ],
-    "29": [
+    "30": [
+      "iptvplayer_js_hls_min_et",
+      "iptvplayer_js_hls_min_gt",
+      "iptvplayer_js_hls_min_he",
+      "iptvplayer_js_hls_min_je",
+      "iptvplayer_js_hls_min_m",
+      "iptvplayer_js_hls_min_ut",
+      "iptvplayer_js_hls_min_v",
+      "iptvplayer_js_hls_min_v_f",
+      "iptvplayer_js_hls_min_v_l",
+      "iptvplayer_js_hls_min_v_o",
+      "iptvplayer_js_hls_min_v_u",
+      "iptvplayer_js_hls_min_vt"
+    ],
+    "31": [
       "iptvplayer_js_services_playbackengine",
       "iptvplayer_js_services_playbackengine_clearwatchdog",
       "iptvplayer_js_services_playbackengine_destroy",
@@ -825,7 +852,7 @@
       "iptvplayer_js_services_playbackengine_startwatchdog",
       "iptvplayer_js_services_playbackengine_trynextcandidate"
     ],
-    "30": [
+    "32": [
       "iptvplayer_js_components_channeldrawer",
       "iptvplayer_js_components_channeldrawer_appendchunk",
       "iptvplayer_js_components_channeldrawer_close",
@@ -837,7 +864,7 @@
       "iptvplayer_js_components_channeldrawer_renderchannels",
       "iptvplayer_js_components_channeldrawer_toggle"
     ],
-    "31": [
+    "33": [
       "iptvplayer_js_views_homeview",
       "iptvplayer_js_views_homeview_addcontinuewatchingrow",
       "iptvplayer_js_views_homeview_addrow",
@@ -849,7 +876,7 @@
       "iptvplayer_js_views_homeview_resumeitem",
       "iptvplayer_js_views_homeview_showresumemodal"
     ],
-    "32": [
+    "34": [
       "iptvplayer_js_views_seriesdetailview",
       "iptvplayer_js_views_seriesdetailview_buildepisodeplayitem",
       "iptvplayer_js_views_seriesdetailview_close",
@@ -861,7 +888,7 @@
       "iptvplayer_js_views_seriesdetailview_renderscreen",
       "iptvplayer_js_views_seriesdetailview_updatefavoritestate"
     ],
-    "33": [
+    "35": [
       "iptvplayer_js_hls_min_bt",
       "iptvplayer_js_hls_min_ft",
       "iptvplayer_js_hls_min_jl",
@@ -872,7 +899,7 @@
       "iptvplayer_js_hls_min_qt",
       "iptvplayer_js_hls_min_wl"
     ],
-    "34": [
+    "36": [
       "iptvplayer_js_hls_min_co",
       "iptvplayer_js_hls_min_jo",
       "iptvplayer_js_hls_min_lo",
@@ -882,7 +909,7 @@
       "iptvplayer_js_hls_min_xo",
       "iptvplayer_js_hls_min_yo"
     ],
-    "35": [
+    "37": [
       "iptvplayer_js_services_downloadstore",
       "iptvplayer_js_services_downloadstore_applysnapshot",
       "iptvplayer_js_services_downloadstore_buildepisodepayload",
@@ -892,7 +919,7 @@
       "iptvplayer_js_services_downloadstore_isdesktop",
       "iptvplayer_js_services_downloadstore_isdownloading"
     ],
-    "36": [
+    "38": [
       "iptvplayer_js_views_settingsview",
       "iptvplayer_js_views_settingsview_bindui",
       "iptvplayer_js_views_settingsview_init",
@@ -902,7 +929,7 @@
       "iptvplayer_js_views_settingsview_setupthemeselector",
       "iptvplayer_js_views_settingsview_updateinfo"
     ],
-    "37": [
+    "39": [
       "iptvplayer_js_core_backstack",
       "iptvplayer_js_core_backstack_clear",
       "iptvplayer_js_core_backstack_handleback",
@@ -910,7 +937,7 @@
       "iptvplayer_js_core_backstack_push",
       "iptvplayer_js_core_backstack_register"
     ],
-    "38": [
+    "40": [
       "iptvplayer_js_core_qrcode_min",
       "iptvplayer_js_core_qrcode_min_qr8bitbyte",
       "iptvplayer_js_core_qrcode_min_qrbitbuffer",
@@ -918,7 +945,7 @@
       "iptvplayer_js_core_qrcode_min_qrpolynomial",
       "iptvplayer_js_core_qrcode_min_qrrsblock"
     ],
-    "39": [
+    "41": [
       "iptvplayer_js_core_theme",
       "iptvplayer_js_core_theme_applytheme",
       "iptvplayer_js_core_theme_getsavedtheme",
@@ -926,183 +953,176 @@
       "iptvplayer_js_core_theme_init",
       "iptvplayer_js_core_theme_resolvethemeid"
     ],
-    "40": [
+    "42": [
       "iptvplayer_js_core_eventbus",
       "iptvplayer_js_core_eventbus_emit",
       "iptvplayer_js_core_eventbus_off",
       "iptvplayer_js_core_eventbus_on",
       "iptvplayer_js_core_eventbus_toast"
     ],
-    "41": [
-      "iptvplayer_js_hls_min_ce",
-      "iptvplayer_js_hls_min_de",
-      "iptvplayer_js_hls_min_fe",
-      "iptvplayer_js_hls_min_ke",
-      "iptvplayer_js_hls_min_ve"
-    ],
-    "42": [
+    "43": [
       "iptvservice_package",
       "iptvservice_package_description",
       "iptvservice_package_main",
       "iptvservice_package_name",
       "iptvservice_package_version"
     ],
-    "43": [
+    "44": [
       "iptvplayer_js_hls_min_ar",
       "iptvplayer_js_hls_min_fl",
       "iptvplayer_js_hls_min_kn",
       "iptvplayer_js_hls_min_xl"
     ],
-    "44": [
+    "45": [
       "iptvplayer_js_hls_min_eo",
       "iptvplayer_js_hls_min_po",
       "iptvplayer_js_hls_min_sl",
       "iptvplayer_js_hls_min_so"
     ],
-    "45": [
+    "46": [
       "iptvplayer_js_views_searchview",
       "iptvplayer_js_views_searchview_collectpoolmatches",
       "iptvplayer_js_views_searchview_init",
       "iptvplayer_js_views_searchview_search"
     ],
-    "46": [
+    "47": [
       "iptvplayer_js_hls_min_md",
       "iptvplayer_js_hls_min_od",
       "iptvplayer_js_hls_min_wd"
     ],
-    "47": [
+    "48": [
       "iptvplayer_js_services_streamresolver",
       "iptvplayer_js_services_streamresolver_buildcandidates",
       "iptvplayer_js_services_streamresolver_getstrategy"
     ],
-    "48": [
+    "49": [
       "iptvplayer_js_services_watchprogresstracker",
       "iptvplayer_js_services_watchprogresstracker_getadjacentepisodes",
       "iptvplayer_js_services_watchprogresstracker_recordprogress"
     ],
-    "49": [
+    "50": [
       "tizen_build_build_buildwgtarchive",
       "tizen_build_build_crc32",
       "tizen_build_build_walk"
     ],
-    "50": [
+    "51": [
       "iptvplayer_js_core_icons",
       "iptvplayer_js_core_icons_get"
     ],
-    "51": [
+    "52": [
       "iptvplayer_js_core_polyfills",
       "iptvplayer_js_core_polyfills_rationale_8"
     ],
-    "52": [
+    "53": [
       "iptvplayer_js_hls_min_ai",
       "iptvplayer_js_hls_min_li"
     ],
-    "53": [
+    "54": [
       "iptvplayer_js_hls_min_cn",
       "iptvplayer_js_hls_min_gn"
     ],
-    "54": [
+    "55": [
       "iptvplayer_js_hls_min_dr",
       "iptvplayer_js_hls_min_ur"
     ],
-    "55": [
+    "56": [
       "iptvplayer_js_hls_min_ht",
       "iptvplayer_js_hls_min_pa"
     ],
-    "56": [
+    "57": [
       "iptvplayer_js_hls_min_ja",
       "iptvplayer_js_hls_min_za"
     ],
-    "57": [
+    "58": [
       "iptvplayer_js_hls_min_ml",
       "iptvplayer_js_hls_min_ol"
     ],
-    "58": [
+    "59": [
       "iptvplayer_js_hls_min_mr",
       "iptvplayer_js_hls_min_xr"
     ],
-    "59": [
+    "60": [
       "iptvplayer_js_hls_min_nu",
       "iptvplayer_js_hls_min_ou"
     ],
-    "60": [
+    "61": [
       "iptvplayer_js_hls_min_qi",
       "iptvplayer_js_hls_min_ui"
     ],
-    "61": [
+    "62": [
       "iptvplayer_js_core_polyfills_abortcontrollershim_abort"
     ],
-    "62": [
+    "63": [
       "iptvplayer_js_core_polyfills_abortsignalshim_addeventlistener"
     ],
-    "63": [
+    "64": [
       "iptvplayer_js_core_polyfills_abortsignalshim_removeeventlistener"
     ],
-    "64": [
+    "65": [
       "iptvplayer_js_core_polyfills_string_includes"
     ],
-    "65": [
+    "66": [
       "iptvplayer_js_core_polyfills_string_startswith"
     ],
-    "66": [
+    "67": [
       "readme_ipk_installation_guide"
     ],
-    "67": [
+    "68": [
       "tizen_build_build_resolvevarswithmap"
     ]
   },
   "cohesion": {
-    "0": 0.050203527815468114,
-    "1": 0.03225806451612903,
+    "0": 0.03225806451612903,
+    "1": 0.06265664160401002,
     "2": 0.08897243107769423,
     "3": 0.05708245243128964,
     "4": 0.05405405405405406,
-    "5": 0.13968253968253969,
-    "6": 0.15151515151515152,
-    "7": 0.1632183908045977,
+    "5": 0.1534090909090909,
+    "6": 0.1590909090909091,
+    "7": 0.1693548387096774,
     "8": 0.11576354679802955,
-    "9": 0.14814814814814814,
-    "10": 0.13230769230769232,
+    "9": 0.09116809116809117,
+    "10": 0.14814814814814814,
     "11": 0.17,
     "12": 0.08333333333333333,
     "13": 0.17391304347826086,
-    "14": 0.18421052631578946,
-    "15": 0.1,
-    "16": 0.12418300653594772,
-    "17": 0.13970588235294118,
-    "18": 0.125,
-    "19": 0.3088235294117647,
-    "20": 0.175,
-    "21": 0.15833333333333333,
-    "22": 0.17582417582417584,
-    "23": 0.26373626373626374,
-    "24": 0.24175824175824176,
-    "25": 0.21794871794871795,
-    "26": 0.15384615384615385,
-    "27": 0.2727272727272727,
+    "14": 0.10276679841897234,
+    "15": 0.18421052631578946,
+    "16": 0.1111111111111111,
+    "17": 0.12418300653594772,
+    "18": 0.15441176470588236,
+    "19": 0.125,
+    "20": 0.11764705882352941,
+    "21": 0.3088235294117647,
+    "22": 0.15833333333333333,
+    "23": 0.17582417582417584,
+    "24": 0.26373626373626374,
+    "25": 0.24175824175824176,
+    "26": 0.21794871794871795,
+    "27": 0.15384615384615385,
     "28": 0.2727272727272727,
-    "29": 0.4727272727272727,
-    "30": 0.4222222222222222,
-    "31": 0.4222222222222222,
-    "32": 0.4,
-    "33": 0.25,
-    "34": 0.25,
-    "35": 0.42857142857142855,
-    "36": 0.4642857142857143,
-    "37": 0.4,
-    "38": 0.3333333333333333,
-    "39": 0.6,
-    "40": 0.6,
-    "41": 0.4,
-    "42": 0.4,
-    "43": 0.5,
+    "29": 0.2727272727272727,
+    "30": 0.19696969696969696,
+    "31": 0.4727272727272727,
+    "32": 0.4222222222222222,
+    "33": 0.4222222222222222,
+    "34": 0.4,
+    "35": 0.25,
+    "36": 0.25,
+    "37": 0.42857142857142855,
+    "38": 0.4642857142857143,
+    "39": 0.4,
+    "40": 0.3333333333333333,
+    "41": 0.6,
+    "42": 0.6,
+    "43": 0.4,
     "44": 0.5,
-    "45": 0.8333333333333334,
-    "46": 0.6666666666666666,
-    "47": 1.0,
+    "45": 0.5,
+    "46": 0.8333333333333334,
+    "47": 0.6666666666666666,
     "48": 1.0,
-    "49": 0.6666666666666666,
-    "50": 1.0,
+    "49": 1.0,
+    "50": 0.6666666666666666,
     "51": 1.0,
     "52": 1.0,
     "53": 1.0,
@@ -1119,7 +1139,8 @@
     "64": 1.0,
     "65": 1.0,
     "66": 1.0,
-    "67": 1.0
+    "67": 1.0,
+    "68": 1.0
   },
   "gods": [
     {
@@ -1197,17 +1218,6 @@
       "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `C()` unexpectedly reaches hub `rt()`"
     },
     {
-      "source": "E()",
-      "target": "e()",
-      "source_files": [
-        "IPTVPlayer/js/hls.min.js",
-        "IPTVPlayer/js/mpegts.js"
-      ],
-      "confidence": "INFERRED",
-      "relation": "indirect_call",
-      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
-    },
-    {
       "source": "r()",
       "target": "e()",
       "source_files": [
@@ -1224,6 +1234,17 @@
       "source_files": [
         "IPTVPlayer/js/hls.min.js",
         "IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
+      "source": "T()",
+      "target": "e()",
+      "source_files": [
+        "IPTVPlayer/js/hls.min.js",
+        "IPTVPlayer/js/mpegts.js"
       ],
       "confidence": "INFERRED",
       "relation": "indirect_call",

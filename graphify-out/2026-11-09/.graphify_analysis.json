@@ -1138,6 +1138,11 @@
       "degree": 24
     },
     {
+      "id": "iptvplayer_js_app_iptvapp",
+      "label": "IPTVApp",
+      "degree": 23
+    },
+    {
       "id": "iptvplayer_js_hls_min_e",
       "label": "E()",
       "degree": 23
@@ -1145,11 +1150,6 @@
     {
       "id": "iptvplayer_js_hls_min_i",
       "label": "i()",
-      "degree": 23
-    },
-    {
-      "id": "iptvplayer_js_app_iptvapp",
-      "label": "IPTVApp",
       "degree": 23
     },
     {
@@ -1183,7 +1183,7 @@
       ],
       "confidence": "INFERRED",
       "relation": "implements",
-      "why": "inferred connection - not explicitly stated in source; crosses file types (doc \u2194 code); connects across different repos/directories; bridges separate communities"
+      "why": "inferred connection - not explicitly stated in source; crosses file types (code \u2194 doc); connects across different repos/directories; bridges separate communities"
     },
     {
       "source": "rt()",
@@ -1197,8 +1197,8 @@
       "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `C()` unexpectedly reaches hub `rt()`"
     },
     {
-      "source": "dt()",
-      "target": "w()",
+      "source": "E()",
+      "target": "e()",
       "source_files": [
         "IPTVPlayer/js/hls.min.js",
         "IPTVPlayer/js/mpegts.js"
@@ -1208,19 +1208,19 @@
       "why": "inferred connection - not explicitly stated in source; bridges separate communities"
     },
     {
-      "source": "dt()",
-      "target": "M()",
+      "source": "r()",
+      "target": "e()",
       "source_files": [
         "IPTVPlayer/js/hls.min.js",
-        "IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js"
+        "IPTVPlayer/js/mpegts.js"
       ],
       "confidence": "INFERRED",
       "relation": "indirect_call",
       "why": "inferred connection - not explicitly stated in source; bridges separate communities"
     },
     {
-      "source": "dt()",
-      "target": "z()",
+      "source": "rt()",
+      "target": "M()",
       "source_files": [
         "IPTVPlayer/js/hls.min.js",
         "IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js"

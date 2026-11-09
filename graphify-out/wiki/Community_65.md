@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **.startsWith()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **.includes()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
 
 ## Relationships
 

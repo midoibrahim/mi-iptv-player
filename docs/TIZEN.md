@@ -52,7 +52,20 @@ flowchart TD
 
 ---
 
-## 4. Packaging the Tizen App (`.wgt`)
+## 4. Prerequisites & One-Click Setup
+
+Before building or deploying:
+1. **Node.js** (v18 or newer): [https://nodejs.org](https://nodejs.org)
+2. **One-Click Setup Script**:
+   Run the setup script at the repository root to install all build tools (Babel ES5, PostCSS, esbuild) and run characterization tests:
+   ```cmd
+   install-dependencies.bat
+   ```
+3. *(Optional for Emulator testing)*: **Samsung Tizen Studio or VS Code Tizen Extension** for `sdb.exe` and `tz.exe`.
+
+---
+
+## 5. Packaging the Tizen App (`.wgt`)
 
 Run the automated Tizen build script:
 ```cmd
@@ -65,7 +78,7 @@ This creates **two output packages** in `dist/`:
 
 ---
 
-## 5. Installation Methods
+## 6. Installation Methods
 
 ### Method 1: USB Flash Drive (Easiest — No PC Tools Needed)
 1. Format a USB flash drive as **FAT32**.

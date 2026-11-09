@@ -1,24 +1,24 @@
 # HLS.js MSE Streaming Engine (Part 49)
 
-> 3 nodes · cohesion 0.67
+> 3 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **walk()** (4 connections) — `tizen-build/build.mjs`
-- **buildWgtArchive()** (3 connections) — `tizen-build/build.mjs`
-- **crc32()** (2 connections) — `tizen-build/build.mjs`
+- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Relationships
 
-- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (3 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `tizen-build/build.mjs`
+- `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 3 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

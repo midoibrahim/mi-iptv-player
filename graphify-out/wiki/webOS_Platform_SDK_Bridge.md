@@ -1,37 +1,37 @@
 # webOS Platform SDK Bridge
 
-> 17 nodes · cohesion 0.12
+> 17 nodes · cohesion 0.15
 
 ## Key Concepts
 
-- **dt()** (22 connections) — `IPTVPlayer/js/hls.min.js`
-- **Me()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **et()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **b()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ee()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **He()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **J()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **re()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **te()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **we()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ct()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **je()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Oe()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **q()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **qe()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **W()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Z()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **rt()** (18 connections) — `IPTVPlayer/js/hls.min.js`
+- **qn()** (9 connections) — `IPTVPlayer/js/hls.min.js`
+- **d()** (8 connections) — `IPTVPlayer/js/hls.min.js`
+- **p()** (8 connections) — `IPTVPlayer/js/hls.min.js`
+- **u()** (8 connections) — `IPTVPlayer/js/hls.min.js`
+- **ei()** (7 connections) — `IPTVPlayer/js/hls.min.js`
+- **h()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **r()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **g()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **gl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **it()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **st()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **yi()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **at()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Jr()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **nt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **zn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (17 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (6 shared connections)
-- [Download UI & Task Management](Download_UI_&_Task_Management.md) (3 shared connections)
-- [Electron Background Downloader](Electron_Background_Downloader.md) (2 shared connections)
-- [Legacy JavaScript Polyfills](Legacy_JavaScript_Polyfills.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 33)](HLS.js_MSE_Streaming_Engine_Part_33.md) (1 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (18 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (16 shared connections)
+- [HLS.js MSE Streaming Engine (Part 14)](HLS.js_MSE_Streaming_Engine_Part_14.md) (5 shared connections)
+- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (3 shared connections)
 - [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (1 shared connections)
-- [Package Configuration & Dependencies (17)](Package_Configuration_&_Dependencies_17.md) (1 shared connections)
+- [Series Detail & Episode Browser](Series_Detail_&_Episode_Browser.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 25)](HLS.js_MSE_Streaming_Engine_Part_25.md) (1 shared connections)
+- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (1 shared connections)
 
 ## Source Files
 
@@ -39,8 +39,8 @@
 
 ## Audit Trail
 
-- EXTRACTED: 32 (65%)
-- INFERRED: 17 (35%)
+- EXTRACTED: 43 (61%)
+- INFERRED: 27 (39%)
 - AMBIGUOUS: 0 (0%)
 
 ---

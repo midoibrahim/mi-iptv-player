@@ -55,6 +55,11 @@ The Windows version includes a dedicated **Downloads** section in the navigation
 
 ### Prerequisites
 - **Node.js** (v18 or newer recommended): [https://nodejs.org](https://nodejs.org)
+- **One-Click Setup Script**:
+  Run the automated installer at the repository root to install all Electron dependencies:
+  ```cmd
+  install-dependencies.bat
+  ```
 
 ### Build Command
 Run the one-click Windows packaging script from the repository root:

@@ -1,14 +1,15 @@
 # Vector Icon System
 
-> 5 nodes · cohesion 0.60
+> 6 nodes · cohesion 0.33
 
 ## Key Concepts
 
-- **eventBus.js** (4 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **emit()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **off()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **on()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **toast()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **qrcode.min.js** (5 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **QR8bitByte()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **QRBitBuffer()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **QRCodeModel()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **QRPolynomial()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **QRRSBlock()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
 
 ## Relationships
 
@@ -16,11 +17,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/eventBus.js`
+- `IPTVPlayer/js/core/qrcode.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 5 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

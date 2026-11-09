@@ -33,10 +33,10 @@
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 49)](HLS.js_MSE_Streaming_Engine_Part_49.md) (3 shared connections)
+- [HLS.js MSE Streaming Engine (Part 50)](HLS.js_MSE_Streaming_Engine_Part_50.md) (3 shared connections)
 - [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (2 shared connections)
 - [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (1 shared connections)
-- [Community 67](Community_67.md) (1 shared connections)
+- [Community 68](Community_68.md) (1 shared connections)
 
 ## Source Files
 

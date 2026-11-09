@@ -51,6 +51,37 @@ Supports **Xtream Codes API** and **M3U / M3U8 playlists**, Live TV with side-dr
 
 ---
 
+## Prerequisites & One-Click Setup
+
+### Requirements
+- **Node.js**: v18.0.0 or later (Node 20+ / 24+ recommended)
+- **npm**: v9.0.0 or later
+- **Python**: v3.10 or later *(optional, for local `server.py` and Graphify knowledge graph)*
+
+### One-Click Setup Script
+Run the automated setup script to install all Python dependencies from `requirements.txt`, install Node.js modules across all platform workspaces (`webos-build` and `windows`), and run the 16 characterization tests:
+
+```cmd
+install-dependencies.bat
+```
+
+Alternatively, install components manually:
+```bash
+# 1. Python dependencies
+pip install -r requirements.txt
+
+# 2. webOS & Tizen build tools (Babel, PostCSS, esbuild)
+cd webos-build && npm install && cd ..
+
+# 3. Windows Desktop Electron dependencies
+cd windows && npm install && cd ..
+
+# 4. Verify characterization tests
+node --test tests/characterization.test.js
+```
+
+---
+
 ## Quick Start & Packaging Commands
 
 ### 1. LG webOS TV (`.ipk`)
@@ -145,10 +176,15 @@ start "" "dist\windows\MI IPTV Player-win32-x64\MI IPTV Player.exe"
 │   ├── tizen-usb/userwidget/MIIPTVPlayer.wgt      # Samsung Tizen USB flash drive package
 │   └── windows/MI IPTV Player-win32-x64/          # Windows Desktop portable application
 │
+├── package.json                 # Workspace coordinator & npm build/test scripts
+├── requirements.txt             # Python requirements (graphifyy, requests)
+├── server.py                    # Standalone Python HTTP test server with CORS
+├── install-dependencies.bat     # One-click installer for Python & Node dependencies
 ├── package-webos.bat            # Build & package LG webOS .ipk
 ├── install-webos.bat            # Install .ipk onto LG TV over LAN
 ├── package-tizen.bat            # Build & package Samsung Tizen .wgt (LAN + USB)
 ├── install-tizen.bat            # Install .wgt onto Samsung TV over LAN
+├── install-tizen-emulator.bat   # Auto-sign and deploy to running Tizen Emulator
 └── package-windows.bat          # Build & package Windows x64 .exe
 ```
 

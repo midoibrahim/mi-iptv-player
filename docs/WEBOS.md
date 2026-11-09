@@ -37,12 +37,17 @@ MI IPTV Player is tested and optimized across all major webOS hardware generatio
 ## 3. Step-by-Step Installation Guide
 
 ### Prerequisites on Your PC
-1. **Node.js** (v16 or newer): [https://nodejs.org](https://nodejs.org)
-2. **Install the Official LG webOS CLI (`@webos-tools/cli`)**:
+1. **Node.js** (v18 or newer): [https://nodejs.org](https://nodejs.org)
+2. **One-Click Dependencies Setup**:
+   Run the repository dependency installer to set up all build tools (Babel ES5, PostCSS, esbuild):
+   ```cmd
+   install-dependencies.bat
+   ```
+3. **Install the Official LG webOS CLI (`@webos-tools/cli`)**:
    ```bash
    npm install -g @webos-tools/cli
    ```
-3. Verify the CLI tools are available:
+4. Verify the CLI tools are available:
    ```bash
    ares -V
    ```

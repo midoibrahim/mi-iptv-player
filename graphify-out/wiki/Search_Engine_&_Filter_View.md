@@ -1,15 +1,17 @@
 # Search Engine & Filter View
 
-> 6 nodes · cohesion 0.33
+> 8 nodes · cohesion 0.46
 
 ## Key Concepts
 
-- **qrcode.min.js** (5 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QR8bitByte()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRBitBuffer()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRCodeModel()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRPolynomial()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRRSBlock()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **settingsView.js** (7 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **init()** (5 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_bindUI()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_loadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_setupDownloadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_saveSettings()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_setupThemeSelector()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **updateInfo()** (1 connections) — `IPTVPlayer/js/views/settingsView.js`
 
 ## Relationships
 
@@ -17,11 +19,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/qrcode.min.js`
+- `IPTVPlayer/js/views/settingsView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 5 (100%)
+- EXTRACTED: 13 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

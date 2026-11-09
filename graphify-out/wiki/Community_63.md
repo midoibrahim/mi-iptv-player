@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **.removeEventListener()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **.addEventListener()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
 
 ## Relationships
 

@@ -1,26 +1,26 @@
 # HLS.js MSE Streaming Engine (Part 45)
 
-> 4 nodes · cohesion 0.83
+> 4 nodes · cohesion 0.50
 
 ## Key Concepts
 
-- **searchView.js** (3 connections) — `IPTVPlayer/js/views/searchView.js`
-- **search()** (3 connections) — `IPTVPlayer/js/views/searchView.js`
-- **_collectPoolMatches()** (2 connections) — `IPTVPlayer/js/views/searchView.js`
-- **init()** (2 connections) — `IPTVPlayer/js/views/searchView.js`
+- **Eo()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Po()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Sl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **So()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (4 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/views/searchView.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 5 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 6 (86%)
+- INFERRED: 1 (14%)
 - AMBIGUOUS: 0 (0%)
 
 ---

@@ -1,25 +1,26 @@
 # main.js & { app, BrowserWindow, ...
 
-> 16 nodes · cohesion 0.16
+> 17 nodes · cohesion 0.31
 
 ## Key Concepts
 
-- **playerOsd.js** (15 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateProgressUI()** (4 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **osdEls()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateProgress()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **fmtTime()** (2 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **autoHide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **bindScrubbing()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **hide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **isVisible()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **navigate()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **show()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **showBanner()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **showSeekHUD()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **toggle()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateFavoriteState()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updatePlayPauseIcon()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **loginView.js** (16 connections) — `IPTVPlayer/js/views/loginView.js`
+- **_bindUI()** (8 connections) — `IPTVPlayer/js/views/loginView.js`
+- **renderProfiles()** (7 connections) — `IPTVPlayer/js/views/loginView.js`
+- **clearFormError()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **handleRemoteCredentials()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **initRemoteSetup()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **showProfilesPage()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **startRemotePolling()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **stopRemotePolling()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **isQrScreenActive()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
+- **_saveAndConnectProfile()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
+- **showAddProfileForm()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
+- **init()** (3 connections) — `IPTVPlayer/js/views/loginView.js`
+- **closeDeleteModal()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
+- **_getApiBase()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
+- **openDeleteModal()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
+- **showFormError()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
 
 ## Relationships
 
@@ -27,11 +28,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/components/playerOsd.js`
+- `IPTVPlayer/js/views/loginView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
+- EXTRACTED: 42 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

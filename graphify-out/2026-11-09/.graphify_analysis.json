@@ -1246,17 +1246,6 @@
       "why": "inferred connection - not explicitly stated in source; bridges separate communities; peripheral node `C()` unexpectedly reaches hub `rt()`"
     },
     {
-      "source": "T()",
-      "target": "e()",
-      "source_files": [
-        "IPTVPlayer/js/hls.min.js",
-        "IPTVPlayer/js/mpegts.js"
-      ],
-      "confidence": "INFERRED",
-      "relation": "indirect_call",
-      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
-    },
-    {
       "source": "r()",
       "target": "e()",
       "source_files": [
@@ -1268,8 +1257,19 @@
       "why": "inferred connection - not explicitly stated in source; bridges separate communities"
     },
     {
-      "source": "rt()",
-      "target": "M()",
+      "source": "E()",
+      "target": "e()",
+      "source_files": [
+        "IPTVPlayer/js/hls.min.js",
+        "IPTVPlayer/js/mpegts.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
+      "source": "gt()",
+      "target": "I()",
       "source_files": [
         "IPTVPlayer/js/hls.min.js",
         "IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js"

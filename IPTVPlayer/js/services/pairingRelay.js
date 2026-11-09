@@ -9,7 +9,7 @@ window.IPTV = window.IPTV || {};
 
 window.IPTV.PairingRelay = {
     RELAY_ENDPOINT: 'https://api.restful-api.dev/objects',
-    DEFAULT_PORTAL_URL: 'https://midoibrahim.github.io/mi-iptv-player-webos/IPTVPlayer/setup.html',
+    DEFAULT_PORTAL_URL: 'https://midoibrahim.github.io/mi-iptv-player/setup.html',
     _sessionId: null,
     _secretKey: null,
     _active: false,

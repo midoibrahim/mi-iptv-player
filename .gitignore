@@ -18,6 +18,7 @@ node_modules/
 /ss/
 /ux_screens/
 /*.py
+!/server.py
 /*.ppt
 /*.pptx
 /*.pdf
@@ -33,6 +34,7 @@ node_modules/
 /IPTVPlayer/TV/
 /IPTVPlayer/store_icons/
 /IPTVPlayer/*.py
+!/server.py
 !/IPTVPlayer/server.py
 /IPTVPlayer/*.jpg
 /IPTVPlayer/icon-svg.svg

@@ -2,7 +2,7 @@
 
 > God node · 34 connections · `windows/downloader.js`
 
-**Community:** [Community 7](Community_7.md)
+**Community:** [Electron Background Downloader](Electron_Background_Downloader.md)
 
 ## Connections by Relation
 
@@ -15,21 +15,21 @@
 - ._processQueue() `EXTRACTED`
 - .startDownload() `EXTRACTED`
 - ._serializeTask() `EXTRACTED`
-- .startBatchDownloads() `EXTRACTED`
 - .updateSettings() `EXTRACTED`
+- .startBatchDownloads() `EXTRACTED`
 - .convertItemToMp4() `EXTRACTED`
 - ._ensureDir() `EXTRACTED`
 - ._handleError() `EXTRACTED`
 - .resumeDownload() `EXTRACTED`
 - ._saveHistory() `EXTRACTED`
-- .constructor() `EXTRACTED`
 - ._formatBytes() `EXTRACTED`
-- .pauseDownload() `EXTRACTED`
-- ._remuxToMp4() `EXTRACTED`
-- ._runningCount() `EXTRACTED`
 - .selectDirectory() `EXTRACTED`
-- .cancelDownload() `EXTRACTED`
-- .clearHistory() `EXTRACTED`
+- .constructor() `EXTRACTED`
+- ._runningCount() `EXTRACTED`
+- ._remuxToMp4() `EXTRACTED`
+- .pauseDownload() `EXTRACTED`
+- .getSettings() `EXTRACTED`
+- .getAll() `EXTRACTED`
 - *…and 13 more `method` connection(s) not listed (lowest-degree first to go)*
 
 ---

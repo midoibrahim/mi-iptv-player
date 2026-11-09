@@ -30,7 +30,7 @@ const BROWSERSLIST = ['chrome >= 38'];
 
 // Same exclusions package-webos.bat used to pass to ares-package (top-level entries)
 const EXCLUDE_TOP = new Set(['server.py', 'README.md', 'package.json', 'TV', 'Tools', 'Downloads',
-    'Config', 'OSE', 'test_svg.png', 'setup.html', 'node_modules']);
+    'Config', 'OSE', 'test_svg.png', 'setup.html', 'node_modules', 'config.xml']);
 const isExcluded = (rel) => {
     const top = rel.split(path.sep)[0];
     if (EXCLUDE_TOP.has(top)) return true;

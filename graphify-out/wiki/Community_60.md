@@ -1,22 +1,23 @@
 # Community 60
 
-> 1 nodes · cohesion 1.00
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **resolveVarsWithMap()** (3 connections) — `tizen-build/build.mjs`
+- **qi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ui()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- [Community 5](Community_5.md) (1 shared connections)
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (2 shared connections)
 
 ## Source Files
 
-- `tizen-build/build.mjs`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 2 (100%)
+- EXTRACTED: 3 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

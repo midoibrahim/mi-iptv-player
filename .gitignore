@@ -55,3 +55,8 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+/tizen-build/.tizen-rds/changelist.json
+/tizen-build/Debug/projects/tizen-build/build.mjs
+/tizen-build/Debug/projects/tizen-build/config.xml
+/tizen-build/Debug/tizen-build.wgt
+/tizen-build/tizen_web_project.yaml

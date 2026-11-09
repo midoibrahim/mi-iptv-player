@@ -2,12 +2,12 @@
 
 > God node · 20 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [Community 8](Community_8.md)
+**Community:** [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md)
 
 ## Connections by Relation
 
 ### calls
-- [E()](E.md) `EXTRACTED`
+- [E()](E_2.md) `EXTRACTED`
 - [n()](n.md) `EXTRACTED`
 - uu() `EXTRACTED`
 - duration() `EXTRACTED`
@@ -17,13 +17,13 @@
 
 ### indirect_call
 - [T()](T.md) `INFERRED`
+- [e()](e.md) `INFERRED`
 - [i()](i.md) `INFERRED`
-- [e()](e_2.md) `INFERRED`
 - [r()](r.md) `INFERRED`
-- dt() `INFERRED`
-- [o()](o.md) `INFERRED`
-- l() `INFERRED`
+- [dt()](dt.md) `INFERRED`
+- o() `INFERRED`
 - rt() `INFERRED`
+- l() `INFERRED`
 - yt() `INFERRED`
 - on() `INFERRED`
 - ne() `INFERRED`

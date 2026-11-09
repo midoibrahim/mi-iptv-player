@@ -1,22 +1,23 @@
 # Community 59
 
-> 1 nodes · cohesion 1.00
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **Companion Phone Web Setup Interface** (0 connections) — `IPTVPlayer/setup.html`
+- **nu()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **ou()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (2 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/setup.html`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 0 (0%)
+- EXTRACTED: 4 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

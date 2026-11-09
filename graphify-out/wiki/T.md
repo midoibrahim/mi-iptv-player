@@ -2,7 +2,7 @@
 
 > God node · 27 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [Community 19](Community_19.md)
+**Community:** [Package Configuration & Dependencies (17)](Package_Configuration_&_Dependencies_17.md)
 
 ## Connections by Relation
 
@@ -31,10 +31,10 @@
 - t() `EXTRACTED`
 
 ### indirect_call
-- [e()](e_2.md) `INFERRED`
+- [e()](e.md) `INFERRED`
 - [n()](n.md) `INFERRED`
 - [a()](a.md) `INFERRED`
-- [o()](o.md) `INFERRED`
+- o() `INFERRED`
 - l() `INFERRED`
 - s() `INFERRED`
 - Oi() `INFERRED`

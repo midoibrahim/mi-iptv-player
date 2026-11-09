@@ -1,22 +1,23 @@
 # Community 57
 
-> 1 nodes · cohesion 1.00
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **.includes()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **Ml()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ol()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (2 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/polyfills.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 0 (0%)
+- EXTRACTED: 3 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

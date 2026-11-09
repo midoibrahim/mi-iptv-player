@@ -2,14 +2,14 @@
 
 > God node · 23 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [Community 8](Community_8.md)
+**Community:** [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md)
 
 ## Connections by Relation
 
 ### calls
-- [E()](E.md) `EXTRACTED`
+- [E()](E_2.md) `EXTRACTED`
 - [r()](r.md) `EXTRACTED`
-- [o()](o.md) `EXTRACTED`
+- o() `EXTRACTED`
 - l() `EXTRACTED`
 - hu() `EXTRACTED`
 - currentTime() `EXTRACTED`

@@ -2,7 +2,7 @@
 
 > God node · 22 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [Community 8](Community_8.md)
+**Community:** [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md)
 
 ## Connections by Relation
 
@@ -18,7 +18,7 @@
 ### indirect_call
 - hls.min.js `INFERRED`
 - [a()](a.md) `INFERRED`
-- [o()](o.md) `INFERRED`
+- o() `INFERRED`
 - rt() `INFERRED`
 - gt() `INFERRED`
 - yt() `INFERRED`

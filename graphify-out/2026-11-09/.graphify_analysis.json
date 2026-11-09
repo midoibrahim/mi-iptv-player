@@ -1187,11 +1187,6 @@
       "degree": 24
     },
     {
-      "id": "iptvplayer_js_app_iptvapp",
-      "label": "IPTVApp",
-      "degree": 23
-    },
-    {
       "id": "iptvplayer_js_hls_min_e",
       "label": "E()",
       "degree": 23
@@ -1199,6 +1194,11 @@
     {
       "id": "iptvplayer_js_hls_min_i",
       "label": "i()",
+      "degree": 23
+    },
+    {
+      "id": "iptvplayer_js_app_iptvapp",
+      "label": "IPTVApp",
       "degree": 23
     },
     {
@@ -1232,7 +1232,7 @@
       ],
       "confidence": "INFERRED",
       "relation": "implements",
-      "why": "inferred connection - not explicitly stated in source; crosses file types (code \u2194 doc); connects across different repos/directories; bridges separate communities"
+      "why": "inferred connection - not explicitly stated in source; crosses file types (doc \u2194 code); connects across different repos/directories; bridges separate communities"
     },
     {
       "source": "rt()",

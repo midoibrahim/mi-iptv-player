@@ -31,8 +31,9 @@ window.IPTV.StreamResolver = {
         const canUseLocalProxy = env.canUseLocalProxy !== undefined
             ? !!env.canUseLocalProxy
             : Boolean(
+                (window.IPTV.Platform && typeof window.IPTV.Platform.isDesktop === 'function' && window.IPTV.Platform.isDesktop()) ||
                 (window.location && window.location.protocol && window.location.protocol.startsWith('http') && window.location.host) ||
-                (window.IPTV.TvServer && window.IPTV.TvServer.isRunning())
+                (window.IPTV.TvServer && typeof window.IPTV.TvServer.isRunning === 'function' && window.IPTV.TvServer.isRunning())
             );
 
         const proxyBase = env.proxyBase || (

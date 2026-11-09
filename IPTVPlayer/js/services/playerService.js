@@ -129,6 +129,9 @@ window.IPTV.PlayerService = {
             this._checkPendingInitialSeek();
             this._updateProgress();
         });
+        this.video.addEventListener('loadeddata', () => {
+            this._checkPendingInitialSeek();
+        });
         this.video.addEventListener('canplay', () => {
             this._checkPendingInitialSeek();
             if (!this._userPaused) {
@@ -185,6 +188,9 @@ window.IPTV.PlayerService = {
 
     _checkPendingInitialSeek() {
         if (this._initialSeekPending !== null && this.canSeek()) {
+            if (!this._avplayActive && this.video && this.video.readyState < 2) {
+                return;
+            }
             const target = this._initialSeekPending;
             this._initialSeekPending = null;
             console.log('[PlayerService] Executing initial seek to saved position:', target);
@@ -211,6 +217,7 @@ window.IPTV.PlayerService = {
         this._initialSeekPending = (options && typeof options.initialSeekTime === 'number' && options.initialSeekTime > 0)
             ? options.initialSeekTime
             : null;
+        this._initialSeekAttempted = (this._initialSeekPending !== null);
         this._lastProgressSaveTime = 0;
 
         if (window.IPTV.Platform && typeof window.IPTV.Platform.setKeepScreenOn === 'function') {
@@ -611,9 +618,9 @@ window.IPTV.PlayerService = {
         };
         this.video.addEventListener('seeked', onSeeked);
 
-        ensurePlaying();
-        setTimeout(ensurePlaying, 200);
-        setTimeout(ensurePlaying, 500);
+        if (!this.video.seeking) {
+            ensurePlaying();
+        }
     },
 
     seekRelative(delta) {

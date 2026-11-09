@@ -6,10 +6,5 @@
   "60": "qi",
   "61": ".abort",
   "62": ".addEventListener",
-  "63": ".removeEventListener",
-  "64": ".includes",
-  "65": ".startsWith",
-  "66": "LG webOS CLI Installation Guide",
-  "67": "resolveVarsWithMap",
-  "68": "gt"
+  "63": ".removeEventListener"
 }

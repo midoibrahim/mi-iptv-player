@@ -821,6 +821,78 @@ test('PairingRelay encrypts/decrypts payloads and handles session lifecycle', as
     assert.equal(remoteObject, null); // Session automatically deleted
 });
 
+test('PlaybackEngine & StreamResolver handle desktop VOD proxy candidate and initial seek readiness', () => {
+    const env = createBrowserEnv({
+        electronDesktop: { isFullScreen: () => false }
+    });
+    loadScript(env, 'IPTVPlayer/js/core/platform.js');
+    loadScript(env, 'IPTVPlayer/js/services/streamResolver.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
+    loadScript(env, 'IPTVPlayer/js/services/playerService.js');
+
+    const { Platform, StreamResolver, PlaybackEngine, PlayerService } = env.window.IPTV;
+
+    assert.equal(Platform.isDesktop(), true);
+
+    // Desktop VOD candidate generation includes companion proxy fallback
+    const vodItem = { type: 'movie', url: 'http://xtream.test:8080/movie/user/pass/999.mp4' };
+    const candidates = StreamResolver.buildCandidates(vodItem);
+    assert.equal(candidates.length, 2);
+    assert.equal(candidates[0], 'http://xtream.test:8080/movie/user/pass/999.mp4');
+    assert.equal(candidates[1], 'http://127.0.0.1:8089/api/proxy?url=' + encodeURIComponent('http://xtream.test:8080/movie/user/pass/999.mp4'));
+
+    // Verify initial seek waits for readyState >= 2
+    let seekCalledWith = null;
+    PlayerService.video = {
+        readyState: 1, // HAVE_METADATA only
+        seeking: false,
+        currentTime: 0,
+        duration: 7200,
+        seekable: { length: 1, end: () => 7200 },
+        play() { return Promise.resolve(); }
+    };
+    PlayerService.canSeek = () => true;
+    PlayerService.seekTo = (t) => { seekCalledWith = t; };
+    PlayerService._initialSeekPending = 3600;
+
+    // Call check while readyState is 1 -> seek should NOT execute yet
+    PlayerService._checkPendingInitialSeek();
+    assert.equal(seekCalledWith, null);
+    assert.equal(PlayerService._initialSeekPending, 3600);
+
+    // Once readyState is 2 (HAVE_CURRENT_DATA) -> seek executes cleanly
+    PlayerService.video.readyState = 2;
+    PlayerService._checkPendingInitialSeek();
+    assert.equal(seekCalledWith, 3600);
+    assert.equal(PlayerService._initialSeekPending, null);
+
+    // Verify watchdog does not falsely report hasVideoData if video is still seeking
+    let nextCandidateCalled = false;
+    PlaybackEngine.tryNextCandidate = () => { nextCandidateCalled = true; };
+    const mockPlayer = {
+        _loadSessionId: 1,
+        visible: true,
+        currentItem: vodItem,
+        _avplayActive: false,
+        _initialSeekPending: null,
+        video: {
+            readyState: 2,
+            seeking: true, // currently seeking to saved offset
+            paused: false,
+            playbackRate: 1,
+            currentTime: 3600
+        }
+    };
+    PlaybackEngine.startWatchdog(mockPlayer, vodItem, 1, 10);
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            assert.equal(nextCandidateCalled, true);
+            resolve();
+        }, 30);
+    });
+});
+
 
 
 

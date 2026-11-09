@@ -34,9 +34,18 @@ window.IPTV.PlaybackEngine = {
         player._candidateWatchdog = setTimeout(() => {
             if (player._loadSessionId !== sessionId) return;
             if (!player.visible || player.currentItem !== item) return;
-            const hasVideoData = player._avplayActive
-            ? (player._avplayCurrentTime > 0)
-            : (player.video && (player.video.readyState >= 2 || player.video.currentTime > 0));
+
+            let hasVideoData = false;
+            if (player._avplayActive) {
+                hasVideoData = (player._avplayCurrentTime > 0);
+            } else if (player.video) {
+                const v = player.video;
+                const isSeeking = v.seeking || (player._initialSeekPending !== null);
+                const hasBufferedData = v.readyState >= 2;
+                const isPlaying = !v.paused && v.playbackRate > 0;
+                hasVideoData = !isSeeking && hasBufferedData && isPlaying;
+            }
+
             if (!hasVideoData) {
                 console.warn('[PlaybackEngine] Candidate timed out waiting for data, trying next...');
                 this.tryNextCandidate(player, item, sessionId);
@@ -337,6 +346,11 @@ window.IPTV.PlaybackEngine = {
 
         const onPlaying = () => {
             if (player._loadSessionId !== sessionId) return;
+            // If an initial resume seek is still pending or the video is currently seeking,
+            // wait until the seek completes and video actually renders before marking candidate success
+            if (player._initialSeekPending !== null || (player.video && player.video.seeking)) {
+                return;
+            }
             player._markCandidateSuccess(rawCandidateUrl || url);
             player.video.removeEventListener('playing', onPlaying);
             player.video.removeEventListener('loadeddata', onPlaying);
@@ -344,10 +358,19 @@ window.IPTV.PlaybackEngine = {
         player.video.addEventListener('playing', onPlaying);
         player.video.addEventListener('loadeddata', onPlaying);
 
+        const onSeeked = () => {
+            if (player._loadSessionId !== sessionId) return;
+            if (!player.video || player.video.seeking || player._initialSeekPending !== null) return;
+            player._markCandidateSuccess(rawCandidateUrl || url);
+            player.video.removeEventListener('seeked', onSeeked);
+        };
+        player.video.addEventListener('seeked', onSeeked);
+
         player.video.onerror = () => {
             if (player._loadSessionId !== sessionId) return;
             player.video.removeEventListener('playing', onPlaying);
             player.video.removeEventListener('loadeddata', onPlaying);
+            player.video.removeEventListener('seeked', onSeeked);
             player.video.onerror = null;
             const err = player.video.error;
             console.warn('[PlaybackEngine] Native video error:', err ? err.code : 'unknown', 'on URL:', url);
@@ -389,6 +412,22 @@ window.IPTV.PlaybackEngine = {
                     }
                 }
             }
+
+            // If an initial resume seek was attempted and failed across all candidates
+            // (e.g. provider server does not support HTTP Range requests for seeking),
+            // gracefully fall back to playing from the beginning (0) so the user is never stuck on a black screen!
+            if (player._initialSeekAttempted) {
+                console.warn('[PlaybackEngine] Seeking to resume position failed across all candidates. Playing from beginning.');
+                player._initialSeekAttempted = false;
+                player._initialSeekPending = null;
+                player.currentCandidateIndex = 0;
+                if (window.IPTV.EventBus) {
+                    window.IPTV.EventBus.toast('Cannot seek on this stream. Playing from beginning.', 4000);
+                }
+                this.loadCandidate(player, player.currentCandidates[0], item);
+                return;
+            }
+
             console.error('[PlaybackEngine] All stream candidates failed for:', item ? item.name : 'Unknown');
             if (window.IPTV.EventBus) {
                 window.IPTV.EventBus.toast('Unable to play stream. Server unreachable or format unsupported.');

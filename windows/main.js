@@ -81,6 +81,10 @@ function createWindow() {
     mainWindow.loadFile(indexPath);
     downloader.setMainWindow(mainWindow);
 
+    mainWindow.webContents.on('console-message', (_event, _level, message) => {
+        console.log(`[Renderer] ${message}`);
+    });
+
     // F12 / Ctrl+Shift+I toggle DevTools shortcut
     mainWindow.webContents.on('before-input-event', (event, input) => {
         if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {

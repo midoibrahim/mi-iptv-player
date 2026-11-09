@@ -121,3 +121,15 @@ tizen run -p MIIPTVPlay.MIIPTVPlayer
 sdb shell 0 was_execute MIIPTVPlay.MIIPTVPlayer
 ```
 
+---
+
+### Method 3: Running in the Tizen Emulator (PC Testing)
+If you are developing and testing on your PC with a running Tizen Emulator:
+```cmd
+install-tizen-emulator.bat
+```
+This script automatically:
+1. Rebuilds and transpiles the app to strict ES5 (`tizen-build/build.mjs`).
+2. Signs the package with your local Tizen developer certificate (`tz.exe pack`).
+3. Deploys and launches the app directly on your active emulator via `sdb`.
+

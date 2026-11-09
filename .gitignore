@@ -60,3 +60,7 @@ Thumbs.db
 /tizen-build/Debug/projects/tizen-build/config.xml
 /tizen-build/Debug/tizen-build.wgt
 /tizen-build/tizen_web_project.yaml
+
+tizen-build/Debug/
+*.signed.wgt
+

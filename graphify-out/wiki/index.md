@@ -80,9 +80,9 @@
 - [Downloader](Downloader.md) — 34 connections
 - [T()](T.md) — 27 connections
 - [e()](e.md) — 24 connections
-- [IPTVApp](IPTVApp.md) — 23 connections
 - [E()](E_2.md) — 23 connections
 - [i()](i.md) — 23 connections
+- [IPTVApp](IPTVApp.md) — 23 connections
 - [dt()](dt.md) — 22 connections
 - [r()](r.md) — 22 connections
 - [n()](n.md) — 21 connections

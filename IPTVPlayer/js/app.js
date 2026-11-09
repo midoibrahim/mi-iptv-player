@@ -106,6 +106,17 @@ class IPTVApp {
         document.querySelectorAll('.nav-item[data-section]').forEach(item => {
             item.addEventListener('click', () => {
                 this.navigateTo(item.dataset.section);
+                // When selecting a navigation item, immediately move focus into the section content
+                // and collapse the side navigation rail
+                setTimeout(() => {
+                    const sec = document.getElementById(`section-${item.dataset.section}`);
+                    if (sec) {
+                        const target = sec.querySelector('.category-item.active, .category-item, .card, .theme-swatch-card.active, .btn-primary, button:not([disabled])');
+                        if (target && window.IPTV.SpatialNav) {
+                            window.IPTV.SpatialNav.focusElement(target);
+                        }
+                    }
+                }, 80);
             });
         });
 

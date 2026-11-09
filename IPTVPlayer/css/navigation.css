@@ -18,13 +18,12 @@
     align-items: center;
     padding: 36px 0;
     z-index: 100;
+    overflow: hidden;
     transition: width 0.18s ease-out;
 }
 
 /* Modal Drawer Overlay Scrim (Explicit .expanded class for Chromium 38 + :focus-within for modern) */
-.side-nav.expanded,
-.side-nav:focus-within,
-.side-nav:hover {
+.side-nav.expanded {
     width: var(--nav-w-exp, 360px);
     box-shadow: 24px 0 64px rgba(0, 0, 0, 0.85);
 }
@@ -156,9 +155,7 @@
     transition: opacity 0.16s ease-out;
 }
 
-.side-nav.expanded .nav-text,
-.side-nav:focus-within .nav-text,
-.side-nav:hover .nav-text {
+.side-nav.expanded .nav-text {
     opacity: 1;
 }
 

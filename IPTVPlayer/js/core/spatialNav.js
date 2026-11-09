@@ -35,6 +35,17 @@ window.IPTV.SpatialNav = {
                 nav.classList.remove('expanded');
             }
         });
+        // Collapse side drawer whenever user clicks or touches outside
+        document.addEventListener('pointerdown', (e) => {
+            if (!nav.contains(e.target)) {
+                nav.classList.remove('expanded');
+            }
+        }, true);
+        document.addEventListener('click', (e) => {
+            if (!nav.contains(e.target)) {
+                nav.classList.remove('expanded');
+            }
+        }, true);
         let passiveOpt = false;
         try {
             const opts = Object.defineProperty({}, 'passive', {

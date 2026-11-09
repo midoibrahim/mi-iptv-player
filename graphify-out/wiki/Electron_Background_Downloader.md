@@ -1,48 +1,50 @@
 # Electron Background Downloader
 
-> 33 nodes · cohesion 0.16
+> 29 nodes · cohesion 0.12
 
 ## Key Concepts
 
-- **Downloader** (34 connections) — `windows/downloader.js`
-- **._executeDownload()** (12 connections) — `windows/downloader.js`
-- **._sendToRenderer()** (11 connections) — `windows/downloader.js`
-- **._processQueue()** (10 connections) — `windows/downloader.js`
-- **.startDownload()** (10 connections) — `windows/downloader.js`
-- **._serializeTask()** (9 connections) — `windows/downloader.js`
-- **.startBatchDownloads()** (6 connections) — `windows/downloader.js`
-- **.updateSettings()** (6 connections) — `windows/downloader.js`
-- **.convertItemToMp4()** (5 connections) — `windows/downloader.js`
-- **._ensureDir()** (5 connections) — `windows/downloader.js`
-- **._handleError()** (5 connections) — `windows/downloader.js`
-- **.resumeDownload()** (5 connections) — `windows/downloader.js`
-- **._saveHistory()** (5 connections) — `windows/downloader.js`
-- **.constructor()** (4 connections) — `windows/downloader.js`
-- **._formatBytes()** (4 connections) — `windows/downloader.js`
-- **.pauseDownload()** (4 connections) — `windows/downloader.js`
-- **._remuxToMp4()** (4 connections) — `windows/downloader.js`
-- **._runningCount()** (4 connections) — `windows/downloader.js`
-- **.selectDirectory()** (4 connections) — `windows/downloader.js`
-- **.cancelDownload()** (3 connections) — `windows/downloader.js`
-- **.clearHistory()** (3 connections) — `windows/downloader.js`
-- **.deleteDownloadedFile()** (3 connections) — `windows/downloader.js`
-- **.getAll()** (3 connections) — `windows/downloader.js`
-- **.getSettings()** (3 connections) — `windows/downloader.js`
-- **.isDownloading()** (3 connections) — `windows/downloader.js`
-- *... and 8 more nodes in this community*
+- **keyHandler.js** (20 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **handleKeyDown()** (12 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **spatialNav.js** (8 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **navigate()** (6 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **focusElement()** (4 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_ensureSideNavBinding()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_findFirstFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **isFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **2D Cartesian Spatial Navigation & Focus Memory** (2 connections) — `README.md`
+- **getDirection()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **init()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isBackKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isChannelDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isChannelUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isEnterKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isFavoriteKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isPlayerActive()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isVolumeDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isVolumeMute()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isVolumeUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **ensureVisible()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **getActiveRoot()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **exitApp()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isBackwardKey()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isChannelListKey()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- *... and 4 more nodes in this community*
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (7 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `windows/downloader.js`
+- `IPTVPlayer/js/core/keyHandler.js`
+- `IPTVPlayer/js/core/spatialNav.js`
+- `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 92 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 45 (96%)
+- INFERRED: 2 (4%)
 - AMBIGUOUS: 0 (0%)
 
 ---

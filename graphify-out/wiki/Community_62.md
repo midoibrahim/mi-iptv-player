@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **.abort()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **LG webOS CLI Installation Guide** (0 connections) — `README.md`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/polyfills.js`
+- `README.md`
 
 ## Audit Trail
 

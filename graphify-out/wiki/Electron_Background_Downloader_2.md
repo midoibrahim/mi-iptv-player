@@ -1,23 +1,25 @@
 # Electron Background Downloader
 
-> 14 nodes · cohesion 0.18
+> 16 nodes · cohesion 0.16
 
 ## Key Concepts
 
-- **catalogStore.js** (13 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **favKey()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **isFavorite()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getFavoriteItems()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **toggleFavorite()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getCategories()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getLive()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getMovies()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getSeries()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **init()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setCatalog()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **playerOsd.js** (15 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updateProgressUI()** (4 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **osdEls()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updateProgress()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **fmtTime()** (2 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **autoHide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **bindScrubbing()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **hide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **isVisible()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **navigate()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **show()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **showBanner()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **showSeekHUD()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **toggle()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updateFavoriteState()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updatePlayPauseIcon()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
 
 ## Relationships
 
@@ -25,11 +27,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/catalogStore.js`
+- `IPTVPlayer/js/components/playerOsd.js`
 
 ## Audit Trail
 
-- EXTRACTED: 16 (100%)
+- EXTRACTED: 19 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

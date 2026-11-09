@@ -1,36 +1,39 @@
 # HLS.js MSE Streaming Engine (Part 25)
 
-> 14 nodes · cohesion 0.24
+> 14 nodes · cohesion 0.26
 
 ## Key Concepts
 
-- **webOSTV-dev.js** (13 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **b()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **h()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **R()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **t()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **u()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **m()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **p()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **C()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **i()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **n()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **o()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **v()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **y()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **webOSTV.js** (14 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **B()** (6 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **I()** (5 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **M()** (5 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **R()** (5 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **d()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **u()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **c()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **l()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **y()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **z()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **a()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **f()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
+- **N()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
 
 ## Relationships
 
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (3 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 36)](HLS.js_MSE_Streaming_Engine_Part_36.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
 
 ## Audit Trail
 
-- EXTRACTED: 25 (96%)
-- INFERRED: 1 (4%)
+- EXTRACTED: 27 (79%)
+- INFERRED: 7 (21%)
 - AMBIGUOUS: 0 (0%)
 
 ---

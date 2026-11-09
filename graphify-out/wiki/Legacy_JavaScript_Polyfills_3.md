@@ -1,19 +1,20 @@
 # Legacy JavaScript Polyfills
 
-> 2 nodes · cohesion 1.00
+> 3 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **Ai()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **li()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (2 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Audit Trail
 

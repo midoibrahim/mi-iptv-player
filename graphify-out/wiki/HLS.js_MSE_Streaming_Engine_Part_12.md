@@ -1,48 +1,45 @@
 # HLS.js MSE Streaming Engine (Part 12)
 
-> 24 nodes · cohesion 0.08
+> 23 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **characterization.test.js** (25 connections) — `tests/characterization.test.js`
-- **ref_node_fs** (3 connections)
-- **ref_node_path** (3 connections)
-- **ref_node_assert** (1 connections)
-- **ref_node_events** (1 connections)
-- **ref_node_os** (1 connections)
-- **ref_node_test** (1 connections)
-- **ref_node_vm** (1 connections)
-- **add()** (1 connections) — `tests/characterization.test.js`
-- **addEventListener()** (1 connections) — `tests/characterization.test.js`
-- **assert** (1 connections) — `tests/characterization.test.js`
-- **contains()** (1 connections) — `tests/characterization.test.js`
-- **createBrowserEnv()** (1 connections) — `tests/characterization.test.js`
-- **fs** (1 connections) — `tests/characterization.test.js`
-- **getElementById()** (1 connections) — `tests/characterization.test.js`
-- **invoke()** (1 connections) — `tests/characterization.test.js`
-- **loadScript()** (1 connections) — `tests/characterization.test.js`
-- **path** (1 connections) — `tests/characterization.test.js`
-- **play()** (1 connections) — `tests/characterization.test.js`
-- **remove()** (1 connections) — `tests/characterization.test.js`
-- **ROOT** (1 connections) — `tests/characterization.test.js`
-- **setAttribute()** (1 connections) — `tests/characterization.test.js`
-- **test** (1 connections) — `tests/characterization.test.js`
-- **vm** (1 connections) — `tests/characterization.test.js`
+- **IPTVApp** (23 connections) — `IPTVPlayer/js/app.js`
+- **.connect()** (8 connections) — `IPTVPlayer/js/app.js`
+- **._init()** (8 connections) — `IPTVPlayer/js/app.js`
+- **._applyCatalogData()** (4 connections) — `IPTVPlayer/js/app.js`
+- **.navigateTo()** (4 connections) — `IPTVPlayer/js/app.js`
+- **.toast()** (4 connections) — `IPTVPlayer/js/app.js`
+- **._bindNavigation()** (3 connections) — `IPTVPlayer/js/app.js`
+- **.disconnect()** (3 connections) — `IPTVPlayer/js/app.js`
+- **._refreshBrowseViews()** (3 connections) — `IPTVPlayer/js/app.js`
+- **._registerBackGuards()** (3 connections) — `IPTVPlayer/js/app.js`
+- **.renderFavorites()** (3 connections) — `IPTVPlayer/js/app.js`
+- **._stepChannel()** (3 connections) — `IPTVPlayer/js/app.js`
+- **.constructor()** (2 connections) — `IPTVPlayer/js/app.js`
+- **._fetchCatalogFromNetwork()** (2 connections) — `IPTVPlayer/js/app.js`
+- **.hideLoading()** (2 connections) — `IPTVPlayer/js/app.js`
+- **.nextChannel()** (2 connections) — `IPTVPlayer/js/app.js`
+- **.onItemClick()** (2 connections) — `IPTVPlayer/js/app.js`
+- **.prevChannel()** (2 connections) — `IPTVPlayer/js/app.js`
+- **.registerSectionHook()** (2 connections) — `IPTVPlayer/js/app.js`
+- **.setLoadingText()** (2 connections) — `IPTVPlayer/js/app.js`
+- **.showLoading()** (2 connections) — `IPTVPlayer/js/app.js`
+- **app.js** (1 connections) — `IPTVPlayer/js/app.js`
+- **.goBack()** (1 connections) — `IPTVPlayer/js/app.js`
 
 ## Relationships
 
-- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (2 shared connections)
-- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (2 shared connections)
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (2 shared connections)
+- [build.js & appDir](build.js_&_appDir.md) (1 shared connections)
 
 ## Source Files
 
-- `tests/characterization.test.js`
+- `IPTVPlayer/js/app.js`
 
 ## Audit Trail
 
-- EXTRACTED: 29 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 44 (98%)
+- INFERRED: 1 (2%)
 - AMBIGUOUS: 0 (0%)
 
 ---

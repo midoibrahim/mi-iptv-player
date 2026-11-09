@@ -1,48 +1,51 @@
 # webOS Build & ES5 Transpilation Pipeline
 
-> 57 nodes · cohesion 0.09
+> 44 nodes · cohesion 0.06
 
 ## Key Concepts
 
-- **playerService.js** (57 connections) — `IPTVPlayer/js/services/playerService.js`
-- **_bindEvents()** (18 connections) — `IPTVPlayer/js/services/playerService.js`
-- **handleKey()** (12 connections) — `IPTVPlayer/js/services/playerService.js`
-- **play()** (11 connections) — `IPTVPlayer/js/services/playerService.js`
-- **seekRelative()** (11 connections) — `IPTVPlayer/js/services/playerService.js`
-- **_recordWatchProgress()** (10 connections) — `IPTVPlayer/js/services/playerService.js`
-- **seekTo()** (9 connections) — `IPTVPlayer/js/services/playerService.js`
-- **close()** (7 connections) — `IPTVPlayer/js/services/playerService.js`
-- **isLiveStream()** (7 connections) — `IPTVPlayer/js/services/playerService.js`
-- **pauseVideo()** (7 connections) — `IPTVPlayer/js/services/playerService.js`
-- **showOSD()** (7 connections) — `IPTVPlayer/js/services/playerService.js`
-- **canSeek()** (6 connections) — `IPTVPlayer/js/services/playerService.js`
-- **getDuration()** (6 connections) — `IPTVPlayer/js/services/playerService.js`
-- **playVideo()** (6 connections) — `IPTVPlayer/js/services/playerService.js`
-- **_checkPendingInitialSeek()** (5 connections) — `IPTVPlayer/js/services/playerService.js`
-- **_getSeriesAdjacentEpisodes()** (5 connections) — `IPTVPlayer/js/services/playerService.js`
-- **nextEpisode()** (5 connections) — `IPTVPlayer/js/services/playerService.js`
-- **prevEpisode()** (5 connections) — `IPTVPlayer/js/services/playerService.js`
-- **togglePlay()** (5 connections) — `IPTVPlayer/js/services/playerService.js`
-- **_updatePlayPauseIcon()** (5 connections) — `IPTVPlayer/js/services/playerService.js`
-- **_updateProgress()** (5 connections) — `IPTVPlayer/js/services/playerService.js`
-- **closeChannelDrawer()** (4 connections) — `IPTVPlayer/js/services/playerService.js`
-- **_markCandidateSuccess()** (4 connections) — `IPTVPlayer/js/services/playerService.js`
-- **showSeekHUD()** (4 connections) — `IPTVPlayer/js/services/playerService.js`
-- **autoHideOSD()** (3 connections) — `IPTVPlayer/js/services/playerService.js`
-- *... and 32 more nodes in this community*
+- **webos-build/build.mjs** (26 connections) — `webos-build/build.mjs`
+- **webos-build/package.json** (14 connections) — `webos-build/package.json`
+- **devDependencies** (9 connections) — `webos-build/package.json`
+- **autoprefixer** (3 connections) — `webos-build/package.json`
+- **@babel/core** (3 connections) — `webos-build/package.json`
+- **esbuild** (3 connections) — `webos-build/package.json`
+- **postcss** (3 connections) — `webos-build/package.json`
+- **resolveVarsWithMap()** (3 connections) — `webos-build/build.mjs`
+- **walk()** (3 connections) — `webos-build/build.mjs`
+- **acorn** (2 connections) — `webos-build/package.json`
+- **@babel/preset-env** (2 connections) — `webos-build/package.json`
+- **core-js** (2 connections) — `webos-build/package.json`
+- **ref_node_url** (2 connections)
+- **regenerator-runtime** (2 connections) — `webos-build/package.json`
+- **acorn@^8.19.0** (2 connections) — `webos-build/package.json`
+- **autoprefixer@^10.6.2** (2 connections) — `webos-build/package.json`
+- **@babel/core@^7.26.0** (2 connections) — `webos-build/package.json`
+- **@babel/preset-env@^7.26.0** (2 connections) — `webos-build/package.json`
+- **core-js@^3.39.0** (2 connections) — `webos-build/package.json`
+- **esbuild@^0.24.0** (2 connections) — `webos-build/package.json`
+- **postcss@^8.4.49** (2 connections) — `webos-build/package.json`
+- **regenerator-runtime@^0.14.1** (2 connections) — `webos-build/package.json`
+- **scripts** (2 connections) — `webos-build/package.json`
+- **babelOpts** (1 connections) — `webos-build/build.mjs`
+- **BROWSERSLIST** (1 connections) — `webos-build/build.mjs`
+- *... and 19 more nodes in this community*
 
 ## Relationships
 
-- [Storage & Profile Persistence](Storage_&_Profile_Persistence.md) (1 shared connections)
+- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (2 shared connections)
+- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (1 shared connections)
+- [build.js & appDir](build.js_&_appDir.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/services/playerService.js`
+- `webos-build/build.mjs`
+- `webos-build/package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 142 (99%)
-- INFERRED: 1 (1%)
+- EXTRACTED: 59 (98%)
+- INFERRED: 1 (2%)
 - AMBIGUOUS: 0 (0%)
 
 ---

@@ -4,19 +4,19 @@
 
 ## Key Concepts
 
-- **.addEventListener()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **resolveVarsWithMap()** (3 connections) — `tizen-build/build.mjs`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/polyfills.js`
+- `tizen-build/build.mjs`
 
 ## Audit Trail
 
-- EXTRACTED: 0 (0%)
+- EXTRACTED: 2 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

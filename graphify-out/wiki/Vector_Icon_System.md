@@ -1,15 +1,19 @@
 # Vector Icon System
 
-> 6 nodes · cohesion 0.33
+> 10 nodes · cohesion 0.40
 
 ## Key Concepts
 
-- **qrcode.min.js** (5 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QR8bitByte()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRBitBuffer()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRCodeModel()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRPolynomial()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRRSBlock()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **seriesDetailView.js** (9 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **renderEpisodesList()** (5 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **renderScreen()** (4 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **buildEpisodePlayItem()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **_formatEpisodeTitle()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **init()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **updateFavoriteState()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **close()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **focusEpisodeCard()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **open()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
 
 ## Relationships
 
@@ -17,11 +21,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/qrcode.min.js`
+- `IPTVPlayer/js/views/seriesDetailView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 5 (100%)
+- EXTRACTED: 18 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

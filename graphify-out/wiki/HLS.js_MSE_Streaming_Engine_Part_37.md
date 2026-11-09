@@ -1,30 +1,35 @@
 # HLS.js MSE Streaming Engine (Part 37)
 
-> 8 nodes · cohesion 0.43
+> 10 nodes · cohesion 0.22
 
 ## Key Concepts
 
-- **downloadStore.js** (7 connections) — `IPTVPlayer/js/services/downloadStore.js`
-- **collectPendingEpisodes()** (4 connections) — `IPTVPlayer/js/services/downloadStore.js`
-- **getDownloadedItem()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
-- **isCompleted()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
-- **buildEpisodePayload()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
-- **isDesktop()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
-- **isDownloading()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
-- **applySnapshot()** (1 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **pe()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **jt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **ft()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **lt()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **ot()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **bt()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Wl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **jl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Kt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **qt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (10 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (3 shared connections)
+- [HLS.js MSE Streaming Engine (Part 36)](HLS.js_MSE_Streaming_Engine_Part_36.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/services/downloadStore.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 12 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 24 (96%)
+- INFERRED: 1 (4%)
 - AMBIGUOUS: 0 (0%)
 
 ---

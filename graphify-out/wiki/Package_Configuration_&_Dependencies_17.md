@@ -25,7 +25,8 @@
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (2 shared connections)
+- [Login View & Profile Selector](Login_View_&_Profile_Selector.md) (1 shared connections)
+- [Community 41](Community_41.md) (1 shared connections)
 
 ## Source Files
 

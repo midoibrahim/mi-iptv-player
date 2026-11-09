@@ -1,38 +1,45 @@
 # build.js & appDir
 
-> 16 nodes · cohesion 0.16
+> 16 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **playerOsd.js** (15 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateProgressUI()** (4 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **osdEls()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateProgress()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **fmtTime()** (2 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **autoHide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **bindScrubbing()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **hide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **isVisible()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **navigate()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **show()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **showBanner()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **showSeekHUD()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **toggle()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateFavoriteState()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updatePlayPauseIcon()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **tvServer.js** (8 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **Universal Cross-Platform Architecture (webOS + Electron)** (4 connections) — `README.md`
+- **QR Code Phone Setup & Background Server** (4 connections) — `README.md`
+- **getSetupInfo()** (4 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **MI IPTV Player Documentation** (4 connections) — `README.md`
+- **10-Foot TV User Interface Architecture** (3 connections) — `README.md`
+- **ensureStarted()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **isWebOS()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **resolveApiBase()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **stop()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **Multi-Stage Playback & Stream Pipeline** (2 connections) — `README.md`
+- **pollCredentials()** (2 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **10-Foot TV Application Shell & Screens** (1 connections) — `IPTVPlayer/index.html`
+- **isRunning()** (1 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **Companion Phone Web Setup Interface** (1 connections) — `IPTVPlayer/setup.html`
+- **LG webOS Compatibility Matrix (webOS 3.x - 25+)** (1 connections) — `README.md`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (1 shared connections)
+- [webOS Build & ES5 Transpilation Pipeline](webOS_Build_&_ES5_Transpilation_Pipeline.md) (1 shared connections)
+- [Theme Engine & Design Tokens](Theme_Engine_&_Design_Tokens.md) (1 shared connections)
+- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (1 shared connections)
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/components/playerOsd.js`
+- `IPTVPlayer/index.html`
+- `IPTVPlayer/js/services/tvServer.js`
+- `IPTVPlayer/setup.html`
+- `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 20 (77%)
+- INFERRED: 6 (23%)
 - AMBIGUOUS: 0 (0%)
 
 ---

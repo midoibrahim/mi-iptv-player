@@ -1,11 +1,13 @@
 # Legacy JavaScript Polyfills
 
-> 2 nodes · cohesion 1.00
+> 4 nodes · cohesion 0.83
 
 ## Key Concepts
 
-- **icons.js** (1 connections) — `IPTVPlayer/js/core/icons.js`
-- **get()** (1 connections) — `IPTVPlayer/js/core/icons.js`
+- **searchView.js** (3 connections) — `IPTVPlayer/js/views/searchView.js`
+- **search()** (3 connections) — `IPTVPlayer/js/views/searchView.js`
+- **_collectPoolMatches()** (2 connections) — `IPTVPlayer/js/views/searchView.js`
+- **init()** (2 connections) — `IPTVPlayer/js/views/searchView.js`
 
 ## Relationships
 
@@ -13,11 +15,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/icons.js`
+- `IPTVPlayer/js/views/searchView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 1 (100%)
+- EXTRACTED: 5 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

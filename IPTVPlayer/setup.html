@@ -402,6 +402,55 @@
             });
         });
 
+        // Relay & Local Network Integration
+        const urlParams = (typeof URLSearchParams !== 'undefined') ? new URLSearchParams(window.location.search) : null;
+        const relaySessionId = urlParams ? urlParams.get('session') : null;
+        const relaySecretKey = urlParams ? urlParams.get('key') : null;
+        const RELAY_ENDPOINT = 'https://api.restful-api.dev/objects';
+
+        if (relaySessionId) {
+            const statusText = document.querySelector('.status-pill span');
+            if (statusText) statusText.textContent = 'Smart TV Secure Pairing Active';
+        }
+
+        function encrypt(text, key) {
+            if (!text || !key) return '';
+            var safeText = encodeURIComponent(text);
+            var out = '';
+            for (var i = 0; i < safeText.length; i++) {
+                out += String.fromCharCode(safeText.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+            }
+            return (typeof btoa === 'function') ? btoa(out) : out;
+        }
+
+        async function transmitCredentials(creds) {
+            if (relaySessionId && relaySecretKey) {
+                var encPayload = encrypt(JSON.stringify(creds), relaySecretKey);
+                var resp = await fetch(RELAY_ENDPOINT + '/' + relaySessionId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'mi-pairing-session',
+                        data: { status: 'ready', payload: encPayload, updatedAt: Date.now() }
+                    })
+                });
+                if (!resp || !resp.ok) {
+                    throw new Error('Pairing relay error (' + (resp ? resp.status : 'offline') + ')');
+                }
+                return;
+            }
+
+            // Default local companion server (webOS & Windows)
+            var resp = await fetch('/api/credentials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(creds)
+            });
+            if (!resp || !resp.ok) {
+                throw new Error('Failed to send credentials to TV.');
+            }
+        }
+
         // Submit Xtream Codes
         document.getElementById('btn-submit-xtream').addEventListener('click', async () => {
             const name = document.getElementById('input-name').value.trim();
@@ -419,19 +468,13 @@
             btn.textContent = 'Sending to TV...';
 
             try {
-                const resp = await fetch('/api/credentials', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'xtream',
-                        name: name || `${username}@${new URL(server.startsWith('http') ? server : 'http://' + server).hostname}`,
-                        server: server,
-                        username: username,
-                        password: password
-                    })
+                await transmitCredentials({
+                    type: 'xtream',
+                    name: name || `${username}@${new URL(server.startsWith('http') ? server : 'http://' + server).hostname}`,
+                    server: server,
+                    username: username,
+                    password: password
                 });
-
-                if (!resp.ok) throw new Error('Failed to send credentials to TV.');
                 showSuccess();
             } catch (err) {
                 alert('Error sending to TV: ' + err.message);
@@ -455,17 +498,11 @@
             btn.textContent = 'Sending to TV...';
 
             try {
-                const resp = await fetch('/api/credentials', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'm3u',
-                        name: name || 'M3U Playlist',
-                        url: url
-                    })
+                await transmitCredentials({
+                    type: 'm3u',
+                    name: name || 'M3U Playlist',
+                    url: url
                 });
-
-                if (!resp.ok) throw new Error('Failed to send credentials to TV.');
                 showSuccess();
             } catch (err) {
                 alert('Error sending to TV: ' + err.message);

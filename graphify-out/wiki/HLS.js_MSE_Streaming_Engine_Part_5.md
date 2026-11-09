@@ -1,55 +1,48 @@
 # HLS.js MSE Streaming Engine (Part 5)
 
-> 33 nodes · cohesion 0.15
+> 33 nodes · cohesion 0.16
 
 ## Key Concepts
 
-- **e()** (24 connections) — `IPTVPlayer/js/mpegts.js`
-- **mpegts.js** (22 connections) — `IPTVPlayer/js/mpegts.js`
-- **t()** (11 connections) — `IPTVPlayer/js/mpegts.js`
-- **a()** (10 connections) — `IPTVPlayer/js/mpegts.js`
-- **i()** (10 connections) — `IPTVPlayer/js/mpegts.js`
-- **n()** (9 connections) — `IPTVPlayer/js/mpegts.js`
-- **o()** (9 connections) — `IPTVPlayer/js/mpegts.js`
-- **s()** (9 connections) — `IPTVPlayer/js/mpegts.js`
-- **k()** (7 connections) — `IPTVPlayer/js/mpegts.js`
-- **l()** (7 connections) — `IPTVPlayer/js/mpegts.js`
-- **r()** (7 connections) — `IPTVPlayer/js/mpegts.js`
-- **c()** (6 connections) — `IPTVPlayer/js/mpegts.js`
-- **ku()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **a()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **b()** (4 connections) — `IPTVPlayer/js/mpegts.js`
-- **d()** (4 connections) — `IPTVPlayer/js/mpegts.js`
-- **wu()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **n()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **zu()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **f()** (3 connections) — `IPTVPlayer/js/mpegts.js`
-- **g()** (3 connections) — `IPTVPlayer/js/mpegts.js`
-- **p()** (3 connections) — `IPTVPlayer/js/mpegts.js`
-- **w()** (3 connections) — `IPTVPlayer/js/mpegts.js`
-- **a()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **h()** (2 connections) — `IPTVPlayer/js/mpegts.js`
+- **Downloader** (34 connections) — `windows/downloader.js`
+- **._executeDownload()** (12 connections) — `windows/downloader.js`
+- **._sendToRenderer()** (11 connections) — `windows/downloader.js`
+- **._processQueue()** (10 connections) — `windows/downloader.js`
+- **.startDownload()** (10 connections) — `windows/downloader.js`
+- **._serializeTask()** (9 connections) — `windows/downloader.js`
+- **.startBatchDownloads()** (6 connections) — `windows/downloader.js`
+- **.updateSettings()** (6 connections) — `windows/downloader.js`
+- **.convertItemToMp4()** (5 connections) — `windows/downloader.js`
+- **._ensureDir()** (5 connections) — `windows/downloader.js`
+- **._handleError()** (5 connections) — `windows/downloader.js`
+- **.resumeDownload()** (5 connections) — `windows/downloader.js`
+- **._saveHistory()** (5 connections) — `windows/downloader.js`
+- **.constructor()** (4 connections) — `windows/downloader.js`
+- **._formatBytes()** (4 connections) — `windows/downloader.js`
+- **.pauseDownload()** (4 connections) — `windows/downloader.js`
+- **._remuxToMp4()** (4 connections) — `windows/downloader.js`
+- **._runningCount()** (4 connections) — `windows/downloader.js`
+- **.selectDirectory()** (4 connections) — `windows/downloader.js`
+- **.cancelDownload()** (3 connections) — `windows/downloader.js`
+- **.clearHistory()** (3 connections) — `windows/downloader.js`
+- **.deleteDownloadedFile()** (3 connections) — `windows/downloader.js`
+- **.getAll()** (3 connections) — `windows/downloader.js`
+- **.getSettings()** (3 connections) — `windows/downloader.js`
+- **.isDownloading()** (3 connections) — `windows/downloader.js`
 - *... and 8 more nodes in this community*
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (4 shared connections)
-- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (3 shared connections)
-- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (3 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (2 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (2 shared connections)
-- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 14)](HLS.js_MSE_Streaming_Engine_Part_14.md) (1 shared connections)
+- [Login View & Profile Selector](Login_View_&_Profile_Selector.md) (7 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
-- `IPTVPlayer/js/mpegts.js`
+- `windows/downloader.js`
 
 ## Audit Trail
 
-- EXTRACTED: 57 (58%)
-- INFERRED: 42 (42%)
+- EXTRACTED: 92 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

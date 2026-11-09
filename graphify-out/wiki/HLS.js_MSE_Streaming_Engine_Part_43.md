@@ -1,14 +1,17 @@
 # HLS.js MSE Streaming Engine (Part 43)
 
-> 5 nodes · cohesion 0.40
+> 8 nodes · cohesion 0.43
 
 ## Key Concepts
 
-- **IPTVService/package.json** (4 connections) — `IPTVService/package.json`
-- **description** (1 connections) — `IPTVService/package.json`
-- **main** (1 connections) — `IPTVService/package.json`
-- **name** (1 connections) — `IPTVService/package.json`
-- **version** (1 connections) — `IPTVService/package.json`
+- **downloadStore.js** (7 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **collectPendingEpisodes()** (4 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **getDownloadedItem()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isCompleted()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **buildEpisodePayload()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDesktop()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDownloading()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **applySnapshot()** (1 connections) — `IPTVPlayer/js/services/downloadStore.js`
 
 ## Relationships
 
@@ -16,11 +19,11 @@
 
 ## Source Files
 
-- `IPTVService/package.json`
+- `IPTVPlayer/js/services/downloadStore.js`
 
 ## Audit Trail
 
-- EXTRACTED: 4 (100%)
+- EXTRACTED: 12 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

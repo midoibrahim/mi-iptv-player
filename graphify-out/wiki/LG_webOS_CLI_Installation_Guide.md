@@ -4,20 +4,20 @@
 
 ## Key Concepts
 
-- **ht()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **pa()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **polyfills.js** (1 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **NOTE: function expression (not declaration) - Chromium 38 rejects block-level** (1 connections) — `IPTVPlayer/js/core/polyfills.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (2 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/core/polyfills.js`
 
 ## Audit Trail
 
-- EXTRACTED: 3 (100%)
+- EXTRACTED: 1 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

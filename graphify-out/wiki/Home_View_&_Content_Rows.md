@@ -1,35 +1,36 @@
 # Home View & Content Rows
 
-> 13 nodes · cohesion 0.22
+> 14 nodes · cohesion 0.24
 
 ## Key Concepts
 
-- **platform.js** (12 connections) — `IPTVPlayer/js/core/platform.js`
-- **_initDesktopViewportAndFullscreen()** (5 connections) — `IPTVPlayer/js/core/platform.js`
-- **init()** (3 connections) — `IPTVPlayer/js/core/platform.js`
-- **isDesktop()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **isFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **setFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **toggleFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **downloads()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **exitApp()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **hasDownloads()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **isTizen()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **isWebOS()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **setKeepScreenOn()** (1 connections) — `IPTVPlayer/js/core/platform.js`
+- **webOSTV-dev.js** (13 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **b()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **h()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **R()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **t()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **u()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **m()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **p()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **C()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **i()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **n()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **o()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **v()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **y()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 36)](HLS.js_MSE_Streaming_Engine_Part_36.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/platform.js`
+- `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
 
 ## Audit Trail
 
-- EXTRACTED: 17 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 25 (96%)
+- INFERRED: 1 (4%)
 - AMBIGUOUS: 0 (0%)
 
 ---

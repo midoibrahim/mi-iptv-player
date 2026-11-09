@@ -1,25 +1,29 @@
 # HLS.js MSE Streaming Engine (Part 44)
 
-> 4 nodes · cohesion 0.50
+> 8 nodes · cohesion 0.43
 
 ## Key Concepts
 
-- **Fl()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ar()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **kn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **xl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **pairingRelay.js** (7 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **createSession()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **deleteSession()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **pollSession()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **stop()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **decrypt()** (2 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **_generateKey()** (2 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **encrypt()** (1 connections) — `IPTVPlayer/js/services/pairingRelay.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (4 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/services/pairingRelay.js`
 
 ## Audit Trail
 
-- EXTRACTED: 7 (100%)
+- EXTRACTED: 12 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

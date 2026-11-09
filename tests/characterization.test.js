@@ -757,6 +757,70 @@ test('Storage.createProfile normalizes Xtream and M3U profiles with default name
     assert.equal(m3uProf.url, 'http://provider.example.com/playlist.m3u8');
 });
 
+test('PairingRelay encrypts/decrypts payloads and handles session lifecycle', async () => {
+    const env = createBrowserEnv({
+        btoa: (s) => Buffer.from(s, 'binary').toString('base64'),
+        atob: (s) => Buffer.from(s, 'base64').toString('binary')
+    });
+    loadScript(env, 'IPTVPlayer/js/services/pairingRelay.js');
+    const { PairingRelay } = env.window.IPTV;
+
+    // 1. Encryption / Decryption symmetry (including Unicode / Arabic / symbols)
+    const secret = 'MYKEY123';
+    const payload = JSON.stringify({
+        type: 'xtream',
+        name: 'قنوات غرفة المعيشة 📺',
+        server: 'http://test.com',
+        username: 'u',
+        password: 'p'
+    });
+    const encrypted = PairingRelay.encrypt(payload, secret);
+    assert.notEqual(encrypted, payload);
+    const decrypted = PairingRelay.decrypt(encrypted, secret);
+    assert.equal(decrypted, payload);
+
+    // 2. Mock session creation and polling
+    let remoteObject = null;
+    env.fetch = async (url, opts = {}) => {
+        if (opts.method === 'POST') {
+            remoteObject = { id: 'obj-1234', data: JSON.parse(opts.body).data };
+            return { ok: true, status: 200, json: async () => remoteObject };
+        }
+        if (opts.method === 'PUT') {
+            remoteObject.data = JSON.parse(opts.body).data;
+            return { ok: true, status: 200, json: async () => remoteObject };
+        }
+        if (opts.method === 'DELETE') {
+            remoteObject = null;
+            return { ok: true, status: 200 };
+        }
+        if (remoteObject) {
+            return { ok: true, status: 200, json: async () => remoteObject };
+        }
+        return { ok: false, status: 404 };
+    };
+
+    const session = await PairingRelay.createSession('http://test.local/setup.html');
+    assert.equal(session.sessionId, 'obj-1234');
+    assert.ok(session.pairUrl.includes('obj-1234'));
+
+    // Still waiting -> poll returns null
+    const beforeSubmit = await PairingRelay.pollSession();
+    assert.equal(beforeSubmit, null);
+
+    // Phone submits encrypted credentials
+    const phoneEnc = PairingRelay.encrypt(payload, session.secretKey);
+    await env.fetch(PairingRelay.RELAY_ENDPOINT + '/' + session.sessionId, {
+        method: 'PUT',
+        body: JSON.stringify({ name: 'mi-pairing-session', data: { status: 'ready', payload: phoneEnc } })
+    });
+
+    // TV polls -> gets decrypted credentials & deletes session
+    const received = await PairingRelay.pollSession();
+    assert.deepEqual(received, JSON.parse(payload));
+    assert.equal(remoteObject, null); // Session automatically deleted
+});
+
 
 
 

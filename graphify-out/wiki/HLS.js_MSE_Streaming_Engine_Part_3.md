@@ -1,51 +1,55 @@
 # HLS.js MSE Streaming Engine (Part 3)
 
-> 44 nodes · cohesion 0.06
+> 39 nodes · cohesion 0.12
 
 ## Key Concepts
 
-- **webos-build/build.mjs** (26 connections) — `webos-build/build.mjs`
-- **webos-build/package.json** (14 connections) — `webos-build/package.json`
-- **devDependencies** (9 connections) — `webos-build/package.json`
-- **autoprefixer** (3 connections) — `webos-build/package.json`
-- **@babel/core** (3 connections) — `webos-build/package.json`
-- **esbuild** (3 connections) — `webos-build/package.json`
-- **postcss** (3 connections) — `webos-build/package.json`
-- **resolveVarsWithMap()** (3 connections) — `webos-build/build.mjs`
-- **walk()** (3 connections) — `webos-build/build.mjs`
-- **acorn** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env** (2 connections) — `webos-build/package.json`
-- **core-js** (2 connections) — `webos-build/package.json`
-- **ref_node_url** (2 connections)
-- **regenerator-runtime** (2 connections) — `webos-build/package.json`
-- **acorn@^8.19.0** (2 connections) — `webos-build/package.json`
-- **autoprefixer@^10.6.2** (2 connections) — `webos-build/package.json`
-- **@babel/core@^7.26.0** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env@^7.26.0** (2 connections) — `webos-build/package.json`
-- **core-js@^3.39.0** (2 connections) — `webos-build/package.json`
-- **esbuild@^0.24.0** (2 connections) — `webos-build/package.json`
-- **postcss@^8.4.49** (2 connections) — `webos-build/package.json`
-- **regenerator-runtime@^0.14.1** (2 connections) — `webos-build/package.json`
-- **scripts** (2 connections) — `webos-build/package.json`
-- **babelOpts** (1 connections) — `webos-build/build.mjs`
-- **BROWSERSLIST** (1 connections) — `webos-build/build.mjs`
-- *... and 19 more nodes in this community*
+- **e()** (24 connections) — `IPTVPlayer/js/mpegts.js`
+- **mpegts.js** (22 connections) — `IPTVPlayer/js/mpegts.js`
+- **t()** (11 connections) — `IPTVPlayer/js/mpegts.js`
+- **m()** (10 connections) — `IPTVPlayer/js/hls.min.js`
+- **a()** (10 connections) — `IPTVPlayer/js/mpegts.js`
+- **i()** (10 connections) — `IPTVPlayer/js/mpegts.js`
+- **n()** (9 connections) — `IPTVPlayer/js/mpegts.js`
+- **o()** (9 connections) — `IPTVPlayer/js/mpegts.js`
+- **s()** (9 connections) — `IPTVPlayer/js/mpegts.js`
+- **v()** (8 connections) — `IPTVPlayer/js/hls.min.js`
+- **k()** (7 connections) — `IPTVPlayer/js/mpegts.js`
+- **l()** (7 connections) — `IPTVPlayer/js/mpegts.js`
+- **r()** (7 connections) — `IPTVPlayer/js/mpegts.js`
+- **c()** (6 connections) — `IPTVPlayer/js/mpegts.js`
+- **f()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **ku()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **a()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **b()** (4 connections) — `IPTVPlayer/js/mpegts.js`
+- **d()** (4 connections) — `IPTVPlayer/js/mpegts.js`
+- **wu()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **n()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **zu()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **f()** (3 connections) — `IPTVPlayer/js/mpegts.js`
+- **g()** (3 connections) — `IPTVPlayer/js/mpegts.js`
+- **p()** (3 connections) — `IPTVPlayer/js/mpegts.js`
+- *... and 14 more nodes in this community*
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (2 shared connections)
-- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (1 shared connections)
-- [Storage & Profile Persistence](Storage_&_Profile_Persistence.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (6 shared connections)
+- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (5 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (3 shared connections)
+- [HLS.js MSE Streaming Engine (Part 25)](HLS.js_MSE_Streaming_Engine_Part_25.md) (3 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 42)](HLS.js_MSE_Streaming_Engine_Part_42.md) (1 shared connections)
+- [Search Engine & Filter View](Search_Engine_&_Filter_View.md) (1 shared connections)
 
 ## Source Files
 
-- `webos-build/build.mjs`
-- `webos-build/package.json`
+- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/mpegts.js`
 
 ## Audit Trail
 
-- EXTRACTED: 59 (98%)
-- INFERRED: 1 (2%)
+- EXTRACTED: 66 (57%)
+- INFERRED: 49 (43%)
 - AMBIGUOUS: 0 (0%)
 
 ---

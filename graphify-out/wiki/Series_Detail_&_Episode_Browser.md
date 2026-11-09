@@ -1,37 +1,35 @@
 # Series Detail & Episode Browser
 
-> 13 nodes · cohesion 0.15
+> 13 nodes · cohesion 0.22
 
 ## Key Concepts
 
-- **ln()** (11 connections) — `IPTVPlayer/js/hls.min.js`
-- **sn()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **dn()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **mn()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **wn()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **Xi()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **en()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **fn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **nn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **pn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **un()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **yn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **zi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **platform.js** (12 connections) — `IPTVPlayer/js/core/platform.js`
+- **_initDesktopViewportAndFullscreen()** (5 connections) — `IPTVPlayer/js/core/platform.js`
+- **init()** (3 connections) — `IPTVPlayer/js/core/platform.js`
+- **isDesktop()** (2 connections) — `IPTVPlayer/js/core/platform.js`
+- **isFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
+- **setFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
+- **toggleFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
+- **downloads()** (1 connections) — `IPTVPlayer/js/core/platform.js`
+- **exitApp()** (1 connections) — `IPTVPlayer/js/core/platform.js`
+- **hasDownloads()** (1 connections) — `IPTVPlayer/js/core/platform.js`
+- **isTizen()** (1 connections) — `IPTVPlayer/js/core/platform.js`
+- **isWebOS()** (1 connections) — `IPTVPlayer/js/core/platform.js`
+- **setKeepScreenOn()** (1 connections) — `IPTVPlayer/js/core/platform.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (13 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (7 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/core/platform.js`
 
 ## Audit Trail
 
-- EXTRACTED: 30 (91%)
-- INFERRED: 3 (9%)
+- EXTRACTED: 17 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

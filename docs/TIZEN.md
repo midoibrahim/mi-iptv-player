@@ -146,3 +146,14 @@ This script automatically:
 2. Signs the package with your local Tizen developer certificate (`tz.exe pack`).
 3. Deploys and launches the app directly on your active emulator via `sdb`.
 
+---
+
+## 7. Phone QR Code Setup via Pairing Relay
+
+Samsung Tizen Smart TVs do not run a local Node.js server. Instead, MI IPTV Player uses an **end-to-end encrypted Pairing Relay**:
+1. When you open the **Add Playlist** screen on your Samsung TV, the TV creates an ephemeral pairing session and renders a QR code.
+2. Scan the QR code using your smartphone camera.
+3. Your phone opens the setup interface, where you type your Xtream Codes or M3U playlist.
+4. When you tap **Send to TV**, your phone encrypts the credentials with the session key and transmits them to the TV.
+5. The TV instantly connects, saves your profile, and immediately deletes the session data from the relay.
+

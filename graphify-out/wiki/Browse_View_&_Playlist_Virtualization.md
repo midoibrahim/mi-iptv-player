@@ -1,47 +1,49 @@
 # Browse View & Playlist Virtualization
 
-> 25 nodes · cohesion 0.17
+> 24 nodes · cohesion 0.08
 
 ## Key Concepts
 
-- **downloadManager.js** (25 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_refreshVisibleCardStates()** (7 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_render()** (7 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_bindEvents()** (6 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_refreshData()** (6 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **init()** (5 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_bindUIControls()** (4 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **downloadEpisode()** (4 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **downloadMovie()** (4 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **getDownloadedItem()** (4 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **isDownloading()** (4 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_injectSectionElement()** (3 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **isCompleted()** (3 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_updateBadge()** (3 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_updatePathDisplay()** (3 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_updateProgressItem()** (3 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_createActiveCard()** (2 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_createCompletedCard()** (2 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **_injectNavigationItem()** (2 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **activeTasks()** (1 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **downloadEntireSeries()** (1 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **downloadSeason()** (1 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **history()** (1 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **settings()** (1 connections) — `IPTVPlayer/js/components/downloadManager.js`
-- **store()** (1 connections) — `IPTVPlayer/js/components/downloadManager.js`
+- **characterization.test.js** (25 connections) — `tests/characterization.test.js`
+- **ref_node_fs** (3 connections)
+- **ref_node_path** (3 connections)
+- **ref_node_assert** (1 connections)
+- **ref_node_events** (1 connections)
+- **ref_node_os** (1 connections)
+- **ref_node_test** (1 connections)
+- **ref_node_vm** (1 connections)
+- **add()** (1 connections) — `tests/characterization.test.js`
+- **addEventListener()** (1 connections) — `tests/characterization.test.js`
+- **assert** (1 connections) — `tests/characterization.test.js`
+- **contains()** (1 connections) — `tests/characterization.test.js`
+- **createBrowserEnv()** (1 connections) — `tests/characterization.test.js`
+- **fs** (1 connections) — `tests/characterization.test.js`
+- **getElementById()** (1 connections) — `tests/characterization.test.js`
+- **invoke()** (1 connections) — `tests/characterization.test.js`
+- **loadScript()** (1 connections) — `tests/characterization.test.js`
+- **path** (1 connections) — `tests/characterization.test.js`
+- **play()** (1 connections) — `tests/characterization.test.js`
+- **remove()** (1 connections) — `tests/characterization.test.js`
+- **ROOT** (1 connections) — `tests/characterization.test.js`
+- **setAttribute()** (1 connections) — `tests/characterization.test.js`
+- **test** (1 connections) — `tests/characterization.test.js`
+- **vm** (1 connections) — `tests/characterization.test.js`
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (1 shared connections)
+- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (2 shared connections)
+- [webOS Build & ES5 Transpilation Pipeline](webOS_Build_&_ES5_Transpilation_Pipeline.md) (2 shared connections)
+- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (1 shared connections)
+- [Login View & Profile Selector](Login_View_&_Profile_Selector.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/components/downloadManager.js`
+- `tests/characterization.test.js`
 
 ## Audit Trail
 
-- EXTRACTED: 51 (98%)
-- INFERRED: 1 (2%)
+- EXTRACTED: 29 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

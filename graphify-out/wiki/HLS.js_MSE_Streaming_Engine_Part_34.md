@@ -1,19 +1,19 @@
 # HLS.js MSE Streaming Engine (Part 34)
 
-> 10 nodes · cohesion 0.40
+> 10 nodes · cohesion 0.22
 
 ## Key Concepts
 
-- **seriesDetailView.js** (9 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderEpisodesList()** (5 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderScreen()** (4 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **buildEpisodePlayItem()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **_formatEpisodeTitle()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **updateFavoriteState()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **close()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **focusEpisodeCard()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **open()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **server.py** (7 connections) — `server.py`
+- **CORSRequestHandler** (3 connections) — `server.py`
+- **run_server()** (2 connections) — `server.py`
+- **socketserver** (2 connections)
+- **http_server** (1 connections)
+- **os** (1 connections)
+- **.end_headers()** (1 connections) — `server.py`
+- **.__init__()** (1 connections) — `server.py`
+- **MI IPTV Player - Lightweight Local Test Server Serves IPTVPlayer/ over HTTP…** (1 connections) — `server.py`
+- **sys** (1 connections)
 
 ## Relationships
 
@@ -21,11 +21,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/views/seriesDetailView.js`
+- `server.py`
 
 ## Audit Trail
 
-- EXTRACTED: 18 (100%)
+- EXTRACTED: 10 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

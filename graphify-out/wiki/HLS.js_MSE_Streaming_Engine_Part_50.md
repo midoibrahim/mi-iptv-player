@@ -1,24 +1,26 @@
 # HLS.js MSE Streaming Engine (Part 50)
 
-> 3 nodes · cohesion 0.67
+> 5 nodes · cohesion 0.40
 
 ## Key Concepts
 
-- **walk()** (4 connections) — `tizen-build/build.mjs`
-- **buildWgtArchive()** (3 connections) — `tizen-build/build.mjs`
-- **crc32()** (2 connections) — `tizen-build/build.mjs`
+- **IPTVService/package.json** (4 connections) — `IPTVService/package.json`
+- **description** (1 connections) — `IPTVService/package.json`
+- **main** (1 connections) — `IPTVService/package.json`
+- **name** (1 connections) — `IPTVService/package.json`
+- **version** (1 connections) — `IPTVService/package.json`
 
 ## Relationships
 
-- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (3 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `tizen-build/build.mjs`
+- `IPTVService/package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 4 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

@@ -1,26 +1,30 @@
 # HLS.js MSE Streaming Engine (Part 45)
 
-> 4 nodes · cohesion 0.50
+> 8 nodes · cohesion 0.46
 
 ## Key Concepts
 
-- **Eo()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **Po()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Sl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **So()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **settingsView.js** (7 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **init()** (5 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_bindUI()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_loadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_setupDownloadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_saveSettings()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **_setupThemeSelector()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **updateInfo()** (1 connections) — `IPTVPlayer/js/views/settingsView.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (4 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/views/settingsView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (86%)
-- INFERRED: 1 (14%)
+- EXTRACTED: 13 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

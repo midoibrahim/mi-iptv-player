@@ -1,12 +1,14 @@
 # HLS.js MSE Streaming Engine (Part 49)
 
-> 3 nodes · cohesion 1.00
+> 5 nodes · cohesion 0.60
 
 ## Key Concepts
 
-- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
-- **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
-- **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **eventBus.js** (4 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **emit()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **off()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **on()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **toast()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
 
 ## Relationships
 
@@ -14,11 +16,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/watchProgressTracker.js`
+- `IPTVPlayer/js/core/eventBus.js`
 
 ## Audit Trail
 
-- EXTRACTED: 3 (100%)
+- EXTRACTED: 6 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

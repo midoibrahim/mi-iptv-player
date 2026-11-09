@@ -1,29 +1,33 @@
 # Search Engine & Filter View
 
-> 8 nodes · cohesion 0.46
+> 10 nodes · cohesion 0.20
 
 ## Key Concepts
 
-- **settingsView.js** (7 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **init()** (5 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_bindUI()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_loadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_setupDownloadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_saveSettings()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_setupThemeSelector()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **updateInfo()** (1 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **hu()** (11 connections) — `IPTVPlayer/js/hls.min.js`
+- **wa()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ll()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Rl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Xt()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **ju()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Oa()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **qu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Xu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Yu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (10 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (5 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/views/settingsView.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 13 (100%)
+- EXTRACTED: 25 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

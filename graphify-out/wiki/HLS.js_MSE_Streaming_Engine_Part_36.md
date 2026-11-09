@@ -1,25 +1,29 @@
 # HLS.js MSE Streaming Engine (Part 36)
 
-> 8 nodes · cohesion 0.25
+> 10 nodes · cohesion 0.24
 
 ## Key Concepts
 
-- **xo()** (9 connections) — `IPTVPlayer/js/hls.min.js`
-- **Mo()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **jo()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ws()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Yo()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Co()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Lo()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **wo()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **rt()** (18 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ue()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ni()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **tt()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **it()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **st()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **at()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Gi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ii()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **nt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (8 shared connections)
-- [test_diag.js & { app, BrowserWin...](test_diag.js_&_{_app,_BrowserWin.md) (1 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 14)](HLS.js_MSE_Streaming_Engine_Part_14.md) (1 shared connections)
-- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (10 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (5 shared connections)
+- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (5 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (2 shared connections)
+- [Home View & Content Rows](Home_View_&_Content_Rows.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 25)](HLS.js_MSE_Streaming_Engine_Part_25.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 37)](HLS.js_MSE_Streaming_Engine_Part_37.md) (1 shared connections)
 
 ## Source Files
 
@@ -27,8 +31,8 @@
 
 ## Audit Trail
 
-- EXTRACTED: 20 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 25 (69%)
+- INFERRED: 11 (31%)
 - AMBIGUOUS: 0 (0%)
 
 ---

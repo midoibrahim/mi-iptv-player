@@ -339,13 +339,28 @@ window.IPTV.LoginView = {
                 return;
             }
 
-            // On Samsung Tizen TV (where no local Node HTTP companion server runs on 127.0.0.1:8089),
-            // display clean direct-remote instructions instead of an unreachable localhost QR code.
+            var setupUrl = (info && info.setupUrl) ? info.setupUrl : null;
+            var isUsingRelay = false;
+
             const hasCompanionServer = Boolean(
                 (info && info.apiBase) ||
                 (window.IPTV.TvServer && window.IPTV.TvServer.isWebOS())
             );
-            if (!hasCompanionServer && window.IPTV.Platform && window.IPTV.Platform.isTizen()) {
+
+            // On platforms without a local Node companion server (such as Samsung Tizen OS),
+            // initialize the secure cloud/ephemeral pairing relay so the phone QR code works seamlessly.
+            if (!hasCompanionServer && window.IPTV.PairingRelay) {
+                if (urlText) urlText.textContent = 'Connecting secure pairing relay...';
+                const session = await window.IPTV.PairingRelay.createSession();
+                if (!this.isQrScreenActive()) return;
+
+                if (session && session.pairUrl) {
+                    setupUrl = session.pairUrl;
+                    isUsingRelay = true;
+                }
+            }
+
+            if (!setupUrl) {
                 if (urlText) urlText.textContent = 'Samsung Smart TV Direct Input';
                 const statusText = document.getElementById('remote-poll-status');
                 if (statusText) statusText.textContent = 'Select any field on the left and press OK on your remote';
@@ -353,10 +368,9 @@ window.IPTV.LoginView = {
                 return;
             }
 
-            const setupUrl = (info && info.setupUrl) ? info.setupUrl : 'http://127.0.0.1:8089/setup.html';
-
+            this._isUsingRelay = isUsingRelay;
             if (urlText) {
-                urlText.textContent = setupUrl;
+                urlText.textContent = isUsingRelay ? 'Scan QR with Phone to Connect' : setupUrl;
             }
 
             qrContainer.innerHTML = '';
@@ -381,22 +395,33 @@ window.IPTV.LoginView = {
     startRemotePolling() {
         this.stopRemotePolling();
         const statusText = document.getElementById('remote-poll-status');
-        if (statusText) statusText.textContent = 'Waiting for credentials from phone...';
+        if (statusText) statusText.textContent = this._isUsingRelay
+            ? 'Waiting for credentials from phone via secure relay...'
+            : 'Waiting for credentials from phone...';
 
+        this._pollingInProgress = false;
         this._pollTimer = setInterval(async () => {
             if (!this.isQrScreenActive()) {
                 this.stopRemotePolling();
                 return;
             }
+            if (this._pollingInProgress) return;
+            this._pollingInProgress = true;
             try {
-                if (!window.IPTV.TvServer) return;
-                const creds = await window.IPTV.TvServer.pollCredentials();
+                var creds = null;
+                if (this._isUsingRelay && window.IPTV.PairingRelay) {
+                    creds = await window.IPTV.PairingRelay.pollSession();
+                } else if (window.IPTV.TvServer) {
+                    creds = await window.IPTV.TvServer.pollCredentials();
+                }
                 if (!this.isQrScreenActive()) return;
                 if (creds) {
                     this.handleRemoteCredentials(creds);
                 }
             } catch(err) {
                 // Silently ignore network poll blips
+            } finally {
+                this._pollingInProgress = false;
             }
         }, 1500);
     },
@@ -405,6 +430,10 @@ window.IPTV.LoginView = {
         if (this._pollTimer) {
             clearInterval(this._pollTimer);
             this._pollTimer = null;
+        }
+        if (this._isUsingRelay && window.IPTV.PairingRelay) {
+            window.IPTV.PairingRelay.stop();
+            this._isUsingRelay = false;
         }
         if (window.IPTV.TvServer) {
             window.IPTV.TvServer.stop();

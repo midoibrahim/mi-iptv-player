@@ -4,21 +4,20 @@
 
 ## Key Concepts
 
-- **dr()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ur()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **icons.js** (1 connections) — `IPTVPlayer/js/core/icons.js`
+- **get()** (1 connections) — `IPTVPlayer/js/core/icons.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (2 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/core/icons.js`
 
 ## Audit Trail
 
-- EXTRACTED: 4 (100%)
+- EXTRACTED: 1 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

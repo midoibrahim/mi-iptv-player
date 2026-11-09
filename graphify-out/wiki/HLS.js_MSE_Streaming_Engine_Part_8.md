@@ -1,35 +1,35 @@
 # HLS.js MSE Streaming Engine (Part 8)
 
-> 29 nodes · cohesion 0.12
+> 27 nodes · cohesion 0.15
 
 ## Key Concepts
 
-- **keyHandler.js** (20 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **handleKeyDown()** (12 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **spatialNav.js** (8 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **navigate()** (6 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **focusElement()** (4 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **_ensureSideNavBinding()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **_findFirstFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **isFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **2D Cartesian Spatial Navigation & Focus Memory** (2 connections) — `README.md`
-- **getDirection()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **init()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isBackKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isChannelDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isChannelUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isEnterKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isFavoriteKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isPlayerActive()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeMute()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **ensureVisible()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **getActiveRoot()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **exitApp()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isBackwardKey()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isChannelListKey()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- *... and 4 more nodes in this community*
+- **storage.js** (26 connections) — `IPTVPlayer/js/core/storage.js`
+- **deleteProfile()** (6 connections) — `IPTVPlayer/js/core/storage.js`
+- **getProfiles()** (6 connections) — `IPTVPlayer/js/core/storage.js`
+- **getWatchProgress()** (5 connections) — `IPTVPlayer/js/core/storage.js`
+- **saveWatchProgress()** (5 connections) — `IPTVPlayer/js/core/storage.js`
+- **getConnectionKey()** (4 connections) — `IPTVPlayer/js/core/storage.js`
+- **_key()** (4 connections) — `IPTVPlayer/js/core/storage.js`
+- **_open()** (4 connections) — `IPTVPlayer/js/core/storage.js`
+- **saveProfiles()** (4 connections) — `IPTVPlayer/js/core/storage.js`
+- **_deduplicateWatchProgress()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **get()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **getConnection()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **remove()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **removeWatchProgress()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **saveProfile()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **saveWatchProgressItem()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **_serverKey()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **set()** (3 connections) — `IPTVPlayer/js/core/storage.js`
+- **clearConnection()** (2 connections) — `IPTVPlayer/js/core/storage.js`
+- **createProfile()** (2 connections) — `IPTVPlayer/js/core/storage.js`
+- **getStreamStrategy()** (2 connections) — `IPTVPlayer/js/core/storage.js`
+- **saveStreamStrategy()** (2 connections) — `IPTVPlayer/js/core/storage.js`
+- **getFavorites()** (1 connections) — `IPTVPlayer/js/core/storage.js`
+- **getSettings()** (1 connections) — `IPTVPlayer/js/core/storage.js`
+- **saveConnection()** (1 connections) — `IPTVPlayer/js/core/storage.js`
+- *... and 2 more nodes in this community*
 
 ## Relationships
 
@@ -37,14 +37,12 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/keyHandler.js`
-- `IPTVPlayer/js/core/spatialNav.js`
-- `README.md`
+- `IPTVPlayer/js/core/storage.js`
 
 ## Audit Trail
 
-- EXTRACTED: 45 (96%)
-- INFERRED: 2 (4%)
+- EXTRACTED: 52 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

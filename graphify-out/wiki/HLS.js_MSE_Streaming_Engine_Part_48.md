@@ -1,12 +1,15 @@
 # HLS.js MSE Streaming Engine (Part 48)
 
-> 3 nodes · cohesion 1.00
+> 6 nodes · cohesion 0.60
 
 ## Key Concepts
 
-- **streamResolver.js** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
-- **buildCandidates()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
-- **getStrategy()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
+- **theme.js** (5 connections) — `IPTVPlayer/js/core/theme.js`
+- **applyTheme()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **getSavedTheme()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **init()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **_resolveThemeId()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **getThemes()** (1 connections) — `IPTVPlayer/js/core/theme.js`
 
 ## Relationships
 
@@ -14,11 +17,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/streamResolver.js`
+- `IPTVPlayer/js/core/theme.js`
 
 ## Audit Trail
 
-- EXTRACTED: 3 (100%)
+- EXTRACTED: 9 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

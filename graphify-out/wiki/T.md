@@ -2,7 +2,7 @@
 
 > God node · 27 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [HLS.js MSE Streaming Engine (Part 14)](HLS.js_MSE_Streaming_Engine_Part_14.md)
+**Community:** [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md)
 
 ## Connections by Relation
 

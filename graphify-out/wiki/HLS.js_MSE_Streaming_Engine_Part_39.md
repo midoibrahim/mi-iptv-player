@@ -1,15 +1,19 @@
 # HLS.js MSE Streaming Engine (Part 39)
 
-> 6 nodes · cohesion 0.40
+> 10 nodes · cohesion 0.42
 
 ## Key Concepts
 
-- **backStack.js** (5 connections) — `IPTVPlayer/js/core/backStack.js`
-- **pop()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
-- **push()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
-- **handleBack()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
-- **register()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
+- **homeView.js** (9 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_addContinueWatchingRow()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **render()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **resumeItem()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **showResumeModal()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **closeResumeModal()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_fmtRemaining()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
+- **init()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_addRow()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_fmtTime()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
 
 ## Relationships
 
@@ -17,11 +21,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/backStack.js`
+- `IPTVPlayer/js/views/homeView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 19 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

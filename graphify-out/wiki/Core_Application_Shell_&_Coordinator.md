@@ -33,10 +33,10 @@
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 50)](HLS.js_MSE_Streaming_Engine_Part_50.md) (3 shared connections)
-- [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (2 shared connections)
-- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (1 shared connections)
-- [Community 68](Community_68.md) (1 shared connections)
+- [Legacy JavaScript Polyfills](Legacy_JavaScript_Polyfills.md) (3 shared connections)
+- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (2 shared connections)
+- [webOS Build & ES5 Transpilation Pipeline](webOS_Build_&_ES5_Transpilation_Pipeline.md) (1 shared connections)
+- [Community 63](Community_63.md) (1 shared connections)
 
 ## Source Files
 

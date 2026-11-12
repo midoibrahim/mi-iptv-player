@@ -75,8 +75,29 @@ if (fs.existsSync(appDir)) {
     fs.rmSync(appDir, { recursive: true, force: true });
 }
 
-console.log('\n[3/3] SUCCESS! Windows app generated in dist/windows/');
+console.log('\n[3/4] Creating portable distribution ZIP archive...');
+const zipOutput = path.join(__dirname, '../dist/MI-IPTV-Player-v1.0.0-windows-x64.zip');
+const packagedDir = path.join(outDir, 'MI IPTV Player-win32-x64');
+if (fs.existsSync(zipOutput)) {
+    try { fs.unlinkSync(zipOutput); } catch (e) {}
+}
+try {
+    execSync(`tar -a -cf "${zipOutput}" -C "${packagedDir}" .`, { stdio: 'inherit' });
+    console.log('Portable ZIP created: ' + zipOutput);
+} catch (e) {
+    try {
+        execSync(`powershell -NoProfile -Command "Compress-Archive -Path '${packagedDir}\\*' -DestinationPath '${zipOutput}' -Force"`, { stdio: 'inherit' });
+        console.log('Portable ZIP created (PowerShell fallback): ' + zipOutput);
+    } catch (zipErr) {
+        console.warn('Could not create portable zip archive automatically:', zipErr.message);
+    }
+}
+
+console.log('\n[4/4] SUCCESS! Windows app generated in dist/');
 const expectedExe = path.join(outDir, 'MI IPTV Player-win32-x64', 'MI IPTV Player.exe');
 if (fs.existsSync(expectedExe)) {
-    console.log('Executable: ' + expectedExe);
+    console.log('  Executable: ' + expectedExe);
+}
+if (fs.existsSync(zipOutput)) {
+    console.log('  Portable ZIP: ' + zipOutput);
 }

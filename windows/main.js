@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, powerMonitor } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
@@ -10,6 +10,11 @@ app.commandLine.appendSwitch('ignore-gpu-blocklist');
 app.commandLine.appendSwitch('enable-gpu-rasterization');
 app.commandLine.appendSwitch('enable-zero-copy');
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
+// Prevent Chromium from throttling or suspending background downloads when minimized, occluded, or screen-locked
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 
 const PORT = 8089;
 let mainWindow = null;
@@ -61,6 +66,7 @@ function createWindow() {
             nodeIntegration: false,
             contextIsolation: true,
             allowRunningInsecureContent: true,
+            backgroundThrottling: false, // Keep timers and download IPC active when screen is locked or window is hidden
             preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -300,6 +306,16 @@ app.whenReady().then(() => {
     startCompanionServer();
     createWindow();
 
+    // Recover any stalled network sockets if OS forced sleep/lock suspension
+    powerMonitor.on('resume', () => {
+        console.log('[Main] System resumed from sleep, checking active downloads...');
+        downloader.recoverStalledDownloads();
+    });
+    powerMonitor.on('unlock-screen', () => {
+        console.log('[Main] Screen unlocked, checking active downloads...');
+        downloader.recoverStalledDownloads();
+    });
+
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
@@ -308,6 +324,7 @@ app.whenReady().then(() => {
 });
 
 app.on('before-quit', () => {
+    downloader.shutdown();
     if (companionServer) {
         try { companionServer.close(); } catch(e) {}
     }

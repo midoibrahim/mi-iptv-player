@@ -27,10 +27,14 @@ if errorlevel 1 (
 
 echo.
 echo ========================================================
-echo   SUCCESS! Windows app ready in dist\windows\
+echo   SUCCESS! Windows app ready in dist\
 echo ========================================================
 echo.
-echo To run the player:
+echo Output artifacts:
+echo   1. Unpacked Folder : dist\windows\MI IPTV Player-win32-x64\
+echo   2. Portable ZIP    : dist\MI-IPTV-Player-v1.0.0-windows-x64.zip
+echo.
+echo To run the player locally:
 echo   start "" "dist\windows\MI IPTV Player-win32-x64\MI IPTV Player.exe"
 echo.
 cd /d "%~dp0"

@@ -1,11 +1,10 @@
 # Theme Engine & Design Tokens
 
-> 11 nodes · cohesion 0.18
+> 13 nodes · cohesion 0.15
 
 ## Key Concepts
 
-- **build.js** (13 connections) — `windows/build.js`
-- **ref_child_process** (2 connections)
+- **build.js** (16 connections) — `windows/build.js`
 - **appDir** (1 connections) — `windows/build.js`
 - **{ execSync }** (1 connections) — `windows/build.js`
 - **expectedExe** (1 connections) — `windows/build.js`
@@ -13,15 +12,18 @@
 - **iconFile** (1 connections) — `windows/build.js`
 - **IGNORED_NAMES** (1 connections) — `windows/build.js`
 - **outDir** (1 connections) — `windows/build.js`
+- **packagedDir** (1 connections) — `windows/build.js`
 - **path** (1 connections) — `windows/build.js`
 - **srcDir** (1 connections) — `windows/build.js`
+- **stagedCompanion** (1 connections) — `windows/build.js`
+- **zipOutput** (1 connections) — `windows/build.js`
 
 ## Relationships
 
-- [Login View & Profile Selector](Login_View_&_Profile_Selector.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 33)](HLS.js_MSE_Streaming_Engine_Part_33.md) (1 shared connections)
 - [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (1 shared connections)
-- [build.js & appDir](build.js_&_appDir.md) (1 shared connections)
+- [Community 64](Community_64.md) (1 shared connections)
+- [Community 15](Community_15.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (1 shared connections)
 
 ## Source Files
 
@@ -29,8 +31,8 @@
 
 ## Audit Trail
 
-- EXTRACTED: 13 (93%)
-- INFERRED: 1 (7%)
+- EXTRACTED: 15 (94%)
+- INFERRED: 1 (6%)
 - AMBIGUOUS: 0 (0%)
 
 ---

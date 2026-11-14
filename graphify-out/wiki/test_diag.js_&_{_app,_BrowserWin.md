@@ -6,16 +6,16 @@
 
 - **xtreamService.js** (8 connections) — `IPTVPlayer/js/services/xtreamService.js`
 - **loadAll()** (5 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **m3uParser.js** (3 connections) — `IPTVPlayer/js/services/m3uParser.js`
 - **fetchJson()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
 - **streamUrl()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **Xtream Codes & M3U Playlist Protocol Engine** (2 connections) — `README.md`
+- **m3uParser.js** (3 connections) — `IPTVPlayer/js/services/m3uParser.js`
 - **load()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
 - **parseExtinf()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
 - **buildCatMap()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
 - **getSeriesInfo()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
 - **resolveEpisodeUrl()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
 - **_yieldToMain()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **Xtream Codes & M3U Playlist Protocol Engine** (2 connections) — `README.md`
 
 ## Relationships
 

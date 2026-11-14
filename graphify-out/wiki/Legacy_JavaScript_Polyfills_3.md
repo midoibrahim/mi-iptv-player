@@ -4,9 +4,9 @@
 
 ## Key Concepts
 
-- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
 - **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
 - **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Relationships
 

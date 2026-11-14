@@ -1,23 +1,27 @@
 # webOS Background Luna Service
 
-> 14 nodes · cohesion 0.18
+> 18 nodes · cohesion 0.11
 
 ## Key Concepts
 
-- **catalogStore.js** (13 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **favKey()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **isFavorite()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getFavoriteItems()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **toggleFavorite()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getCategories()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getLive()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getMovies()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getSeries()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **init()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setCatalog()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **package.json** (9 connections) — `package.json`
+- **scripts** (9 connections) — `package.json`
+- **author** (1 connections) — `package.json`
+- **description** (1 connections) — `package.json`
+- **keywords** (1 connections) — `package.json`
+- **license** (1 connections) — `package.json`
+- **name** (1 connections) — `package.json`
+- **private** (1 connections) — `package.json`
+- **build:all** (1 connections) — `package.json`
+- **build:tizen** (1 connections) — `package.json`
+- **build:webos** (1 connections) — `package.json`
+- **build:windows** (1 connections) — `package.json`
+- **setup** (1 connections) — `package.json`
+- **start:server** (1 connections) — `package.json`
+- **start:windows** (1 connections) — `package.json`
+- **test** (1 connections) — `package.json`
+- **version** (1 connections) — `package.json`
+- **workspaces** (1 connections) — `package.json`
 
 ## Relationships
 
@@ -25,11 +29,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/catalogStore.js`
+- `package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 16 (100%)
+- EXTRACTED: 17 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

@@ -18,9 +18,7 @@ window.IPTV.SearchView = {
 
             const activateSearch = () => {
                 if (this.input.readOnly) {
-                    this.input.readOnly = false;
-                    this.input.focus();
-                    try { this.input.select(); } catch(err) {}
+                    this.focusInput();
                 }
             };
 
@@ -56,16 +54,22 @@ window.IPTV.SearchView = {
         }
     },
 
+    focusInput() {
+        if (!this.input) return;
+        this.input.readOnly = false;
+        this.input.focus();
+        try { this.input.select(); } catch(err) {}
+    },
+
     _collectPoolMatches(arr, q, maxPerGroup) {
         const matches = [];
         if (!arr || !arr.length) return matches;
         for (let i = 0; i < arr.length && matches.length < maxPerGroup; i++) {
             const item = arr[i];
-            const hit = item._q
-                ? item._q.indexOf(q) !== -1
-                : ((item.name && item.name.toLowerCase().indexOf(q) !== -1) ||
-                   (item.category && item.category.toLowerCase().indexOf(q) !== -1));
-            if (hit) {
+            if (item._q === undefined) {
+                item._q = ((item.name || '') + ' ' + (item.category || '')).toLowerCase();
+            }
+            if (item._q.indexOf(q) !== -1) {
                 matches.push(item);
             }
         }

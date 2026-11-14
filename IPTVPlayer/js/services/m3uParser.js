@@ -16,51 +16,99 @@ window.IPTV.M3UParser = {
         }
 
         if (onProgress) onProgress('Parsing channels and VODs...');
-        const lines = text.split('\n');
         let currentMeta = null;
 
         const liveChannels = [];
         const movies = [];
         const series = [];
+        const liveCatSet = new Set();
+        const movieCatSet = new Set();
+        const seriesCatSet = new Set();
 
-        for (let i = 0; i < lines.length; i++) {
-            if (i > 0 && (i & 16383) === 0) {
+        let pos = 0;
+        let lineNum = 0;
+        const len = text.length;
+
+        while (pos < len) {
+            if (lineNum > 0 && (lineNum & 16383) === 0) {
                 await new Promise(r => setTimeout(r, 0));
             }
-            const line = lines[i].trim();
+            const nextNl = text.indexOf('\n', pos);
+            const rawLine = nextNl === -1 ? text.slice(pos) : text.slice(pos, nextNl);
+            pos = nextNl === -1 ? len : nextNl + 1;
+
+            const line = rawLine.trim();
+            if (!line) {
+                lineNum++;
+                continue;
+            }
             if (line.startsWith('#EXTINF:')) {
                 currentMeta = this.parseExtinf(line);
-            } else if (line && !line.startsWith('#') && currentMeta) {
+            } else if (!line.startsWith('#') && currentMeta) {
                 const streamUrl = line;
                 const cat = currentMeta.groupTitle || 'Uncategorized';
                 const name = currentMeta.title || 'Unknown';
-                const item = {
-                    id: `m3u_${i}`,
-                    name: name,
-                    _q: (name + ' ' + cat).toLowerCase(),
-                    logo: currentMeta.tvgLogo || '',
-                    category: cat,
-                    url: streamUrl,
-                    hd: /hd|fhd|uhd|4k/i.test(name)
-                };
-
-                // Classify stream type
+                const logo = currentMeta.tvgLogo || '';
+                const qText = (name + ' ' + cat).toLowerCase();
+                const isHd = /hd|fhd|uhd|4k/i.test(name);
                 const lcUrl = streamUrl.toLowerCase();
+
                 if (/\.(mp4|mkv|avi|mov)($|\?)/.test(lcUrl)) {
-                    movies.push({ ...item, type: 'movie', poster: item.logo, plot: '', rating: '', year: '' });
+                    movieCatSet.add(cat);
+                    movies.push({
+                        id: `m3u_${lineNum}`,
+                        name: name,
+                        _q: qText,
+                        logo: logo,
+                        category: cat,
+                        url: streamUrl,
+                        hd: isHd,
+                        type: 'movie',
+                        poster: logo,
+                        plot: '',
+                        rating: '',
+                        year: ''
+                    });
                 } else if (/\/series\//.test(lcUrl)) {
-                    series.push({ ...item, type: 'series', poster: item.logo, plot: '', rating: '', year: '' });
+                    seriesCatSet.add(cat);
+                    series.push({
+                        id: `m3u_${lineNum}`,
+                        name: name,
+                        _q: qText,
+                        logo: logo,
+                        category: cat,
+                        url: streamUrl,
+                        hd: isHd,
+                        type: 'series',
+                        poster: logo,
+                        plot: '',
+                        rating: '',
+                        year: ''
+                    });
                 } else {
-                    liveChannels.push({ ...item, type: 'live', _idx: liveChannels.length });
+                    liveCatSet.add(cat);
+                    liveChannels.push({
+                        id: `m3u_${lineNum}`,
+                        name: name,
+                        _q: qText,
+                        logo: logo,
+                        category: cat,
+                        url: streamUrl,
+                        hd: isHd,
+                        type: 'live',
+                        _idx: liveChannels.length
+                    });
                 }
                 currentMeta = null;
             }
+            lineNum++;
         }
 
+        const toCats = (set) => Array.from(set).map((n, idx) => ({ category_id: idx, category_name: n }));
         const categories = {
-            live: [...new Set(liveChannels.map(c => c.category))].map((n, i) => ({ category_id: i, category_name: n })),
-            movies: [...new Set(movies.map(c => c.category))].map((n, i) => ({ category_id: i, category_name: n })),
-            series: [...new Set(series.map(c => c.category))].map((n, i) => ({ category_id: i, category_name: n }))
+            live: toCats(liveCatSet),
+            movies: toCats(movieCatSet),
+            series: toCats(seriesCatSet)
         };
 
         return {

@@ -4,9 +4,9 @@
 
 ## Key Concepts
 
-- **streamResolver.js** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
 - **buildCandidates()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
 - **getStrategy()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
+- **streamResolver.js** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
 
 ## Relationships
 

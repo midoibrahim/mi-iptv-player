@@ -361,6 +361,40 @@ window.IPTV.SpatialNav = {
             }
         }
 
+        // ---- 3b. O(1) Grid Fast Path inside .browse-content.grid-view ----
+        // Avoids querySelectorAll + getBoundingClientRect() across hundreds of rendered cards per keypress
+        const gridView = current.closest('.browse-content.grid-view');
+        if (gridView && current.classList.contains('card')) {
+            const curTop = current.offsetTop;
+            const curLeft = current.offsetLeft;
+            const curW = current.offsetWidth || 1;
+            if (dir === 'left') {
+                const prev = current.previousElementSibling;
+                if (prev && prev.classList.contains('card') && Math.abs(prev.offsetTop - curTop) <= 12) {
+                    return this.focusElement(prev);
+                }
+            } else if (dir === 'right') {
+                const next = current.nextElementSibling;
+                if (next && next.classList.contains('card') && Math.abs(next.offsetTop - curTop) <= 12) {
+                    return this.focusElement(next);
+                }
+            } else if (dir === 'up' || dir === 'down') {
+                const step = dir === 'up' ? 'previousElementSibling' : 'nextElementSibling';
+                let scan = current[step];
+                let hops = 0;
+                while (scan && hops < 32) {
+                    if (scan.classList.contains('card')) {
+                        const rowDiff = dir === 'up' ? (curTop - scan.offsetTop) : (scan.offsetTop - curTop);
+                        if (rowDiff > 12 && Math.abs(scan.offsetLeft - curLeft) < curW * 0.55) {
+                            return this.focusElement(scan);
+                        }
+                    }
+                    scan = scan[step];
+                    hops++;
+                }
+            }
+        }
+
         // ---- 4. Scoped 2D Cartesian Spatial Navigation ----
         const currentRect = current.getBoundingClientRect();
         const cX = currentRect.left + currentRect.width / 2;

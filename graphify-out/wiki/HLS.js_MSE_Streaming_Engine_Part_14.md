@@ -16,11 +16,11 @@
 - **_flushRemainingCategories()** (3 connections) — `IPTVPlayer/js/components/browseView.js`
 - **_renderGrid()** (3 connections) — `IPTVPlayer/js/components/browseView.js`
 - **create()** (3 connections) — `IPTVPlayer/js/components/card.js`
-- **High-FPS Large Playlist Virtualization Engine** (2 connections) — `README.md`
 - **_renderRows()** (2 connections) — `IPTVPlayer/js/components/browseView.js`
 - **setData()** (2 connections) — `IPTVPlayer/js/components/browseView.js`
 - **_getIcon()** (2 connections) — `IPTVPlayer/js/components/card.js`
 - **_scheduleLazyImg()** (2 connections) — `IPTVPlayer/js/components/card.js`
+- **High-FPS Large Playlist Virtualization Engine** (2 connections) — `README.md`
 - **constructor()** (1 connections) — `IPTVPlayer/js/components/browseView.js`
 - **clearLazyQueue()** (1 connections) — `IPTVPlayer/js/components/card.js`
 - **eagerLoad()** (1 connections) — `IPTVPlayer/js/components/card.js`

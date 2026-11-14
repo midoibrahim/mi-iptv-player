@@ -1,25 +1,35 @@
 # Electron Background Downloader
 
-> 16 nodes · cohesion 0.16
+> 30 nodes · cohesion 0.11
 
 ## Key Concepts
 
-- **playerOsd.js** (15 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateProgressUI()** (4 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **osdEls()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateProgress()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **fmtTime()** (2 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **autoHide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **bindScrubbing()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **hide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **isVisible()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **navigate()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **show()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **showBanner()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **showSeekHUD()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **toggle()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updateFavoriteState()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
-- **updatePlayPauseIcon()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **keyHandler.js** (21 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **handleKeyDown()** (13 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **spatialNav.js** (8 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **navigate()** (6 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **focusElement()** (4 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_ensureSideNavBinding()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_findFirstFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **isFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **getDirection()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **init()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isBackKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isChannelDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isChannelUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isDesktopSearchShortcut()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isEnterKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isFavoriteKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isPlayerActive()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isVolumeDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isVolumeMute()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isVolumeUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **ensureVisible()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **getActiveRoot()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **2D Cartesian Spatial Navigation & Focus Memory** (2 connections) — `README.md`
+- **exitApp()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- **isBackwardKey()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
+- *... and 5 more nodes in this community*
 
 ## Relationships
 
@@ -27,12 +37,14 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/components/playerOsd.js`
+- `IPTVPlayer/js/core/keyHandler.js`
+- `IPTVPlayer/js/core/spatialNav.js`
+- `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 47 (96%)
+- INFERRED: 2 (4%)
 - AMBIGUOUS: 0 (0%)
 
 ---

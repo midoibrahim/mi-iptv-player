@@ -16,10 +16,42 @@ window.IPTV.PlaybackEngine = {
             s.src = src;
             s.async = true;
             s.onload = () => resolve(true);
-            s.onerror = () => resolve(false);
+            s.onerror = () => {
+                delete this._scriptPromises[src];
+                resolve(false);
+            };
             document.head.appendChild(s);
         });
         return this._scriptPromises[src];
+    },
+
+    /**
+     * Returns platform-tuned MSE buffer limits & worker flags.
+     * Smart TVs (512MB-1.5GB RAM) use tighter buffers and disable Blob Workers
+     * for legacy Chromium/CSP safety; Desktop uses larger buffers & Worker demuxing.
+     */
+    getEngineProfile() {
+        const P = window.IPTV && window.IPTV.Platform;
+        const isTv = Boolean(P && ((typeof P.isWebOS === 'function' && P.isWebOS()) || (typeof P.isTizen === 'function' && P.isTizen())));
+        const isDesktop = Boolean(P && typeof P.isDesktop === 'function' && P.isDesktop());
+        if (isTv) {
+            return {
+                enableWorker: false,
+                hlsMaxBufferLength: 12,
+                hlsMaxMaxBufferLength: 24,
+                hlsMaxBufferSize: 15 * 1000 * 1000,
+                mpegtsLazyMaxDuration: 15,
+                mpegtsLazyRecoverDuration: 8
+            };
+        }
+        return {
+            enableWorker: isDesktop && typeof Worker !== 'undefined',
+            hlsMaxBufferLength: 20,
+            hlsMaxMaxBufferLength: 40,
+            hlsMaxBufferSize: 30 * 1000 * 1000,
+            mpegtsLazyMaxDuration: 30,
+            mpegtsLazyRecoverDuration: 15
+        };
     },
 
     clearWatchdog(player) {
@@ -242,6 +274,8 @@ window.IPTV.PlaybackEngine = {
 
         this.startWatchdog(player, item, currentSessionId, isLive ? 7000 : 12000);
 
+        const profile = this.getEngineProfile();
+
         // 1. HLS (.m3u8) streams via Hls.js MSE
         if (isM3u8 && (forceMseHls || typeof window.MediaSource !== 'undefined')) {
             if (!window.Hls) {
@@ -251,11 +285,11 @@ window.IPTV.PlaybackEngine = {
             if (window.Hls && Hls.isSupported()) {
                 try {
                     const hlsConfig = {
-                        enableWorker: false,
+                        enableWorker: profile.enableWorker,
                         lowLatencyMode: false,
-                        maxBufferLength: 20,
-                        maxMaxBufferLength: 40,
-                        maxBufferSize: 30 * 1000 * 1000
+                        maxBufferLength: profile.hlsMaxBufferLength,
+                        maxMaxBufferLength: profile.hlsMaxMaxBufferLength,
+                        maxBufferSize: profile.hlsMaxBufferSize
                     };
                     if (player._initialSeekPending !== null && player._initialSeekPending > 0) {
                         hlsConfig.startPosition = player._initialSeekPending;
@@ -299,9 +333,9 @@ window.IPTV.PlaybackEngine = {
                         isLive: isLive,
                         url: url
                     }, {
-                        enableWorker: false,
-                        lazyLoadMaxDuration: 30,
-                        lazyLoadRecoverDuration: 15,
+                        enableWorker: profile.enableWorker,
+                        lazyLoadMaxDuration: profile.mpegtsLazyMaxDuration,
+                        lazyLoadRecoverDuration: profile.mpegtsLazyRecoverDuration,
                         seekType: isLive ? 'range' : 'param'
                     });
                     player.mpegtsPlayer = tsPlayer;

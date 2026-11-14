@@ -21,7 +21,7 @@
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 36)](HLS.js_MSE_Streaming_Engine_Part_36.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (1 shared connections)
 
 ## Source Files
 

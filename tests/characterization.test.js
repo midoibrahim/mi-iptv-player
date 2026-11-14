@@ -893,6 +893,111 @@ test('PlaybackEngine & StreamResolver handle desktop VOD proxy candidate and ini
     });
 });
 
+test('PlaybackEngine.getEngineProfile adapts buffer caps for Smart TV vs Desktop', () => {
+    const tvEnv = createBrowserEnv({ webOS: {} });
+    loadScript(tvEnv, 'IPTVPlayer/js/core/platform.js');
+    loadScript(tvEnv, 'IPTVPlayer/js/services/playbackEngine.js');
+    const tvProfile = tvEnv.window.IPTV.PlaybackEngine.getEngineProfile();
+    assert.equal(tvProfile.enableWorker, false);
+    assert.equal(tvProfile.hlsMaxBufferSize, 15 * 1000 * 1000);
+    assert.equal(tvProfile.hlsMaxBufferLength, 12);
+
+    const desktopEnv = createBrowserEnv({
+        electronDesktop: {},
+        Worker: function MockWorker() {}
+    });
+    loadScript(desktopEnv, 'IPTVPlayer/js/core/platform.js');
+    loadScript(desktopEnv, 'IPTVPlayer/js/services/playbackEngine.js');
+    const deskProfile = desktopEnv.window.IPTV.PlaybackEngine.getEngineProfile();
+    assert.equal(deskProfile.enableWorker, true);
+    assert.equal(deskProfile.hlsMaxBufferSize, 30 * 1000 * 1000);
+    assert.equal(deskProfile.hlsMaxBufferLength, 20);
+});
+
+test('IPTVPlayer/index.html defers hls.min.js and mpegts.js out of synchronous boot tags', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'IPTVPlayer/index.html'), 'utf8');
+    assert.equal(/<script[^>]+src=["']js\/hls\.min\.js["']/.test(html), false);
+    assert.equal(/<script[^>]+src=["']js\/mpegts\.js["']/.test(html), false);
+});
+
+test('KeyHandler opens Search and focuses editable input on Desktop Ctrl+F without triggering Favorite', () => {
+    let focusedCardFavToggled = false;
+    let searchFocused = false;
+    let searchSelected = false;
+    let navigatedTo = null;
+
+    const searchInput = {
+        readOnly: true,
+        value: '',
+        addEventListener() {},
+        focus() { searchFocused = true; },
+        select() { searchSelected = true; }
+    };
+    const focusedCard = {
+        tagName: 'DIV',
+        classList: { contains: (c) => c === 'card' },
+        _item: { id: '1', type: 'movie', name: 'Test' }
+    };
+    const mainShellEl = { classList: { contains: (c) => c === 'active' } };
+    const elements = {
+        'main-shell': mainShellEl,
+        'search-input': searchInput,
+        'search-results': {}
+    };
+
+    const env = createBrowserEnv({
+        electronDesktop: {},
+        addEventListener() {}
+    });
+    env.document.activeElement = focusedCard;
+    env.document.getElementById = (id) => elements[id] || null;
+    env.window.IPTV.CatalogStore = { toggleFavorite: () => { focusedCardFavToggled = true; } };
+
+    loadScript(env, 'IPTVPlayer/js/core/platform.js');
+    loadScript(env, 'IPTVPlayer/js/views/searchView.js');
+    loadScript(env, 'IPTVPlayer/js/core/keyHandler.js');
+
+    const { SearchView, KeyHandler } = env.window.IPTV;
+    const mockApp = {
+        currentSection: 'home',
+        navigateTo: (sec) => {
+            navigatedTo = sec;
+            mockApp.currentSection = sec;
+        },
+        searchView: SearchView
+    };
+    SearchView.init(mockApp);
+    KeyHandler.app = mockApp;
+
+    let prevented = false;
+    let stopped = false;
+    KeyHandler.handleKeyDown({
+        key: 'f',
+        keyCode: 70,
+        ctrlKey: true,
+        metaKey: false,
+        altKey: false,
+        shiftKey: false,
+        preventDefault() { prevented = true; },
+        stopPropagation() { stopped = true; }
+    });
+
+    assert.equal(navigatedTo, 'search');
+    assert.equal(searchInput.readOnly, false);
+    assert.equal(searchFocused, true);
+    assert.equal(searchSelected, true);
+    assert.equal(focusedCardFavToggled, false);
+    assert.equal(prevented, true);
+    assert.equal(stopped, true);
+
+    // Verify plain F (no Ctrl) still triggers Favorite rather than Search shortcut
+    assert.equal(KeyHandler.isDesktopSearchShortcut({ key: 'f', keyCode: 70, ctrlKey: false }), false);
+    assert.equal(KeyHandler.isFavoriteKey({ key: 'f', keyCode: 70, ctrlKey: false }), true);
+    assert.equal(KeyHandler.isFavoriteKey({ key: 'f', keyCode: 70, ctrlKey: true }), false);
+});
+
+
+
 
 
 

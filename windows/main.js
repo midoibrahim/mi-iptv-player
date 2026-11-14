@@ -3,7 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const downloader = require('./downloader');
-const companionCore = require('./companionCore');
+const companionCorePath = fs.existsSync(path.join(__dirname, 'companionCore.js'))
+    ? './companionCore'
+    : '../IPTVService/companionCore';
+const companionCore = require(companionCorePath);
 
 // Hardware video decoding & acceleration switches for 4K / 60fps IPTV playback
 app.commandLine.appendSwitch('ignore-gpu-blocklist');

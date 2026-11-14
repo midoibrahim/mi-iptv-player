@@ -172,6 +172,12 @@ class IPTVApp {
 
             // Restore last focused item in section or focus first non-input focusable item
             setTimeout(() => {
+                if (!sec.classList.contains('active')) return;
+                const curActive = document.activeElement;
+                if (curActive && sec.contains(curActive) &&
+                    (curActive.tagName === 'INPUT' || curActive.tagName === 'TEXTAREA') && !curActive.readOnly) {
+                    return;
+                }
                 const activeRoot = window.IPTV.SpatialNav ? window.IPTV.SpatialNav.getActiveRoot() : document.body;
                 let target = null;
                 if (sec._lastFocusedEl && document.contains(sec._lastFocusedEl) && sec._lastFocusedEl.tagName !== 'INPUT' &&

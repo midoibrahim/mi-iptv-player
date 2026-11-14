@@ -1,11 +1,11 @@
 # QR Code Generation Library
 
-> 11 nodes · cohesion 0.47
+> 12 nodes · cohesion 0.42
 
 ## Key Concepts
 
-- **playbackEngine.js** (10 connections) — `IPTVPlayer/js/services/playbackEngine.js`
-- **loadCandidate()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **playbackEngine.js** (11 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **loadCandidate()** (7 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 - **playTizenAvPlay()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 - **tryNextCandidate()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 - **startWatchdog()** (5 connections) — `IPTVPlayer/js/services/playbackEngine.js`
@@ -14,6 +14,7 @@
 - **destroyTizenAvPlay()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 - **isTizenAvPlayAvailable()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 - **playNativeDirect()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **getEngineProfile()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 - **loadScriptOnce()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 
 ## Relationships
@@ -26,7 +27,7 @@
 
 ## Audit Trail
 
-- EXTRACTED: 26 (100%)
+- EXTRACTED: 28 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

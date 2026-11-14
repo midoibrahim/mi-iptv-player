@@ -449,12 +449,12 @@ window.IPTV.SeriesDetailView = {
         }
     },
 
-    close() {
+    close(restoreFocus = true) {
         if (this.screen) this.screen.classList.remove('active');
         const mainShell = document.getElementById('main-shell');
         if (mainShell) mainShell.classList.add('active');
 
-        if (this.lastFocusedElement && document.contains(this.lastFocusedElement)) {
+        if (restoreFocus && this.lastFocusedElement && document.contains(this.lastFocusedElement)) {
             setTimeout(() => {
                 try { this.lastFocusedElement.focus(); } catch(e) {}
             }, 60);

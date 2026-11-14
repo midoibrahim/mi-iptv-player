@@ -70,7 +70,11 @@ if (!packaged) {
     throw new Error('Packaging failed after 3 attempts');
 }
 
-// Clean up temporary app folder
+// Clean up temporary app folder and staged companionCore copy
+const stagedCompanion = path.join(__dirname, 'companionCore.js');
+if (fs.existsSync(stagedCompanion)) {
+    fs.unlinkSync(stagedCompanion);
+}
 if (fs.existsSync(appDir)) {
     fs.rmSync(appDir, { recursive: true, force: true });
 }

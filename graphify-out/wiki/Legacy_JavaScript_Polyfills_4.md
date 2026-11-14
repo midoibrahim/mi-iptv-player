@@ -1,24 +1,23 @@
 # Legacy JavaScript Polyfills
 
-> 3 nodes · cohesion 0.67
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **walk()** (4 connections) — `tizen-build/build.mjs`
-- **buildWgtArchive()** (3 connections) — `tizen-build/build.mjs`
-- **crc32()** (2 connections) — `tizen-build/build.mjs`
+- **get()** (1 connections) — `IPTVPlayer/js/core/icons.js`
+- **icons.js** (1 connections) — `IPTVPlayer/js/core/icons.js`
 
 ## Relationships
 
-- [Core Application Shell & Coordinator](Core_Application_Shell_&_Coordinator.md) (3 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `tizen-build/build.mjs`
+- `IPTVPlayer/js/core/icons.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 1 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

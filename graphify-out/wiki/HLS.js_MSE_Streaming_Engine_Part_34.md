@@ -8,11 +8,11 @@
 - **CORSRequestHandler** (3 connections) — `server.py`
 - **run_server()** (2 connections) — `server.py`
 - **socketserver** (2 connections)
-- **http_server** (1 connections)
-- **os** (1 connections)
 - **.end_headers()** (1 connections) — `server.py`
 - **.__init__()** (1 connections) — `server.py`
 - **MI IPTV Player - Lightweight Local Test Server Serves IPTVPlayer/ over HTTP…** (1 connections) — `server.py`
+- **http_server** (1 connections)
+- **os** (1 connections)
 - **sys** (1 connections)
 
 ## Relationships

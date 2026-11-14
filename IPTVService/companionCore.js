@@ -45,9 +45,18 @@ var DEFAULT_PREFERRED_IFACES = [
     'Local Area Connection'
 ];
 
+var _lanIpCache = { key: null, ip: null, ts: 0 };
+var LAN_IP_CACHE_TTL_MS = 10000;
+
 function getLanIp(preferred) {
-    var ifaces = os.networkInterfaces();
     var prefs = preferred || DEFAULT_PREFERRED_IFACES;
+    var cacheKey = prefs.join(',');
+    var now = Date.now();
+    if (_lanIpCache.key === cacheKey && _lanIpCache.ip && (now - _lanIpCache.ts) < LAN_IP_CACHE_TTL_MS) {
+        return _lanIpCache.ip;
+    }
+
+    var ifaces = os.networkInterfaces();
     var candidates = [];
 
     Object.keys(ifaces).forEach(function (name) {
@@ -58,26 +67,35 @@ function getLanIp(preferred) {
         });
     });
 
+    var result = null;
     var i, j, prefLower;
     // 1. Exact interface name match first (e.g. wlan0, eth0 on webOS)
-    for (i = 0; i < prefs.length; i++) {
+    for (i = 0; i < prefs.length && !result; i++) {
         for (j = 0; j < candidates.length; j++) {
             if (candidates[j].name === prefs[i]) {
-                return candidates[j].address;
+                result = candidates[j].address;
+                break;
             }
         }
     }
     // 2. Case-insensitive substring match (e.g. "Wi-Fi", "Ethernet 2" on Windows)
-    for (i = 0; i < prefs.length; i++) {
+    for (i = 0; i < prefs.length && !result; i++) {
         prefLower = String(prefs[i]).toLowerCase();
         for (j = 0; j < candidates.length; j++) {
             if (candidates[j].name.toLowerCase().indexOf(prefLower) >= 0) {
-                return candidates[j].address;
+                result = candidates[j].address;
+                break;
             }
         }
     }
 
-    return candidates.length ? candidates[0].address : '127.0.0.1';
+    if (!result) {
+        result = candidates.length ? candidates[0].address : '127.0.0.1';
+    }
+    _lanIpCache.key = cacheKey;
+    _lanIpCache.ip = result;
+    _lanIpCache.ts = now;
+    return result;
 }
 
 function sendJson(res, code, obj) {

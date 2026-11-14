@@ -8,10 +8,10 @@
 - **electron** (5 connections) — `windows/package.json`
 - **devDependencies** (3 connections) — `windows/package.json`
 - **scripts** (3 connections) — `windows/package.json`
-- **@electron/packager** (2 connections) — `windows/package.json`
 - **electron@^33.2.1** (2 connections) — `windows/package.json`
 - **@electron/packager@^18.3.6** (2 connections) — `windows/package.json`
 - **preload.js** (2 connections) — `windows/preload.js`
+- **@electron/packager** (2 connections) — `windows/package.json`
 - **author** (1 connections) — `windows/package.json`
 - **description** (1 connections) — `windows/package.json`
 - **keywords** (1 connections) — `windows/package.json`
@@ -25,7 +25,7 @@
 
 ## Relationships
 
-- [Login View & Profile Selector](Login_View_&_Profile_Selector.md) (1 shared connections)
+- [Community 15](Community_15.md) (1 shared connections)
 - [Community 41](Community_41.md) (1 shared connections)
 
 ## Source Files

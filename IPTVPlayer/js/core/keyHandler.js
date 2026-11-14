@@ -209,7 +209,17 @@ window.IPTV.KeyHandler = {
     },
 
 
+    isDesktopSearchShortcut(e) {
+        if (!(window.IPTV.Platform && typeof window.IPTV.Platform.isDesktop === 'function' && window.IPTV.Platform.isDesktop())) {
+            return false;
+        }
+        const key = e.key;
+        const code = e.keyCode || e.which;
+        return Boolean((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (key === 'f' || key === 'F' || code === 70));
+    },
+
     isFavoriteKey(e) {
+        if (e.ctrlKey || e.metaKey || e.altKey) return false;
         const key = e.key;
         const code = e.keyCode || e.which;
         return (
@@ -312,6 +322,34 @@ window.IPTV.KeyHandler = {
                 e.preventDefault();
                 e.stopPropagation();
                 this.app.prevChannel();
+                return;
+            }
+        }
+
+        // ---- 2b. Desktop Ctrl+F Shortcut: Open Search & Start Typing Immediately ----
+        if (this.isDesktopSearchShortcut(e)) {
+            const cwModal = document.getElementById('continue-watching-modal');
+            const delModal = document.getElementById('profile-delete-modal');
+            const modalOpen = (cwModal && !cwModal.classList.contains('hidden')) ||
+                              (delModal && !delModal.classList.contains('hidden'));
+            const mainShell = document.getElementById('main-shell');
+            const seriesScreen = document.getElementById('series-detail-screen');
+            const canSearch = !this.isPlayerActive() && !modalOpen &&
+                ((mainShell && mainShell.classList.contains('active')) ||
+                 (seriesScreen && seriesScreen.classList.contains('active')));
+
+            if (canSearch && this.app) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (seriesScreen && seriesScreen.classList.contains('active') && this.app.seriesDetailView) {
+                    this.app.seriesDetailView.close(false);
+                }
+                if (this.app.currentSection !== 'search' && typeof this.app.navigateTo === 'function') {
+                    this.app.navigateTo('search');
+                }
+                if (this.app.searchView && typeof this.app.searchView.focusInput === 'function') {
+                    this.app.searchView.focusInput();
+                }
                 return;
             }
         }

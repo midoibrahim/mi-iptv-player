@@ -2,6 +2,7 @@
 /build/
 node_modules/
 **/node_modules/
+/windows/companionCore.js
 
 # Ignore extra/legacy IPKs, zips, and store icon drafts in dist/, keep only final packages
 /dist/*

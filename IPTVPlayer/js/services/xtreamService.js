@@ -77,16 +77,10 @@ window.IPTV.XtreamService = {
         const movieCatMap = this.buildCatMap(categories.movies);
         const seriesCatMap = this.buildCatMap(categories.series);
 
-        // 3. Streams
-        if (onProgress) onProgress('Loading streams and channels...');
-        const [liveStreams, vodStreams, serStreams] = await Promise.all([
-            this.fetchJson(`${base}/player_api.php?${auth}&action=get_live_streams`).catch(() => []),
-            this.fetchJson(`${base}/player_api.php?${auth}&action=get_vod_streams`).catch(() => []),
-            this.fetchJson(`${base}/player_api.php?${auth}&action=get_series`).catch(() => [])
-        ]);
-
-        // Map live channels with O(1) category lookup + periodic UI yield for smooth spinner
-        const liveArr = Array.isArray(liveStreams) ? liveStreams : [];
+        // 3. Streams (fetch & normalize sequentially so raw server JSON arrays are released before the next section)
+        if (onProgress) onProgress('Loading live channels...');
+        let rawLive = await this.fetchJson(`${base}/player_api.php?${auth}&action=get_live_streams`).catch(() => []);
+        const liveArr = Array.isArray(rawLive) ? rawLive : [];
         if (onProgress && liveArr.length > 0) onProgress(`Indexing ${liveArr.length} live channels...`);
         await this._yieldToMain();
         const liveChannels = new Array(liveArr.length);
@@ -111,9 +105,12 @@ window.IPTV.XtreamService = {
                 hd: /hd|fhd|uhd|4k/i.test(name)
             };
         }
+        rawLive = null;
 
         // Map movies (VOD)
-        const vodArr = Array.isArray(vodStreams) ? vodStreams : [];
+        if (onProgress) onProgress('Loading movies...');
+        let rawVod = await this.fetchJson(`${base}/player_api.php?${auth}&action=get_vod_streams`).catch(() => []);
+        const vodArr = Array.isArray(rawVod) ? rawVod : [];
         if (onProgress && vodArr.length > 0) onProgress(`Indexing ${vodArr.length} movies...`);
         await this._yieldToMain();
         const movies = new Array(vodArr.length);
@@ -137,9 +134,12 @@ window.IPTV.XtreamService = {
                 year: m.year || ''
             };
         }
+        rawVod = null;
 
         // Map series
-        const serArr = Array.isArray(serStreams) ? serStreams : [];
+        if (onProgress) onProgress('Loading series...');
+        let rawSer = await this.fetchJson(`${base}/player_api.php?${auth}&action=get_series`).catch(() => []);
+        const serArr = Array.isArray(rawSer) ? rawSer : [];
         if (onProgress && serArr.length > 0) onProgress(`Indexing ${serArr.length} series...`);
         await this._yieldToMain();
         const series = new Array(serArr.length);
@@ -161,6 +161,7 @@ window.IPTV.XtreamService = {
                 year: s.year || ''
             };
         }
+        rawSer = null;
 
         return {
             userInfo: authResp.user_info,

@@ -33,7 +33,7 @@
 
 ## Relationships
 
-- [build.js & appDir](build.js_&_appDir.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (1 shared connections)
 
 ## Source Files
 

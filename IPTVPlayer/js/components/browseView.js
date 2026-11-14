@@ -139,7 +139,7 @@ window.IPTV.BrowseView = class {
                 }
             };
             contentEl._onScrollCheck = checkLoadMore;
-            contentEl.addEventListener('scroll', checkLoadMore);
+            contentEl.addEventListener('scroll', checkLoadMore, { passive: true });
         }
 
         // View Mode Toggles

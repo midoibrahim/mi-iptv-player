@@ -16,7 +16,12 @@ const {
     formatBytes,
     resolveDownloadTarget,
     serializeTask,
-    remuxToMp4
+    remuxToMp4,
+    matchesDownloadItem,
+    createSegments,
+    saveSegmentMeta,
+    loadSegmentMeta,
+    removeSegmentMeta
 } = require('./downloadUtils');
 
 class Downloader {
@@ -320,18 +325,8 @@ class Downloader {
 
     isDownloading(urlOrId) {
         if (!urlOrId) return false;
-        const target = String(urlOrId);
-        const normTarget = target.replace(/^series_/, 'ep_');
         for (const task of this.activeDownloads.values()) {
-            const taskItemId = task.itemId ? String(task.itemId) : '';
-            const normTaskItemId = taskItemId.replace(/^series_/, 'ep_');
-            if (
-                task.id === target ||
-                taskItemId === target ||
-                (normTaskItemId && normTaskItemId === normTarget) ||
-                (taskItemId && taskItemId.endsWith('_' + target)) ||
-                task.url === target
-            ) {
+            if (matchesDownloadItem(task, urlOrId)) {
                 return true;
             }
         }
@@ -340,20 +335,7 @@ class Downloader {
 
     isCompleted(urlOrId) {
         if (!urlOrId) return false;
-        const target = String(urlOrId);
-        const normTarget = target.replace(/^series_/, 'ep_');
-        return this.history.some(h => {
-            if (!h.filePath || !fs.existsSync(h.filePath)) return false;
-            const hItemId = h.itemId ? String(h.itemId) : '';
-            const normHItemId = hItemId.replace(/^series_/, 'ep_');
-            return (
-                h.id === target ||
-                hItemId === target ||
-                (normHItemId && normHItemId === normTarget) ||
-                (hItemId && hItemId.endsWith('_' + target)) ||
-                h.url === target
-            );
-        });
+        return this.history.some(h => Boolean(h.filePath && fs.existsSync(h.filePath) && matchesDownloadItem(h, urlOrId)));
     }
 
     _runningCount() {
@@ -434,20 +416,9 @@ class Downloader {
             return { alreadyActive: true };
         }
 
-        const normItemId = item.id ? String(item.id).replace(/^series_/, 'ep_') : '';
-        const existingInHistory = this.history.find(h => {
-            if (!h.filePath || !fs.existsSync(h.filePath)) return false;
-            const hItemId = h.itemId ? String(h.itemId).replace(/^series_/, 'ep_') : '';
-            if (h.url === item.url) return true;
-            if (item.id && (h.id === item.id || h.itemId === item.id || (hItemId && hItemId === normItemId))) return true;
-            if (item.seriesName && item.season != null && item.episode != null && h.seriesName) {
-                const sameSeries = h.seriesName.trim().toLowerCase() === String(item.seriesName).trim().toLowerCase();
-                const sameSeason = String(h.season) === String(item.season);
-                const sameEp = String(h.episode) === String(item.episode);
-                if (sameSeries && sameSeason && sameEp) return true;
-            }
-            return false;
-        });
+        const existingInHistory = this.history.find(h => Boolean(
+            h.filePath && fs.existsSync(h.filePath) && matchesDownloadItem(h, item)
+        ));
         if (existingInHistory && !options.forceRedownload) {
             console.log('[Downloader] File already downloaded on disk: ' + existingInHistory.filePath);
             return { alreadyDownloaded: true, filePath: existingInHistory.filePath, id: existingInHistory.id };
@@ -556,54 +527,15 @@ class Downloader {
     }
 
     _saveSegmentMeta(task) {
-        if (!Array.isArray(task.segments) || !task.metaPath) return;
-        try {
-            const payload = {
-                totalBytes: task.totalBytes,
-                resolvedUrl: task.resolvedUrl || task.url,
-                maxConnections: task.maxConnections,
-                segments: task.segments.map(s => ({
-                    index: s.index,
-                    start: s.start,
-                    end: s.end,
-                    current: s.current,
-                    status: s.status === 'done' ? 'done' : 'pending'
-                }))
-            };
-            fs.writeFileSync(task.metaPath, JSON.stringify(payload), 'utf8');
-        } catch (e) {}
+        return saveSegmentMeta(task);
     }
 
     _loadSegmentMeta(task) {
-        if (!task.metaPath || !fs.existsSync(task.metaPath) || !fs.existsSync(task.partPath)) return false;
-        try {
-            const data = JSON.parse(fs.readFileSync(task.metaPath, 'utf8'));
-            if (data && Array.isArray(data.segments) && data.segments.length > 0 && data.totalBytes > 0) {
-                task.totalBytes = data.totalBytes;
-                task.resolvedUrl = data.resolvedUrl || task.url;
-                task.maxConnections = data.maxConnections || 8;
-                task.segments = data.segments.map(s => ({
-                    index: s.index,
-                    start: s.start,
-                    end: s.end,
-                    current: s.current,
-                    status: s.current > s.end ? 'done' : 'pending',
-                    retryCount: 0,
-                    request: null,
-                    fileStream: null
-                }));
-                task.receivedBytes = task.segments.reduce((acc, s) => acc + Math.max(0, s.current - s.start), 0);
-                task.lastReportBytes = task.receivedBytes;
-                return true;
-            }
-        } catch (e) {}
-        return false;
+        return loadSegmentMeta(task);
     }
 
     _removeSegmentMeta(task) {
-        if (task.metaPath && fs.existsSync(task.metaPath)) {
-            try { fs.unlinkSync(task.metaPath); } catch (e) {}
-        }
+        return removeSegmentMeta(task);
     }
 
     _reportProgress(task, force = false) {
@@ -703,25 +635,8 @@ class Downloader {
     }
 
     _createSegments(task) {
-        const total = task.totalBytes;
-        const numSegs = total >= 100 * 1024 * 1024 ? 8 : (total >= 20 * 1024 * 1024 ? 6 : 4);
-        task.maxConnections = numSegs;
-        const chunkSize = Math.floor(total / numSegs);
-        const segments = [];
-        for (let i = 0; i < numSegs; i++) {
-            const start = i * chunkSize;
-            const end = i === numSegs - 1 ? total - 1 : (start + chunkSize - 1);
-            segments.push({
-                index: i,
-                start,
-                end,
-                current: start,
-                status: i === 0 ? 'active' : 'pending',
-                retryCount: 0,
-                request: null,
-                fileStream: null
-            });
-        }
+        const segments = createSegments(task.totalBytes);
+        task.maxConnections = segments.length;
         task.segments = segments;
         return segments;
     }

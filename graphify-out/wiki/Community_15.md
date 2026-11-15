@@ -1,49 +1,35 @@
 # Community 15
 
-> 20 nodes · cohesion 0.15
+> 13 nodes · cohesion 0.33
 
 ## Key Concepts
 
-- **downloader.js** (22 connections) — `windows/downloader.js`
-- **downloadUtils.js** (16 connections) — `windows/downloadUtils.js`
-- **resolveDownloadTarget()** (5 connections) — `windows/downloadUtils.js`
-- **ensureDir()** (4 connections) — `windows/downloadUtils.js`
-- **formatBytes()** (4 connections) — `windows/downloadUtils.js`
-- **sanitizeFileName()** (4 connections) — `windows/downloadUtils.js`
-- **serializeTask()** (4 connections) — `windows/downloadUtils.js`
-- **remuxToMp4()** (3 connections) — `windows/downloadUtils.js`
-- **._sanitizeFileName()** (2 connections) — `windows/downloader.js`
-- **ref_child_process** (2 connections)
-- **{ app, dialog, shell, powerSaveBlocker }** (1 connections) — `windows/downloader.js`
-- **fs** (1 connections) — `windows/downloader.js`
-- **http** (1 connections) — `windows/downloader.js`
-- **https** (1 connections) — `windows/downloader.js`
-- **path** (1 connections) — `windows/downloader.js`
-- **{ URL }** (1 connections) — `windows/downloader.js`
-- **fs** (1 connections) — `windows/downloadUtils.js`
-- **path** (1 connections) — `windows/downloadUtils.js`
-- **{ spawn }** (1 connections) — `windows/downloadUtils.js`
-- **{ URL }** (1 connections) — `windows/downloadUtils.js`
+- **browseView.js** (12 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_refreshContent()** (6 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_bindControls()** (5 connections) — `IPTVPlayer/js/views/browseView.js`
+- **render()** (5 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_renderCategories()** (4 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_appendNextGridBatch()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_createCategoryLi()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **ensureRendered()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_flushRemainingCategories()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_renderGrid()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_renderRows()** (2 connections) — `IPTVPlayer/js/views/browseView.js`
+- **setData()** (2 connections) — `IPTVPlayer/js/views/browseView.js`
+- **constructor()** (1 connections) — `IPTVPlayer/js/views/browseView.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (7 shared connections)
-- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (5 shared connections)
-- [Community 64](Community_64.md) (3 shared connections)
-- [Community 41](Community_41.md) (2 shared connections)
-- [Package Configuration & Dependencies (17)](Package_Configuration_&_Dependencies_17.md) (1 shared connections)
-- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (1 shared connections)
-- [Theme Engine & Design Tokens](Theme_Engine_&_Design_Tokens.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `windows/downloadUtils.js`
-- `windows/downloader.js`
+- `IPTVPlayer/js/views/browseView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 41 (85%)
-- INFERRED: 7 (15%)
+- EXTRACTED: 26 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

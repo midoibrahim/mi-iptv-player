@@ -54,6 +54,123 @@ window.IPTV.PlaybackEngine = {
         };
     },
 
+    getCurrentTime(player) {
+        if (player._avplayActive) return player._avplayCurrentTime || 0;
+        return (player.video && player.video.currentTime) ? player.video.currentTime : 0;
+    },
+
+    getDuration(player) {
+        if (player._avplayActive) return player._avplayDuration || 0;
+        return (player.video && player.video.duration) ? player.video.duration : 0;
+    },
+
+    isPaused(player) {
+        if (player._avplayActive) return !!player._avplayPaused;
+        return Boolean(player.video && player.video.paused);
+    },
+
+    play(player) {
+        if (!player || !player.video) return;
+        player._userPaused = false;
+        if (player._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                window.webapis.avplay.play();
+                player._avplayPaused = false;
+            } catch (e) {}
+        } else {
+            const p = player.video.play();
+            if (p && typeof p.catch === 'function') {
+                p.catch(e => console.warn('Play blocked:', e));
+            }
+        }
+        player._updatePlayPauseIcon(true);
+    },
+
+    pause(player) {
+        if (!player || !player.video) return;
+        player._userPaused = true;
+        if (player._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                window.webapis.avplay.pause();
+                player._avplayPaused = true;
+            } catch (e) {}
+            player._recordWatchProgress();
+        } else {
+            player.video.pause();
+        }
+        player._updatePlayPauseIcon(false);
+    },
+
+    canSeek(player) {
+        if (!player || !player.video || player.isLiveStream()) return false;
+        if (!player.hasValidDuration()) return false;
+        if (player._avplayActive) return true;
+        try {
+            const seekable = player.video.seekable;
+            if (!seekable || seekable.length === 0) {
+                return player.hasValidDuration() && player.video.duration > 0;
+            }
+            return seekable.end(seekable.length - 1) > 0;
+        } catch (e) {
+            return false;
+        }
+    },
+
+    seekTo(player, clamped, startPlaying = true) {
+        if (player._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                window.webapis.avplay.seekTo(Math.floor(clamped * 1000), () => {
+                    player._avplayCurrentTime = clamped;
+                    if (startPlaying) {
+                        player._userPaused = false;
+                        player._avplayPaused = false;
+                        try { window.webapis.avplay.play(); } catch (e) {}
+                        player._updatePlayPauseIcon(true);
+                    }
+                    player._updateProgress();
+                }, () => {});
+            } catch (err) {
+                console.warn('[PlayerService] AVPlay seek error:', err);
+            }
+            return;
+        }
+
+        if (player.hls && typeof player.hls.startLoad === 'function') {
+            try { player.hls.startLoad(clamped); } catch (e) {}
+        }
+
+        try {
+            player.video.currentTime = clamped;
+        } catch (err) {
+            console.warn('[PlayerService] Seek error:', err);
+        }
+
+        if (startPlaying) {
+            player._userPaused = false;
+        }
+
+        const ensurePlaying = () => {
+            if (!player._userPaused) {
+                const p = player.video.play();
+                if (p && typeof p.then === 'function') {
+                    p.catch(e => console.warn('[PlayerService] Play after seek caught:', e));
+                }
+                player._updatePlayPauseIcon(true);
+            }
+        };
+
+        const onSeeked = () => {
+            player.video.removeEventListener('seeked', onSeeked);
+            ensurePlaying();
+            player._updateProgress();
+        };
+        player.video.addEventListener('seeked', onSeeked);
+
+        if (!player.video.seeking) {
+            ensurePlaying();
+        }
+    },
+
     clearWatchdog(player) {
         if (player && player._candidateWatchdog) {
             clearTimeout(player._candidateWatchdog);

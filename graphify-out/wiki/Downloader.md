@@ -13,14 +13,14 @@
 - ._executeDownload() `EXTRACTED`
 - ._sendToRenderer() `EXTRACTED`
 - ._processQueue() `EXTRACTED`
+- .startDownload() `EXTRACTED`
 - ._serializeTask() `EXTRACTED`
 - ._handleError() `EXTRACTED`
-- .startDownload() `EXTRACTED`
 - ._completeTask() `EXTRACTED`
 - ._attachStreamToSegment() `EXTRACTED`
 - ._handleTransientOrFatalError() `EXTRACTED`
-- ._abortTaskSockets() `EXTRACTED`
 - ._runSegment() `EXTRACTED`
+- ._abortTaskSockets() `EXTRACTED`
 - .recoverStalledDownloads() `EXTRACTED`
 - ._syncPowerSaveBlocker() `EXTRACTED`
 - ._reportProgress() `EXTRACTED`
@@ -28,8 +28,8 @@
 - ._formatBytes() `EXTRACTED`
 - .updateSettings() `EXTRACTED`
 - .startBatchDownloads() `EXTRACTED`
+- ._saveSegmentMeta() `EXTRACTED`
 - ._scheduleRetry() `EXTRACTED`
-- .pauseDownload() `EXTRACTED`
 - *…and 31 more `method` connection(s) not listed (lowest-degree first to go)*
 
 ---

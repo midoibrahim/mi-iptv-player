@@ -58,37 +58,8 @@ window.IPTV.SeriesDetailView = {
         this.lastFocusedElement = document.activeElement;
         this.app.showLoading('Loading series details...');
         try {
-            let seasonsData = {};
-            let seriesInfo = { ...item };
-
-            if (window.IPTV.CatalogStore.getConnection() && window.IPTV.CatalogStore.getConnection().type === 'xtream') {
-                const resp = await window.IPTV.XtreamService.getSeriesInfo(window.IPTV.CatalogStore.getConnection(), item.id);
-                if (resp) {
-                    if (resp.info) {
-                        seriesInfo.name = resp.info.name || item.name;
-                        seriesInfo.poster = resp.info.cover || resp.info.movie_image || item.poster;
-                        seriesInfo.plot = resp.info.plot || item.plot;
-                        seriesInfo.rating = resp.info.rating || item.rating;
-                        seriesInfo.year = resp.info.releaseDate || resp.info.year || item.year;
-                        seriesInfo.category = resp.info.genre || item.category;
-                    }
-                    if (resp.episodes && typeof resp.episodes === 'object') {
-                        seasonsData = resp.episodes;
-                    }
-                }
-            }
-
-            // Fallback if no episodes data from API (e.g. M3U playlist)
-            const seasonKeys = Object.keys(seasonsData);
-            if (seasonKeys.length === 0 && item.url) {
-                seasonsData['1'] = [{
-                    id: item.id,
-                    episode_num: 1,
-                    title: item.name,
-                    url: item.url,
-                    info: { movie_image: item.poster, plot: item.plot }
-                }];
-            }
+            const conn = window.IPTV.CatalogStore ? window.IPTV.CatalogStore.getConnection() : null;
+            const { seriesInfo, seasonsData } = await window.IPTV.XtreamService.loadSeriesSeasons(conn, item);
 
             this.currentSeries = seriesInfo;
             this.app.hideLoading();
@@ -202,67 +173,11 @@ window.IPTV.SeriesDetailView = {
     },
 
     _formatEpisodeTitle(rawTitle, seriesName, seasonNum, epNum) {
-        const fallback = `Episode ${epNum || ''}`.trim();
-        if (!rawTitle) return fallback;
-        let t = String(rawTitle).trim();
-
-        // Strip leading series name if prefixed (e.g., "Lupin - S04E01" or "Lupin: S04E01 - Pilot")
-        if (seriesName) {
-            const baseSeries = String(seriesName).replace(/\s*\(.*?\)\s*$/, '').trim();
-            if (baseSeries && t.toLowerCase().indexOf(baseSeries.toLowerCase()) === 0) {
-                t = t.slice(baseSeries.length).replace(/^[\s\-_:|.]+/, '').trim();
-            }
-        }
-
-        // If title starts with SxxExx followed by a separator and a real episode name, keep the real name
-        const prefixMatch = t.match(/^S0*\d+\s*[._\-]?\s*E0*\d+\s*[\-_:|\s]+(.+)$/i);
-        if (prefixMatch && prefixMatch[1]) {
-            t = prefixMatch[1].trim();
-        }
-
-        // If the remaining title is just a raw season/episode code (e.g. "S04E01", "S4 E1", "E01"), use clean "Episode X"
-        if (!t || /^S0*\d+\s*[._\-]?\s*E0*\d+$/i.test(t) || /^E0*\d+$/i.test(t) || /^Episode\s*0*\d+$/i.test(t)) {
-            return fallback;
-        }
-        return t;
+        return window.IPTV.XtreamService.formatEpisodeTitle(rawTitle, seriesName, seasonNum, epNum);
     },
 
     buildEpisodePlayItem(connection, seriesInfo, seasonsData, seasonNum, epIndex) {
-        const seasonStr = String(seasonNum);
-        const episodes = (seasonsData && seasonsData[seasonStr]) ? seasonsData[seasonStr] : null;
-        if (!episodes || !episodes[epIndex]) return null;
-        const ep = episodes[epIndex];
-
-        const streamUrl = window.IPTV.XtreamService
-            ? window.IPTV.XtreamService.resolveEpisodeUrl(connection, ep)
-            : (ep.url || '');
-        if (!streamUrl) return null;
-
-        const epNum = ep.episode_num || ep.episode || (epIndex + 1);
-        const epTitle = this._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum);
-        const epNumStr = `S${seasonNum} E${epNum}`;
-        const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
-
-        return {
-            id: `series_${seriesInfo.id || ''}_${ep.id || ''}`,
-            name: `${seriesInfo.name} - ${epNumStr}: ${epTitle}`,
-            type: 'series',
-            url: streamUrl,
-            logo: thumb || seriesInfo.poster,
-            category: seriesInfo.name,
-            seriesContext: {
-                seriesId: seriesInfo.id,
-                seriesName: seriesInfo.name,
-                poster: seriesInfo.poster,
-                plot: seriesInfo.plot,
-                seasonsData: seasonsData,
-                currentSeason: seasonStr,
-                currentEpisodeIndex: epIndex,
-                currentEpisodeId: ep.id,
-                currentEpisodeNum: epNum,
-                currentEpisodeTitle: epTitle
-            }
-        };
+        return window.IPTV.XtreamService.buildEpisodePlayItem(connection, seriesInfo, seasonsData, seasonNum, epIndex);
     },
 
     renderEpisodesList(seriesInfo, episodes, seasonNum) {

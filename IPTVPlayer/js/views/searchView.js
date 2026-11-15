@@ -14,38 +14,17 @@ window.IPTV.SearchView = {
         this.debounceTimeout = null;
 
         if (this.input) {
-            this.input.readOnly = true;
-
-            const activateSearch = () => {
-                if (this.input.readOnly) {
-                    this.focusInput();
-                }
-            };
-
-            const deactivateSearch = () => {
-                this.input.readOnly = true;
-            };
-
-            this.input.addEventListener('click', activateSearch);
-
-            this.input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.keyCode === 13) {
-                    if (this.input.readOnly) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        activateSearch();
-                    } else {
-                        deactivateSearch();
+            if (window.IPTV.Platform && typeof window.IPTV.Platform.bindTvInput === 'function') {
+                window.IPTV.Platform.bindTvInput(this.input, {
+                    onEnter: (_e, deactivate) => {
+                        deactivate();
                         this.input.blur();
                         this.search(this.input.value.trim());
                     }
-                } else if (e.key === 'Escape' || e.keyCode === 27) {
-                    deactivateSearch();
-                    this.input.blur();
-                }
-            });
-
-            this.input.addEventListener('blur', deactivateSearch);
+                });
+            } else {
+                this.input.readOnly = true;
+            }
 
             this.input.addEventListener('input', () => {
                 clearTimeout(this.debounceTimeout);

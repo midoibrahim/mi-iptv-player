@@ -20,7 +20,7 @@
 - [Community 33](Community_33.md) (6 shared connections)
 - [Community 4](Community_4.md) (4 shared connections)
 - [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (2 shared connections)
-- [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md) (1 shared connections)
+- [Community 32](Community_32.md) (1 shared connections)
 
 ## Source Files
 

@@ -7,15 +7,9 @@
     "ast_empty": true
   },
   "IPTVPlayer/js/app.js": {
-    "mtime": 1794663500.4006798,
-    "seen": 1794663728.3544407,
-    "ast_hash": "9ac44037242ee919aa8966e9ba9ba32e",
-    "semantic_hash": ""
-  },
-  "IPTVPlayer/js/components/browseView.js": {
-    "mtime": 1794661644.2708313,
-    "seen": 1794663728.3544476,
-    "ast_hash": "1a59f8150b6c00e8cb2eed3f611a82e3",
+    "mtime": 1794727020.7295,
+    "seen": 1794727591.7080917,
+    "ast_hash": "9ff63043af2ce5a9287f77069bc30782",
     "semantic_hash": ""
   },
   "IPTVPlayer/js/components/card.js": {
@@ -25,10 +19,10 @@
     "semantic_hash": "869758ecad3519d23aa4c413c90c291d"
   },
   "IPTVPlayer/js/components/downloadManager.js": {
-    "mtime": 1794176473.2251594,
-    "seen": 1794182540.3232462,
-    "ast_hash": "3489d96b7a9f643b2f594605824e3e9e",
-    "semantic_hash": "3489d96b7a9f643b2f594605824e3e9e"
+    "mtime": 1794727244.8036544,
+    "seen": 1794727591.7081122,
+    "ast_hash": "ca500d02e41f1bd5c2fc950d5cc85cda",
+    "semantic_hash": ""
   },
   "IPTVPlayer/js/core/icons.js": {
     "mtime": 1793967018.0122676,
@@ -85,15 +79,15 @@
     "semantic_hash": "4f52c70514f94d3a64723077a7a7482b"
   },
   "IPTVPlayer/js/services/m3uParser.js": {
-    "mtime": 1794661644.5638568,
-    "seen": 1794663728.3545253,
-    "ast_hash": "75bad735965866c281e86ddf01aa1e88",
+    "mtime": 1794727054.3930519,
+    "seen": 1794727591.7081895,
+    "ast_hash": "594b740dd2b74012f9c53701e6407c2b",
     "semantic_hash": ""
   },
   "IPTVPlayer/js/services/playerService.js": {
-    "mtime": 1794244508.2082849,
-    "seen": 1794512515.818755,
-    "ast_hash": "496e2ee39cafc8c3ad5aa2dfb7e7631f",
+    "mtime": 1794727176.919323,
+    "seen": 1794727591.7082021,
+    "ast_hash": "62f1d7f0d8d7427cb3af739dcc47f922",
     "semantic_hash": ""
   },
   "IPTVPlayer/js/services/tvServer.js": {
@@ -103,40 +97,40 @@
     "semantic_hash": "d877860717c334dbc23f2741097cc33c"
   },
   "IPTVPlayer/js/services/xtreamService.js": {
-    "mtime": 1794661644.9360263,
-    "seen": 1794663728.3545518,
-    "ast_hash": "e85d999b578b101be95e3d2b18c245a0",
+    "mtime": 1794727089.6931534,
+    "seen": 1794727591.70822,
+    "ast_hash": "e1fd897c4655c3f22337a597f1b58a7f",
     "semantic_hash": ""
   },
   "IPTVPlayer/js/views/homeView.js": {
-    "mtime": 1794072607.1691668,
-    "seen": 1794182540.3581967,
-    "ast_hash": "cc12945d3164b0dc657f93a9766e8e97",
-    "semantic_hash": "cc12945d3164b0dc657f93a9766e8e97"
+    "mtime": 1794727097.8465912,
+    "seen": 1794727591.7082283,
+    "ast_hash": "06ac5a372236dafc8624dca13e5fda63",
+    "semantic_hash": ""
   },
   "IPTVPlayer/js/views/loginView.js": {
-    "mtime": 1794215652.1488316,
-    "seen": 1794215760.4798872,
-    "ast_hash": "abd065b436fea3a1b9bcaf3adab36cac",
-    "semantic_hash": "abd065b436fea3a1b9bcaf3adab36cac"
+    "mtime": 1794727137.8864996,
+    "seen": 1794727591.708232,
+    "ast_hash": "06bee5a54b1f0824b88de63d727ae3bc",
+    "semantic_hash": ""
   },
   "IPTVPlayer/js/views/searchView.js": {
-    "mtime": 1794663653.9469328,
-    "seen": 1794663728.3545628,
-    "ast_hash": "22326b4ef0f16eb3410f2a62d7fdcc98",
+    "mtime": 1794727134.5821397,
+    "seen": 1794727591.7082357,
+    "ast_hash": "789f276e7bb57aa9316af25c218d6b0e",
     "semantic_hash": ""
   },
   "IPTVPlayer/js/views/seriesDetailView.js": {
-    "mtime": 1794663655.9697256,
-    "seen": 1794663728.354566,
-    "ast_hash": "98d7e31822993c4d977108340c4d3728",
+    "mtime": 1794727093.5873723,
+    "seen": 1794727591.7082393,
+    "ast_hash": "2cbbcb88d0e5839305cf56d7d4b81068",
     "semantic_hash": ""
   },
   "IPTVPlayer/js/views/settingsView.js": {
-    "mtime": 1794072607.2040267,
-    "seen": 1794182540.3618033,
-    "ast_hash": "188633833b74d1bd6a2e5e2a0cb61fd6",
-    "semantic_hash": "188633833b74d1bd6a2e5e2a0cb61fd6"
+    "mtime": 1794727247.5181863,
+    "seen": 1794727591.708243,
+    "ast_hash": "815b04abf52fb9fad49c5113fa5a52c4",
+    "semantic_hash": ""
   },
   "IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js": {
     "mtime": 1790360185.5306416,
@@ -188,9 +182,9 @@
     "semantic_hash": ""
   },
   "windows/downloader.js": {
-    "mtime": 1794519696.5651195,
-    "seen": 1794519724.6124437,
-    "ast_hash": "549b5a9b568838e9eb00bc83c74b57b3",
+    "mtime": 1794727299.3342285,
+    "seen": 1794727591.7083156,
+    "ast_hash": "a36918f615e59a30e62af080bb0f638c",
     "semantic_hash": ""
   },
   "windows/main.js": {
@@ -212,9 +206,9 @@
     "semantic_hash": "2c4277c550900548fb0acc42d8fa3b72"
   },
   "IPTVPlayer/index.html": {
-    "mtime": 1794661644.027778,
-    "seen": 1794663728.3546538,
-    "ast_hash": "5c010c112d0f7324a6d428eacbb58abe",
+    "mtime": 1794727013.9359038,
+    "seen": 1794727591.7083418,
+    "ast_hash": "5e097c7c2d650ccb8295e306409d9de8",
     "semantic_hash": ""
   },
   "IPTVPlayer/setup.html": {
@@ -236,10 +230,10 @@
     "semantic_hash": "4ea1fbcd379fdfb1a686acdaeaeae784"
   },
   "IPTVPlayer/js/components/playerOsd.js": {
-    "mtime": 1794177956.911042,
-    "seen": 1794182540.3242853,
-    "ast_hash": "9d532512b14c2d33f9d83635bfab24f5",
-    "semantic_hash": "9d532512b14c2d33f9d83635bfab24f5"
+    "mtime": 1794727237.6424336,
+    "seen": 1794727591.7081175,
+    "ast_hash": "8ca1a39b65585b3f3cc8628c9f576c6a",
+    "semantic_hash": ""
   },
   "IPTVPlayer/js/core/backStack.js": {
     "mtime": 1794010590.0399816,
@@ -260,21 +254,21 @@
     "semantic_hash": "f2396293ef5787d0d29dea02f67daea1"
   },
   "IPTVPlayer/js/core/platform.js": {
-    "mtime": 1794177418.6330533,
-    "seen": 1794182540.3315563,
-    "ast_hash": "1fddf401f6c557991e6eab1d21e547e0",
-    "semantic_hash": "1fddf401f6c557991e6eab1d21e547e0"
+    "mtime": 1794727240.1566093,
+    "seen": 1794727591.708147,
+    "ast_hash": "6dfb2b03bb649f711e3d9be348125d38",
+    "semantic_hash": ""
   },
   "IPTVPlayer/js/services/downloadStore.js": {
-    "mtime": 1794072607.121584,
-    "seen": 1794182540.349205,
-    "ast_hash": "1826b176d772c685e1fb1f355a1c2cdb",
-    "semantic_hash": "1826b176d772c685e1fb1f355a1c2cdb"
+    "mtime": 1794727130.4140232,
+    "seen": 1794727591.7081854,
+    "ast_hash": "bdda9139c888324f6b4521687942830d",
+    "semantic_hash": ""
   },
   "IPTVPlayer/js/services/playbackEngine.js": {
-    "mtime": 1794661644.832787,
-    "seen": 1794663728.3545332,
-    "ast_hash": "db4d0647042f8f366500c141cab5801a",
+    "mtime": 1794727175.1226354,
+    "seen": 1794727591.7081983,
+    "ast_hash": "2e5c908d95a93fc9679ca525c84d1a41",
     "semantic_hash": ""
   },
   "IPTVPlayer/js/services/streamResolver.js": {
@@ -296,9 +290,9 @@
     "semantic_hash": ""
   },
   "tests/characterization.test.js": {
-    "mtime": 1794663554.3343492,
-    "seen": 1794663728.354609,
-    "ast_hash": "99b5811c7a5db7e43f0f4a1535fbe5f9",
+    "mtime": 1794727409.9465196,
+    "seen": 1794727591.708289,
+    "ast_hash": "9f586e5b89f9d6b0433237a823a22506",
     "semantic_hash": ""
   },
   "tizen-build/build.mjs": {
@@ -308,10 +302,10 @@
     "semantic_hash": ""
   },
   "windows/downloadUtils.js": {
-    "mtime": 1794072607.843045,
-    "seen": 1794182540.3788667,
-    "ast_hash": "3a2624ffabfaba51ffe44e1af4483fe5",
-    "semantic_hash": "3a2624ffabfaba51ffe44e1af4483fe5"
+    "mtime": 1794727285.3868895,
+    "seen": 1794727591.7083118,
+    "ast_hash": "e4572e802f2a1d3c2a9a325ad9cb8b83",
+    "semantic_hash": ""
   },
   "package.json": {
     "mtime": 1794210602.2239385,
@@ -419,6 +413,12 @@
     "mtime": 1794660878.5812075,
     "seen": 1794661057.9738054,
     "ast_hash": "7b75099264e6976e65adcf6edb2e2223",
+    "semantic_hash": ""
+  },
+  "IPTVPlayer/js/views/browseView.js": {
+    "mtime": 1794727011.5094187,
+    "seen": 1794727591.7082243,
+    "ast_hash": "33d07bdcb02d338d7cadf571a7c26711",
     "semantic_hash": ""
   },
   "package-lock.json": {

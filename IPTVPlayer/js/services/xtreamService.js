@@ -176,5 +176,102 @@ window.IPTV.XtreamService = {
         const base = conn.server.replace(/\/+$/, '');
         const auth = `username=${encodeURIComponent(conn.user)}&password=${encodeURIComponent(conn.pass)}`;
         return this.fetchJson(`${base}/player_api.php?${auth}&action=get_series_info&series_id=${seriesId}`);
+    },
+
+    formatEpisodeTitle(rawTitle, seriesName, seasonNum, epNum) {
+        const fallback = `Episode ${epNum || ''}`.trim();
+        if (!rawTitle) return fallback;
+        let t = String(rawTitle).trim();
+
+        // Strip leading series name if prefixed (e.g., "Lupin - S04E01" or "Lupin: S04E01 - Pilot")
+        if (seriesName) {
+            const baseSeries = String(seriesName).replace(/\s*\(.*?\)\s*$/, '').trim();
+            if (baseSeries && t.toLowerCase().indexOf(baseSeries.toLowerCase()) === 0) {
+                t = t.slice(baseSeries.length).replace(/^[\s\-_:|.]+/, '').trim();
+            }
+        }
+
+        // If title starts with SxxExx followed by a separator and a real episode name, keep the real name
+        const prefixMatch = t.match(/^S0*\d+\s*[._\-]?\s*E0*\d+\s*[\-_:|\s]+(.+)$/i);
+        if (prefixMatch && prefixMatch[1]) {
+            t = prefixMatch[1].trim();
+        }
+
+        // If the remaining title is just a raw season/episode code (e.g. "S04E01", "S4 E1", "E01"), use clean "Episode X"
+        if (!t || /^S0*\d+\s*[._\-]?\s*E0*\d+$/i.test(t) || /^E0*\d+$/i.test(t) || /^Episode\s*0*\d+$/i.test(t)) {
+            return fallback;
+        }
+        return t;
+    },
+
+    buildEpisodePlayItem(connection, seriesInfo, seasonsData, seasonNum, epIndex) {
+        const seasonStr = String(seasonNum);
+        const episodes = (seasonsData && seasonsData[seasonStr]) ? seasonsData[seasonStr] : null;
+        if (!episodes || !episodes[epIndex] || !seriesInfo) return null;
+        const ep = episodes[epIndex];
+
+        const streamUrl = this.resolveEpisodeUrl(connection, ep);
+        if (!streamUrl) return null;
+
+        const epNum = ep.episode_num || ep.episode || (epIndex + 1);
+        const epTitle = this.formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum);
+        const epNumStr = `S${seasonNum} E${epNum}`;
+        const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
+
+        return {
+            id: `series_${seriesInfo.id || ''}_${ep.id || ''}`,
+            name: `${seriesInfo.name} - ${epNumStr}: ${epTitle}`,
+            type: 'series',
+            url: streamUrl,
+            logo: thumb || seriesInfo.poster,
+            category: seriesInfo.name,
+            seriesContext: {
+                seriesId: seriesInfo.id,
+                seriesName: seriesInfo.name,
+                poster: seriesInfo.poster,
+                plot: seriesInfo.plot,
+                seasonsData: seasonsData,
+                currentSeason: seasonStr,
+                currentEpisodeIndex: epIndex,
+                currentEpisodeId: ep.id,
+                currentEpisodeNum: epNum,
+                currentEpisodeTitle: epTitle
+            }
+        };
+    },
+
+    async loadSeriesSeasons(connection, item) {
+        let seasonsData = {};
+        const seriesInfo = { ...item };
+
+        if (connection && connection.type === 'xtream') {
+            const resp = await this.getSeriesInfo(connection, item.id);
+            if (resp) {
+                if (resp.info) {
+                    seriesInfo.name = resp.info.name || item.name;
+                    seriesInfo.poster = resp.info.cover || resp.info.movie_image || item.poster;
+                    seriesInfo.plot = resp.info.plot || item.plot;
+                    seriesInfo.rating = resp.info.rating || item.rating;
+                    seriesInfo.year = resp.info.releaseDate || resp.info.year || item.year;
+                    seriesInfo.category = resp.info.genre || item.category;
+                }
+                if (resp.episodes && typeof resp.episodes === 'object') {
+                    seasonsData = resp.episodes;
+                }
+            }
+        }
+
+        // Fallback if no episodes data from API (e.g. M3U playlist)
+        if (Object.keys(seasonsData).length === 0 && item && item.url) {
+            seasonsData['1'] = [{
+                id: item.id,
+                episode_num: 1,
+                title: item.name,
+                url: item.url,
+                info: { movie_image: item.poster, plot: item.plot }
+            }];
+        }
+
+        return { seriesInfo, seasonsData };
     }
 };

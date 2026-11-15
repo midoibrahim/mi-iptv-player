@@ -108,10 +108,12 @@ test('M3UParser.load classifies live, movies, and series and builds categories',
     assert.equal(data.liveChannels[0].type, 'live');
     assert.equal(data.liveChannels[0]._idx, 0);
 
-    // Note: .mkv matches movie regex before /series/ check in M3UParser
-    assert.equal(data.movies.length, 2);
+    assert.equal(data.movies.length, 1);
     assert.equal(data.movies[0].name, 'Matrix 4K');
     assert.equal(data.movies[0].type, 'movie');
+    assert.equal(data.series.length, 1);
+    assert.equal(data.series[0].name, 'Expanse S01E01');
+    assert.equal(data.series[0].type, 'series');
 });
 
 test('XtreamService.buildCatMap and loadAll generate expected stream URLs', async () => {
@@ -235,7 +237,7 @@ test('IPTVApp prevChannel and nextChannel wrap around and ignore VOD', () => {
     loadScript(env, 'IPTVPlayer/js/core/theme.js');
     loadScript(env, 'IPTVPlayer/js/core/storage.js');
     loadScript(env, 'IPTVPlayer/js/core/keyHandler.js');
-    loadScript(env, 'IPTVPlayer/js/components/browseView.js');
+    loadScript(env, 'IPTVPlayer/js/views/browseView.js');
     loadScript(env, 'IPTVPlayer/js/app.js');
 
     const proto = env.window.IPTVApp
@@ -422,7 +424,6 @@ test('BackStack executes LIFO transient handlers and priority-ordered guards acr
 
     const mockApp = Object.assign(Object.create(proto), {
         currentSection: 'movies',
-        sectionHistory: ['home'],
         homeView: { closeResumeModal: () => { elements.get('continue-watching-modal')._hidden = true; log.push('close-cw'); } },
         loginView: {
             closeDeleteModal: () => { elements.get('profile-delete-modal')._hidden = true; log.push('close-del'); },
@@ -995,6 +996,73 @@ test('KeyHandler opens Search and focuses editable input on Desktop Ctrl+F witho
     assert.equal(KeyHandler.isFavoriteKey({ key: 'f', keyCode: 70, ctrlKey: false }), true);
     assert.equal(KeyHandler.isFavoriteKey({ key: 'f', keyCode: 70, ctrlKey: true }), false);
 });
+
+test('XtreamService.formatEpisodeTitle and buildEpisodePlayItem normalize titles and build seriesContext', () => {
+    const env = createBrowserEnv();
+    loadScript(env, 'IPTVPlayer/js/services/xtreamService.js');
+    const { XtreamService } = env.window.IPTV;
+
+    assert.equal(XtreamService.formatEpisodeTitle('Lupin - S04E01 - Pilot', 'Lupin', 4, 1), 'Pilot');
+    assert.equal(XtreamService.formatEpisodeTitle('Lupin: S04E02', 'Lupin', 4, 2), 'Episode 2');
+    assert.equal(XtreamService.formatEpisodeTitle('', 'Lupin', 1, 3), 'Episode 3');
+
+    const conn = { type: 'xtream', server: 'http://tv.test:8080/', user: 'u', pass: 'p' };
+    const seriesInfo = { id: '55', name: 'Lupin', poster: 'http://img/lupin.jpg', plot: 'Heist' };
+    const seasonsData = {
+        '1': [
+            { id: '901', episode_num: 1, title: 'Lupin - S01E01 - Chapter 1', container_extension: 'mkv', info: { movie_image: 'http://img/ep1.jpg' } }
+        ]
+    };
+
+    const item = XtreamService.buildEpisodePlayItem(conn, seriesInfo, seasonsData, '1', 0);
+    assert.equal(item.id, 'series_55_901');
+    assert.equal(item.name, 'Lupin - S1 E1: Chapter 1');
+    assert.equal(item.type, 'series');
+    assert.equal(item.url, 'http://tv.test:8080/series/u/p/901.mkv');
+    assert.equal(item.logo, 'http://img/ep1.jpg');
+    assert.equal(item.seriesContext.seriesId, '55');
+    assert.equal(item.seriesContext.currentSeason, '1');
+    assert.equal(item.seriesContext.currentEpisodeIndex, 0);
+    assert.equal(item.seriesContext.currentEpisodeId, '901');
+    assert.equal(item.seriesContext.currentEpisodeNum, 1);
+    assert.equal(item.seriesContext.currentEpisodeTitle, 'Chapter 1');
+});
+
+test('downloadUtils.matchesDownloadItem and createSegments handle IDs, episodes, and byte ranges', () => {
+    const downloadUtils = require(path.join(ROOT, 'windows/downloadUtils.js'));
+
+    const record = {
+        id: 'dl_100',
+        itemId: 'ep_55_901',
+        url: 'http://tv.test/series/u/p/901.mkv',
+        seriesName: 'Lupin',
+        season: 1,
+        episode: 1
+    };
+
+    assert.equal(downloadUtils.matchesDownloadItem(record, 'dl_100'), true);
+    assert.equal(downloadUtils.matchesDownloadItem(record, 'series_55_901'), true);
+    assert.equal(downloadUtils.matchesDownloadItem(record, '901'), true);
+    assert.equal(downloadUtils.matchesDownloadItem(record, { url: 'http://tv.test/series/u/p/901.mkv' }), true);
+    assert.equal(downloadUtils.matchesDownloadItem(record, { seriesName: 'lupin', season: '1', episode: 1 }), true);
+    assert.equal(downloadUtils.matchesDownloadItem(record, { seriesName: 'lupin', season: '1', episode: 2 }), false);
+
+    const smallSegs = downloadUtils.createSegments(1024);
+    assert.equal(smallSegs.length, 4);
+    assert.equal(smallSegs[0].start, 0);
+    assert.equal(smallSegs[smallSegs.length - 1].end, 1023);
+
+    const mediumSegs = downloadUtils.createSegments(25 * 1024 * 1024);
+    assert.equal(mediumSegs.length, 6);
+    assert.equal(mediumSegs[mediumSegs.length - 1].end, 25 * 1024 * 1024 - 1);
+
+    const largeSegs = downloadUtils.createSegments(120 * 1024 * 1024);
+    assert.equal(largeSegs.length, 8);
+    assert.equal(largeSegs[0].status, 'active');
+    assert.equal(largeSegs[1].status, 'pending');
+    assert.equal(largeSegs[largeSegs.length - 1].end, 120 * 1024 * 1024 - 1);
+});
+
 
 
 

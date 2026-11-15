@@ -475,51 +475,49 @@ window.IPTV.PlayerService = {
     },
 
     getCurrentTime() {
-        if (this._avplayActive) return this._avplayCurrentTime || 0;
-        return (this.video && this.video.currentTime) ? this.video.currentTime : 0;
+        return window.IPTV.PlaybackEngine
+            ? window.IPTV.PlaybackEngine.getCurrentTime(this)
+            : ((this.video && this.video.currentTime) ? this.video.currentTime : 0);
     },
 
     getDuration() {
-        if (this._avplayActive) return this._avplayDuration || 0;
-        return (this.video && this.video.duration) ? this.video.duration : 0;
+        return window.IPTV.PlaybackEngine
+            ? window.IPTV.PlaybackEngine.getDuration(this)
+            : ((this.video && this.video.duration) ? this.video.duration : 0);
     },
 
     playVideo() {
         if (!this.video) return;
-        this._userPaused = false;
-        if (this._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                window.webapis.avplay.play();
-                this._avplayPaused = false;
-            } catch (e) {}
+        if (window.IPTV.PlaybackEngine) {
+            window.IPTV.PlaybackEngine.play(this);
         } else {
-            this.video.play().catch(e => console.warn('Play blocked:', e));
+            this._userPaused = false;
+            const p = this.video.play();
+            if (p && typeof p.catch === 'function') p.catch(e => console.warn('Play blocked:', e));
+            this._updatePlayPauseIcon(true);
         }
-        this._updatePlayPauseIcon(true);
         this.showSeekHUD('play', 'Play', '');
         this.showOSD();
     },
 
     pauseVideo() {
         if (!this.video) return;
-        this._userPaused = true;
-        if (this._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                window.webapis.avplay.pause();
-                this._avplayPaused = true;
-            } catch (e) {}
-            this._recordWatchProgress();
+        if (window.IPTV.PlaybackEngine) {
+            window.IPTV.PlaybackEngine.pause(this);
         } else {
+            this._userPaused = true;
             this.video.pause();
+            this._updatePlayPauseIcon(false);
         }
-        this._updatePlayPauseIcon(false);
         this.showSeekHUD('pause', 'Pause', '');
         this.showOSD();
     },
 
     togglePlay() {
         if (!this.video) return;
-        const isPaused = this._avplayActive ? !!this._avplayPaused : this.video.paused;
+        const isPaused = window.IPTV.PlaybackEngine
+            ? window.IPTV.PlaybackEngine.isPaused(this)
+            : this.video.paused;
         if (isPaused) {
             this.playVideo();
         } else {
@@ -541,16 +539,10 @@ window.IPTV.PlayerService = {
     canSeek() {
         if (!this.video || this.isLiveStream()) return false;
         if (!this.hasValidDuration()) return false;
-        if (this._avplayActive) return true;
-        try {
-            const seekable = this.video.seekable;
-            if (!seekable || seekable.length === 0) {
-                return this.hasValidDuration() && this.video.duration > 0;
-            }
-            return seekable.end(seekable.length - 1) > 0;
-        } catch(e) {
-            return false;
+        if (window.IPTV.PlaybackEngine) {
+            return window.IPTV.PlaybackEngine.canSeek(this);
         }
+        return Boolean(this.hasValidDuration() && this.video.duration > 0);
     },
 
     _osdEls() {
@@ -569,57 +561,15 @@ window.IPTV.PlayerService = {
         this._updateProgressUI(clamped, duration);
         this.showOSD();
 
-        if (this._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                window.webapis.avplay.seekTo(Math.floor(clamped * 1000), () => {
-                    this._avplayCurrentTime = clamped;
-                    if (startPlaying) {
-                        this._userPaused = false;
-                        this._avplayPaused = false;
-                        try { window.webapis.avplay.play(); } catch (e) {}
-                        this._updatePlayPauseIcon(true);
-                    }
-                    this._updateProgress();
-                }, () => {});
-            } catch (err) {
-                console.warn('[PlayerService] AVPlay seek error:', err);
-            }
+        if (window.IPTV.PlaybackEngine) {
+            window.IPTV.PlaybackEngine.seekTo(this, clamped, startPlaying);
             return;
-        }
-
-        if (this.hls && typeof this.hls.startLoad === 'function') {
-            try { this.hls.startLoad(clamped); } catch(e) {}
         }
 
         try {
             this.video.currentTime = clamped;
         } catch(err) {
             console.warn('[PlayerService] Seek error:', err);
-        }
-
-        if (startPlaying) {
-            this._userPaused = false;
-        }
-
-        const ensurePlaying = () => {
-            if (!this._userPaused) {
-                const p = this.video.play();
-                if (p && typeof p.then === 'function') {
-                    p.catch(e => console.warn('[PlayerService] Play after seek caught:', e));
-                }
-                this._updatePlayPauseIcon(true);
-            }
-        };
-
-        const onSeeked = () => {
-            this.video.removeEventListener('seeked', onSeeked);
-            ensurePlaying();
-            this._updateProgress();
-        };
-        this.video.addEventListener('seeked', onSeeked);
-
-        if (!this.video.seeking) {
-            ensurePlaying();
         }
     },
 
@@ -711,60 +661,52 @@ window.IPTV.PlayerService = {
         return this._getSeriesAdjacentEpisodes().hasPrev;
     },
 
+    _playEpisodeFromContext(targetSeason, targetIndex, markCompleted, label) {
+        if (!this.seriesContext) return false;
+        const conn = window.IPTV.CatalogStore ? window.IPTV.CatalogStore.getConnection() : null;
+        const seriesInfo = {
+            id: this.seriesContext.seriesId,
+            name: this.seriesContext.seriesName,
+            poster: this.seriesContext.poster,
+            plot: this.seriesContext.plot
+        };
+
+        const buildFn = (window.IPTV.XtreamService && typeof window.IPTV.XtreamService.buildEpisodePlayItem === 'function')
+            ? (c, info, seasons, s, idx) => window.IPTV.XtreamService.buildEpisodePlayItem(c, info, seasons, s, idx)
+            : (this.app && this.app.seriesDetailView && typeof this.app.seriesDetailView.buildEpisodePlayItem === 'function'
+                ? (c, info, seasons, s, idx) => this.app.seriesDetailView.buildEpisodePlayItem(c, info, seasons, s, idx)
+                : null);
+
+        if (!buildFn) return false;
+
+        this._recordWatchProgress(Boolean(markCompleted));
+        const playItem = buildFn(conn, seriesInfo, this.seriesContext.seasonsData, targetSeason, targetIndex);
+        if (playItem) {
+            this.play(playItem);
+            if (window.IPTV.EventBus) {
+                window.IPTV.EventBus.toast(`${label}: ${playItem.name}`);
+            }
+            return true;
+        }
+        return false;
+    },
+
     nextEpisode() {
         const { hasNext, nextSeason, nextIndex } = this._getSeriesAdjacentEpisodes();
-        if (!hasNext || !this.app || !this.app.seriesDetailView || !this.seriesContext) {
-            window.IPTV.EventBus.toast('No next episode available');
+        if (!hasNext || !this.seriesContext) {
+            if (window.IPTV.EventBus) window.IPTV.EventBus.toast('No next episode available');
             return;
         }
-
-        this._recordWatchProgress(true);
-
-        const nextPlayItem = this.app.seriesDetailView.buildEpisodePlayItem(
-            window.IPTV.CatalogStore.getConnection(),
-            {
-                id: this.seriesContext.seriesId,
-                name: this.seriesContext.seriesName,
-                poster: this.seriesContext.poster,
-                plot: this.seriesContext.plot
-            },
-            this.seriesContext.seasonsData,
-            nextSeason,
-            nextIndex
-        );
-
-        if (nextPlayItem) {
-            this.play(nextPlayItem);
-            window.IPTV.EventBus.toast(`Next: ${nextPlayItem.name}`);
-        }
+        this._playEpisodeFromContext(nextSeason, nextIndex, true, 'Next');
     },
 
     prevEpisode() {
         const { hasPrev, prevSeason, prevIndex } = this._getSeriesAdjacentEpisodes();
-        if (!hasPrev || !this.app || !this.app.seriesDetailView || !this.seriesContext) {
-            window.IPTV.EventBus.toast('No previous episode available');
+        if (!hasPrev || !this.seriesContext) {
+            if (window.IPTV.EventBus) window.IPTV.EventBus.toast('No previous episode available');
             return;
         }
-
-        this._recordWatchProgress();
-
-        const prevPlayItem = this.app.seriesDetailView.buildEpisodePlayItem(
-            window.IPTV.CatalogStore.getConnection(),
-            {
-                id: this.seriesContext.seriesId,
-                name: this.seriesContext.seriesName,
-                poster: this.seriesContext.poster,
-                plot: this.seriesContext.plot
-            },
-            this.seriesContext.seasonsData,
-            prevSeason,
-            prevIndex
-        );
-
-        if (prevPlayItem) {
-            this.play(prevPlayItem);
-            window.IPTV.EventBus.toast(`Previous: ${prevPlayItem.name}`);
-        }
+        this._playEpisodeFromContext(prevSeason, prevIndex, false, 'Previous');
     },
 
     // ---- In-Player Side Channel List Drawer (delegates to ChannelDrawer) ----

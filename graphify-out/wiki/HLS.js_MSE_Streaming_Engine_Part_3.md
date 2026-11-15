@@ -1,6 +1,6 @@
 # HLS.js MSE Streaming Engine (Part 3)
 
-> 47 nodes · cohesion 0.10
+> 45 nodes · cohesion 0.11
 
 ## Key Concepts
 
@@ -19,7 +19,6 @@
 - **c()** (6 connections) — `IPTVPlayer/js/mpegts.js`
 - **B()** (6 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
 - **I()** (5 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
-- **M()** (5 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
 - **R()** (5 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
 - **ku()** (4 connections) — `IPTVPlayer/js/hls.min.js`
 - **a()** (4 connections) — `IPTVPlayer/js/hls.min.js`
@@ -29,16 +28,17 @@
 - **u()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV.js`
 - **wu()** (3 connections) — `IPTVPlayer/js/hls.min.js`
 - **n()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- *... and 22 more nodes in this community*
+- **zu()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- *... and 20 more nodes in this community*
 
 ## Relationships
 
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (5 shared connections)
 - [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (4 shared connections)
 - [Community 22](Community_22.md) (4 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (4 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (2 shared connections)
 - [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (2 shared connections)
 - [Search Engine & Filter View](Search_Engine_&_Filter_View.md) (1 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
 
 ## Source Files
 
@@ -48,8 +48,8 @@
 
 ## Audit Trail
 
-- EXTRACTED: 84 (65%)
-- INFERRED: 46 (35%)
+- EXTRACTED: 83 (66%)
+- INFERRED: 43 (34%)
 - AMBIGUOUS: 0 (0%)
 
 ---

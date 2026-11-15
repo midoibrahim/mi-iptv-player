@@ -86,36 +86,11 @@ window.IPTV.BrowseView = class {
         const contentEl = this.sectionEl.querySelector('.browse-content');
 
         if (searchInput) {
-            searchInput.readOnly = true;
-
-            const activateSearch = () => {
-                if (searchInput.readOnly) {
-                    searchInput.readOnly = false;
-                    searchInput.focus();
-                    try { searchInput.select(); } catch(err) {}
-                }
-            };
-
-            const deactivateSearch = () => {
+            if (window.IPTV.Platform && typeof window.IPTV.Platform.bindTvInput === 'function') {
+                window.IPTV.Platform.bindTvInput(searchInput);
+            } else {
                 searchInput.readOnly = true;
-            };
-
-            searchInput.addEventListener('click', activateSearch);
-
-            searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.keyCode === 13) {
-                    if (searchInput.readOnly) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        activateSearch();
-                    }
-                } else if (e.key === 'Escape' || e.keyCode === 27) {
-                    deactivateSearch();
-                    searchInput.blur();
-                }
-            });
-
-            searchInput.addEventListener('blur', deactivateSearch);
+            }
 
             if (catList) {
                 searchInput.addEventListener('input', () => {

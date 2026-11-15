@@ -53,23 +53,7 @@ window.IPTV.M3UParser = {
                 const isHd = /hd|fhd|uhd|4k/i.test(name);
                 const lcUrl = streamUrl.toLowerCase();
 
-                if (/\.(mp4|mkv|avi|mov)($|\?)/.test(lcUrl)) {
-                    movieCatSet.add(cat);
-                    movies.push({
-                        id: `m3u_${lineNum}`,
-                        name: name,
-                        _q: qText,
-                        logo: logo,
-                        category: cat,
-                        url: streamUrl,
-                        hd: isHd,
-                        type: 'movie',
-                        poster: logo,
-                        plot: '',
-                        rating: '',
-                        year: ''
-                    });
-                } else if (/\/series\//.test(lcUrl)) {
+                if (/\/series\//.test(lcUrl)) {
                     seriesCatSet.add(cat);
                     series.push({
                         id: `m3u_${lineNum}`,
@@ -80,6 +64,22 @@ window.IPTV.M3UParser = {
                         url: streamUrl,
                         hd: isHd,
                         type: 'series',
+                        poster: logo,
+                        plot: '',
+                        rating: '',
+                        year: ''
+                    });
+                } else if (/\.(mp4|mkv|avi|mov)($|\?)/.test(lcUrl) || /\/movie\//.test(lcUrl)) {
+                    movieCatSet.add(cat);
+                    movies.push({
+                        id: `m3u_${lineNum}`,
+                        name: name,
+                        _q: qText,
+                        logo: logo,
+                        category: cat,
+                        url: streamUrl,
+                        hd: isHd,
+                        type: 'movie',
                         poster: logo,
                         plot: '',
                         rating: '',

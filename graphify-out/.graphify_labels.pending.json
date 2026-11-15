@@ -1,15 +1,16 @@
 {
   "4": "tizen-build/build.mjs",
-  "15": "downloader.js",
+  "14": "card.js",
+  "15": "browseView.js",
   "22": "gt",
+  "25": "ve",
+  "32": "build.js",
   "33": "legacyCompiler.mjs",
-  "41": "package.json",
   "54": "webos-build/build.mjs",
   "57": "Ml",
   "58": "Mr",
   "59": "nu",
   "60": "qi",
   "61": ".abort",
-  "62": ".addEventListener",
-  "64": "service.js"
+  "62": ".addEventListener"
 }

@@ -11,7 +11,6 @@ class IPTVApp {
         this.store = window.IPTV.CatalogStore;
         this.currentSection = 'home';
         this.currentChannelIndex = -1;
-        this.sectionHistory = [];
 
         // Subsystems & Views
         this.playerService = window.IPTV.PlayerService;
@@ -142,10 +141,6 @@ class IPTVApp {
         const prevSec = this.currentSection ? document.getElementById(`section-${this.currentSection}`) : null;
         if (prevSec && contentArea) {
             prevSec._savedScrollTop = contentArea.scrollTop;
-        }
-
-        if (pushHistory && this.currentSection && this.currentSection !== section) {
-            this.sectionHistory.push(this.currentSection);
         }
 
         this.currentSection = section;
@@ -296,7 +291,6 @@ class IPTVApp {
             },
             onBack: () => {
                 if (this.currentSection !== 'home') {
-                    this.sectionHistory = [];
                     this.navigateTo('home', false);
                     return;
                 }

@@ -268,7 +268,8 @@ window.IPTV.PlayerOsd = {
         const topBtns = [
             document.getElementById('player-back'),
             document.getElementById('osd-channels-btn'),
-            document.getElementById('osd-fav')
+            document.getElementById('osd-fav'),
+            document.getElementById('osd-fullscreen-btn')
         ].filter(b => b && b.style.display !== 'none');
 
         const progressBar = document.getElementById('osd-progress-bar') || document.querySelector('.progress-bar');

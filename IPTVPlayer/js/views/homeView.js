@@ -126,33 +126,8 @@ window.IPTV.HomeView = {
 
             this.app.showLoading('Resuming series episode...');
             try {
-                let seasonsData = {};
-                let seriesInfo = { ...series };
-
-                if (window.IPTV.CatalogStore.getConnection() && window.IPTV.CatalogStore.getConnection().type === 'xtream') {
-                    const resp = await window.IPTV.XtreamService.getSeriesInfo(window.IPTV.CatalogStore.getConnection(), series.id);
-                    if (resp) {
-                        if (resp.info) {
-                            seriesInfo.name = resp.info.name || series.name;
-                            seriesInfo.poster = resp.info.cover || resp.info.movie_image || series.poster;
-                            seriesInfo.plot = resp.info.plot || series.plot;
-                        }
-                        if (resp.episodes && typeof resp.episodes === 'object') {
-                            seasonsData = resp.episodes;
-                        }
-                    }
-                }
-
-                const seasonKeys = Object.keys(seasonsData);
-                if (seasonKeys.length === 0 && series.url) {
-                    seasonsData['1'] = [{
-                        id: series.id,
-                        episode_num: 1,
-                        title: series.name,
-                        url: series.url,
-                        info: { movie_image: series.poster, plot: series.plot }
-                    }];
-                }
+                const conn = window.IPTV.CatalogStore.getConnection();
+                const { seriesInfo, seasonsData } = await window.IPTV.XtreamService.loadSeriesSeasons(conn, series);
 
                 const seasonNum = String(record.seasonNum || Object.keys(seasonsData)[0] || '1');
                 const episodes = seasonsData[seasonNum] || [];
@@ -169,21 +144,17 @@ window.IPTV.HomeView = {
 
                 if (epIndex === -1) {
                     this.app.hideLoading();
-                    if (window.IPTV.Storage && window.IPTV.CatalogStore.getConnection()) {
-                        window.IPTV.Storage.removeWatchProgress(window.IPTV.CatalogStore.getConnection(), record.id);
+                    if (window.IPTV.Storage && conn) {
+                        window.IPTV.Storage.removeWatchProgress(conn, record.id);
                     }
                     this.render(window.IPTV.CatalogStore.getLive(), window.IPTV.CatalogStore.getMovies(), window.IPTV.CatalogStore.getSeries());
                     window.IPTV.EventBus.toast('Episode is no longer available in the catalog');
                     return;
                 }
 
-                const playItem = this.app.seriesDetailView.buildEpisodePlayItem(
-                    window.IPTV.CatalogStore.getConnection(),
-                    seriesInfo,
-                    seasonsData,
-                    seasonNum,
-                    epIndex
-                );
+                const playItem = (window.IPTV.XtreamService && typeof window.IPTV.XtreamService.buildEpisodePlayItem === 'function')
+                    ? window.IPTV.XtreamService.buildEpisodePlayItem(conn, seriesInfo, seasonsData, seasonNum, epIndex)
+                    : this.app.seriesDetailView.buildEpisodePlayItem(conn, seriesInfo, seasonsData, seasonNum, epIndex);
                 this.app.hideLoading();
 
                 if (!playItem) {
@@ -281,15 +252,18 @@ window.IPTV.HomeView = {
     },
 
     _fmtTime(sec) {
+        if (window.IPTV.PlayerOsd && typeof window.IPTV.PlayerOsd.fmtTime === 'function') {
+            return window.IPTV.PlayerOsd.fmtTime(sec);
+        }
         if (isNaN(sec) || sec < 0) return '00:00';
         const total = Math.floor(sec);
         const h = Math.floor(total / 3600);
         const m = Math.floor((total % 3600) / 60);
         const s = total % 60;
         if (h > 0) {
-            return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
-        return `${m}:${String(s).padStart(2,'0')}`;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     },
 
     _addContinueWatchingRow(items) {

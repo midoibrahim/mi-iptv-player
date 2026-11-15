@@ -60,35 +60,18 @@ window.IPTV.SettingsView = {
 
         const btnChange = dlGroup.querySelector('#btn-setting-change-folder');
         if (btnChange) {
-            btnChange.addEventListener('click', async () => {
-                const res = await window.IPTV.Platform.downloads.selectDirectory();
-                if (!res.canceled && res.path) {
-                    dm.settings.saveDirectory = res.path;
-                    const pathEl = document.getElementById('setting-dl-path');
-                    if (pathEl) pathEl.textContent = res.path;
-                    dm._updatePathDisplay();
-                    window.IPTV.EventBus.toast('Downloads folder updated');
-                }
-            });
+            btnChange.addEventListener('click', () => dm.selectAndSaveDirectory());
         }
 
         const btnOpen = dlGroup.querySelector('#btn-setting-open-folder');
         if (btnOpen) {
-            btnOpen.addEventListener('click', () => {
-                window.IPTV.Platform.downloads.openFolder(dm.settings.saveDirectory);
-            });
+            btnOpen.addEventListener('click', () => dm.openSaveDirectory());
         }
 
         const selParallel = dlGroup.querySelector('#setting-dl-parallel');
         if (selParallel) {
             selParallel.value = String(dm.settings.maxConcurrent || 1);
-            selParallel.addEventListener('change', async (e) => {
-                const val = parseInt(e.target.value, 10) || 1;
-                dm.settings.maxConcurrent = val;
-                await window.IPTV.Platform.downloads.updateSettings({ maxConcurrent: val });
-                dm._updatePathDisplay();
-                window.IPTV.EventBus.toast(`Parallel downloads set to ${val}`);
-            });
+            selParallel.addEventListener('change', (e) => dm.setParallelDownloads(e.target.value));
         }
     },
 

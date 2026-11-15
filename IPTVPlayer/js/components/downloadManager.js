@@ -162,21 +162,12 @@ window.IPTV.DownloadManager = {
 
         const btnChangeFolder = this.sectionEl.querySelector('#dl-btn-change-folder');
         if (btnChangeFolder) {
-            btnChangeFolder.addEventListener('click', async () => {
-                const res = await window.IPTV.Platform.downloads.selectDirectory();
-                if (!res.canceled && res.path) {
-                    this.settings.saveDirectory = res.path;
-                    this._updatePathDisplay();
-                    window.IPTV.EventBus.toast('Downloads folder updated');
-                }
-            });
+            btnChangeFolder.addEventListener('click', () => this.selectAndSaveDirectory());
         }
 
         const btnOpenFolder = this.sectionEl.querySelector('#dl-btn-open-folder');
         if (btnOpenFolder) {
-            btnOpenFolder.addEventListener('click', () => {
-                window.IPTV.Platform.downloads.openFolder(this.settings.saveDirectory);
-            });
+            btnOpenFolder.addEventListener('click', () => this.openSaveDirectory());
         }
 
         const btnClear = this.sectionEl.querySelector('#dl-btn-clear-history');
@@ -201,12 +192,7 @@ window.IPTV.DownloadManager = {
 
         const selectParallel = this.sectionEl.querySelector('#dl-select-parallel');
         if (selectParallel) {
-            selectParallel.addEventListener('change', async (e) => {
-                const val = parseInt(e.target.value, 10) || 1;
-                this.settings.maxConcurrent = val;
-                await window.IPTV.Platform.downloads.updateSettings({ maxConcurrent: val });
-                window.IPTV.EventBus.toast(`Parallel downloads set to ${val}`);
-            });
+            selectParallel.addEventListener('change', (e) => this.setParallelDownloads(e.target.value));
         }
 
         const checkAsk = this.sectionEl.querySelector('#dl-check-ask-everytime');
@@ -290,20 +276,54 @@ window.IPTV.DownloadManager = {
         }
     },
 
+    async selectAndSaveDirectory() {
+        if (!window.IPTV.Platform || !window.IPTV.Platform.downloads) return;
+        const res = await window.IPTV.Platform.downloads.selectDirectory();
+        if (!res.canceled && res.path) {
+            this.settings.saveDirectory = res.path;
+            this._updatePathDisplay();
+            window.IPTV.EventBus.toast('Downloads folder updated');
+        }
+    },
+
+    openSaveDirectory() {
+        if (!window.IPTV.Platform || !window.IPTV.Platform.downloads) return;
+        window.IPTV.Platform.downloads.openFolder(this.settings.saveDirectory);
+    },
+
+    async setParallelDownloads(val) {
+        if (!window.IPTV.Platform || !window.IPTV.Platform.downloads) return;
+        const n = parseInt(val, 10) || 1;
+        this.settings.maxConcurrent = n;
+        await window.IPTV.Platform.downloads.updateSettings({ maxConcurrent: n });
+        this._updatePathDisplay();
+        window.IPTV.EventBus.toast(`Parallel downloads set to ${n}`);
+    },
+
     _updatePathDisplay() {
+        const pathText = this.settings.saveDirectory || 'Default Downloads folder';
         const pathEl = document.getElementById('dl-current-path');
         if (pathEl) {
-            pathEl.textContent = this.settings.saveDirectory || 'Default Downloads folder';
+            pathEl.textContent = pathText;
             pathEl.title = this.settings.saveDirectory;
+        }
+        const settingPathEl = document.getElementById('setting-dl-path');
+        if (settingPathEl) {
+            settingPathEl.textContent = pathText;
         }
         const checkAutoMp4 = document.getElementById('dl-check-auto-mp4');
         if (checkAutoMp4) {
             checkAutoMp4.checked = this.settings.autoConvertToMp4 !== false;
         }
 
+        const parallelVal = String(this.settings.maxConcurrent || 1);
         const selectParallel = document.getElementById('dl-select-parallel');
         if (selectParallel) {
-            selectParallel.value = String(this.settings.maxConcurrent || 1);
+            selectParallel.value = parallelVal;
+        }
+        const settingParallel = document.getElementById('setting-dl-parallel');
+        if (settingParallel) {
+            settingParallel.value = parallelVal;
         }
 
         const checkAsk = document.getElementById('dl-check-ask-everytime');

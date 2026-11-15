@@ -21,6 +21,7 @@ set "TIZEN_BIN="
 
 if exist "C:\tizen-studio\tools\sdb.exe" set "SDB_BIN=C:\tizen-studio\tools\sdb.exe"
 if exist "%USERPROFILE%\tizen-studio\tools\sdb.exe" set "SDB_BIN=%USERPROFILE%\tizen-studio\tools\sdb.exe"
+if exist "%USERPROFILE%\.tizen-extension-platform\server\sdktools\data\tools\sdb.exe" set "SDB_BIN=%USERPROFILE%\.tizen-extension-platform\server\sdktools\data\tools\sdb.exe"
 if "%SDB_BIN%"=="" (
     for /f "delims=" %%i in ('where.exe sdb.exe 2^>nul') do if "!SDB_BIN!"=="" set "SDB_BIN=%%i"
 )

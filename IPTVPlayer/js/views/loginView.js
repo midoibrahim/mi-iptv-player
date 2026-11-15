@@ -120,16 +120,19 @@ window.IPTV.LoginView = {
         }
 
         document.querySelectorAll('#login-form-page input').forEach(inp => {
-            inp.readOnly = true;
-            const activateInput = () => {
-                if (inp.readOnly) {
-                    inp.readOnly = false;
-                    inp.focus();
-                    try { inp.select(); } catch(err) {}
-                }
-            };
-            inp.addEventListener('click', activateInput);
-            inp.addEventListener('blur', () => { inp.readOnly = true; });
+            if (window.IPTV.Platform && typeof window.IPTV.Platform.bindTvInput === 'function') {
+                window.IPTV.Platform.bindTvInput(inp);
+            } else {
+                inp.readOnly = true;
+                inp.addEventListener('click', () => {
+                    if (inp.readOnly) {
+                        inp.readOnly = false;
+                        inp.focus();
+                        try { inp.select(); } catch(err) {}
+                    }
+                });
+                inp.addEventListener('blur', () => { inp.readOnly = true; });
+            }
             inp.addEventListener('input', () => this.clearFormError());
         });
 

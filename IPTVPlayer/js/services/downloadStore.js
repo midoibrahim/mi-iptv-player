@@ -121,9 +121,11 @@ window.IPTV.DownloadStore = {
         if (!streamUrl) return null;
 
         const epNum = ep.episode_num || ep.episode || (epIndex + 1);
-        const epTitle = (window.IPTV.SeriesDetailView && window.IPTV.SeriesDetailView._formatEpisodeTitle)
-            ? window.IPTV.SeriesDetailView._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum)
-            : (ep.title || `Episode ${epNum}`);
+        const epTitle = (window.IPTV.XtreamService && typeof window.IPTV.XtreamService.formatEpisodeTitle === 'function')
+            ? window.IPTV.XtreamService.formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum)
+            : ((window.IPTV.SeriesDetailView && window.IPTV.SeriesDetailView._formatEpisodeTitle)
+                ? window.IPTV.SeriesDetailView._formatEpisodeTitle(ep.title, seriesInfo.name, seasonNum, epNum)
+                : (ep.title || `Episode ${epNum}`));
         const thumb = (ep.info && ep.info.movie_image) || (ep.info && ep.info.cover) || seriesInfo.poster || '';
 
         return {

@@ -1,17 +1,17 @@
-# Graph Report - IPTV  (2026-11-14)
+# Graph Report - IPTV  (2026-11-15)
 
 ## Corpus Check
-- 54 files · ~73,773 words
+- 54 files · ~74,211 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 18 file(s) not represented in the graph (top: .css 8, .bat 7, (none) 1)
 
 ## Summary
-- 974 nodes · 1865 edges · 62 communities (48 shown, 14 thin omitted)
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 189 edges (avg confidence: 0.86)
+- 994 nodes · 1898 edges · 61 communities (47 shown, 14 thin omitted)
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 193 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6d39490c`
+- Built from commit: `d637f9ae`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -30,8 +30,8 @@
 - Browse View & Playlist Virtualization
 - HLS.js MSE Streaming Engine (Part 12)
 - HLS.js MSE Streaming Engine (Part 13)
-- HLS.js MSE Streaming Engine (Part 14)
-- downloader.js
+- card.js
+- browseView.js
 - webOS Background Luna Service
 - Package Configuration & Dependencies (17)
 - webOS Platform SDK Bridge
@@ -41,13 +41,14 @@
 - gt
 - Electron Background Downloader
 - webOS Background Luna Service
+- ve
 - Home View & Content Rows
 - Series Detail & Episode Browser
 - Settings & Preferences View
 - test_diag.js & { app, BrowserWin...
 - Package Configuration & Dependencies (30)
 - QR Code Generation Library
-- Theme Engine & Design Tokens
+- build.js
 - legacyCompiler.mjs
 - HLS.js MSE Streaming Engine (Part 34)
 - Package Configuration & Dependencies (35)
@@ -55,7 +56,6 @@
 - Search Engine & Filter View
 - HLS.js MSE Streaming Engine (Part 39)
 - Vector Icon System
-- package.json
 - HLS.js MSE Streaming Engine (Part 42)
 - HLS.js MSE Streaming Engine (Part 43)
 - HLS.js MSE Streaming Engine (Part 44)
@@ -69,7 +69,6 @@
 - Legacy JavaScript Polyfills
 - webos-build/build.mjs
 - .addEventListener
-- service.js
 
 ## God Nodes (most connected - your core abstractions)
 1. `Downloader` - 52 edges
@@ -103,27 +102,31 @@
 - **Hardware & MSE Video Playback Pipeline** — concept_streaming_pipeline, iptvplayer_js_services_playerservice, iptvservice_service [INFERRED 0.95]
 - **10-Foot Spatial Focus & Remote Control System** — concept_spatial_navigation_engine, iptvplayer_js_core_spatialnav, iptvplayer_js_core_keyhandler [INFERRED 0.95]
 
-## Communities (62 total, 14 thin omitted)
+## Communities (61 total, 14 thin omitted)
 
 ### Community 0 - "HLS.js MSE Streaming Engine (Part 0)"
 Cohesion: 0.03
-Nodes (29): Ai(), Ar(), cn(), dr(), Eo(), Fl(), gn(), ht() (+21 more)
+Nodes (27): Ai(), Ar(), cn(), dr(), Eo(), Fl(), gn(), ht() (+19 more)
 
 ### Community 1 - "Video Player & OSD Pipeline"
-Cohesion: 0.09
-Nodes (45): autoHideOSD(), _bindEvents(), _buildCandidateUrls(), canSeek(), _checkPendingInitialSeek(), _clearCandidateWatchdog(), close(), closeChannelDrawer() (+37 more)
+Cohesion: 0.08
+Nodes (46): autoHideOSD(), _bindEvents(), _buildCandidateUrls(), canSeek(), _checkPendingInitialSeek(), _clearCandidateWatchdog(), close(), closeChannelDrawer() (+38 more)
 
 ### Community 2 - "webOS Build & ES5 Transpilation Pipeline"
 Cohesion: 0.11
 Nodes (23): acorn, autoprefixer, @babel/core, @babel/preset-env, core-js, esbuild, postcss, regenerator-runtime (+15 more)
 
 ### Community 3 - "HLS.js MSE Streaming Engine (Part 3)"
-Cohesion: 0.10
-Nodes (39): ku(), a(), a(), wu(), n(), zu(), a(), b() (+31 more)
+Cohesion: 0.11
+Nodes (37): ku(), a(), a(), wu(), n(), zu(), a(), b() (+29 more)
 
 ### Community 4 - "tizen-build/build.mjs"
 Cohesion: 0.10
 Nodes (16): walkDir(), buildWgtArchive(), crc32(), CRC_TABLE, DIST, EXCLUDE_TOP, HERE, OUT (+8 more)
+
+### Community 5 - "HLS.js MSE Streaming Engine (Part 5)"
+Cohesion: 0.06
+Nodes (28): Windows Desktop Offline Download System, { app, dialog, shell, powerSaveBlocker }, Downloader, fs, http, https, path, { URL } (+20 more)
 
 ### Community 6 - "Electron Background Downloader"
 Cohesion: 0.11
@@ -131,7 +134,7 @@ Nodes (21): 2D Cartesian Spatial Navigation & Focus Memory, getDirection(), hand
 
 ### Community 7 - "Spatial Navigation & Key Handling"
 Cohesion: 0.17
-Nodes (32): a(), ae(), assetPlayers(), bufferedEnd(), currentTime(), duration(), E(), es() (+24 more)
+Nodes (29): a(), ae(), assetPlayers(), bufferedEnd(), currentTime(), duration(), es(), fr() (+21 more)
 
 ### Community 8 - "HLS.js MSE Streaming Engine (Part 8)"
 Cohesion: 0.15
@@ -142,28 +145,24 @@ Cohesion: 0.08
 Nodes (24): concurrency, cancel-in-progress, group, environment, runs-on, steps, name, url (+16 more)
 
 ### Community 10 - "Download UI & Task Management"
-Cohesion: 0.17
-Nodes (18): _bindEvents(), _bindUIControls(), _createActiveCard(), _createCompletedCard(), downloadEpisode(), downloadMovie(), getDownloadedItem(), init() (+10 more)
+Cohesion: 0.15
+Nodes (21): _bindEvents(), _bindUIControls(), _createActiveCard(), _createCompletedCard(), downloadEpisode(), downloadMovie(), getDownloadedItem(), init() (+13 more)
 
 ### Community 11 - "Browse View & Playlist Virtualization"
 Cohesion: 0.08
 Nodes (6): assert, fs, path, ROOT, test, vm
 
-### Community 12 - "HLS.js MSE Streaming Engine (Part 12)"
-Cohesion: 0.09
-Nodes (15): 10-Foot TV User Interface Architecture, Universal Cross-Platform Architecture (webOS + Electron), QR Code Phone Setup & Background Server, Multi-Stage Playback & Stream Pipeline, 10-Foot TV Application Shell & Screens, IPTVApp, ensureStarted(), getSetupInfo() (+7 more)
-
 ### Community 13 - "HLS.js MSE Streaming Engine (Part 13)"
-Cohesion: 0.15
-Nodes (17): at(), d(), r(), ei(), g(), gl(), h(), it() (+9 more)
+Cohesion: 0.13
+Nodes (26): at(), c(), d(), Dd(), E(), r(), ei(), f() (+18 more)
 
-### Community 14 - "HLS.js MSE Streaming Engine (Part 14)"
-Cohesion: 0.18
-Nodes (15): High-FPS Large Playlist Virtualization Engine, _appendNextGridBatch(), _bindControls(), _createCategoryLi(), ensureRendered(), _flushRemainingCategories(), _refreshContent(), render() (+7 more)
+### Community 14 - "card.js"
+Cohesion: 0.38
+Nodes (4): High-FPS Large Playlist Virtualization Engine, create(), _getIcon(), _scheduleLazyImg()
 
-### Community 15 - "downloader.js"
-Cohesion: 0.15
-Nodes (16): { app, dialog, shell, powerSaveBlocker }, fs, http, https, path, { URL }, ensureDir(), formatBytes() (+8 more)
+### Community 15 - "browseView.js"
+Cohesion: 0.33
+Nodes (11): _appendNextGridBatch(), _bindControls(), _createCategoryLi(), ensureRendered(), _flushRemainingCategories(), _refreshContent(), render(), _renderCategories() (+3 more)
 
 ### Community 16 - "webOS Background Luna Service"
 Cohesion: 0.11
@@ -174,20 +173,20 @@ Cohesion: 0.12
 Nodes (16): electron, @electron/packager, author, description, devDependencies, electron@^33.2.1, @electron/packager@^18.3.6, keywords (+8 more)
 
 ### Community 18 - "webOS Platform SDK Bridge"
-Cohesion: 0.10
-Nodes (22): an(), be(), c(), Ci(), Dd(), Gi(), ie(), Ii() (+14 more)
+Cohesion: 0.14
+Nodes (16): an(), be(), Ci(), Gi(), Ii(), In(), Le(), lt() (+8 more)
 
 ### Community 19 - "webOS Platform SDK Bridge"
-Cohesion: 0.12
-Nodes (17): b(), ce(), ct(), De(), dt(), ee(), J(), ke() (+9 more)
+Cohesion: 0.14
+Nodes (16): b(), ct(), dt(), ee(), J(), Me(), Oe(), q() (+8 more)
 
 ### Community 20 - "HLS.js MSE Streaming Engine (Part 20)"
 Cohesion: 0.31
 Nodes (16): _bindUI(), clearFormError(), closeDeleteModal(), _getApiBase(), handleRemoteCredentials(), init(), initRemoteSetup(), isQrScreenActive() (+8 more)
 
 ### Community 21 - "main.js & { app, BrowserWindow, ..."
-Cohesion: 0.26
-Nodes (6): createCompanionHandler(), handle(), getLanIp(), proxyStream(), sendJson(), serveStatic()
+Cohesion: 0.18
+Nodes (10): createCompanionHandler(), handle(), getLanIp(), proxyStream(), sendJson(), serveStatic(), ensureServer(), keepAlive() (+2 more)
 
 ### Community 22 - "gt"
 Cohesion: 0.20
@@ -201,12 +200,16 @@ Nodes (4): fmtTime(), osdEls(), updateProgress(), updateProgressUI()
 Cohesion: 0.18
 Nodes (4): favKey(), getFavoriteItems(), isFavorite(), toggleFavorite()
 
+### Community 25 - "ve"
+Cohesion: 0.40
+Nodes (5): ce(), De(), fe(), ke(), ve()
+
 ### Community 26 - "Home View & Content Rows"
 Cohesion: 0.24
 Nodes (13): b(), C(), h(), i(), m(), n(), o(), p() (+5 more)
 
 ### Community 27 - "Series Detail & Episode Browser"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (6): init(), _initDesktopViewportAndFullscreen(), isDesktop(), isFullScreen(), setFullScreen(), toggleFullScreen()
 
 ### Community 28 - "Settings & Preferences View"
@@ -214,20 +217,20 @@ Cohesion: 0.15
 Nodes (13): dn(), en(), fn(), ln(), mn(), nn(), pn(), sn() (+5 more)
 
 ### Community 29 - "test_diag.js & { app, BrowserWin..."
-Cohesion: 0.27
-Nodes (10): Xtream Codes & M3U Playlist Protocol Engine, load(), parseExtinf(), buildCatMap(), fetchJson(), getSeriesInfo(), loadAll(), resolveEpisodeUrl() (+2 more)
+Cohesion: 0.23
+Nodes (13): Xtream Codes & M3U Playlist Protocol Engine, load(), parseExtinf(), buildCatMap(), buildEpisodePlayItem(), fetchJson(), formatEpisodeTitle(), getSeriesInfo() (+5 more)
 
 ### Community 30 - "Package Configuration & Dependencies (30)"
 Cohesion: 0.27
 Nodes (12): Bs(), Fs(), Gs(), Hs(), js(), Ks(), ls(), Ns() (+4 more)
 
 ### Community 31 - "QR Code Generation Library"
-Cohesion: 0.42
+Cohesion: 0.20
 Nodes (11): clearWatchdog(), destroy(), destroyTizenAvPlay(), getEngineProfile(), isTizenAvPlayAvailable(), loadCandidate(), loadScriptOnce(), playNativeDirect() (+3 more)
 
-### Community 32 - "Theme Engine & Design Tokens"
-Cohesion: 0.15
-Nodes (12): appDir, { execSync }, expectedExe, fs, iconFile, IGNORED_NAMES, outDir, packagedDir (+4 more)
+### Community 32 - "build.js"
+Cohesion: 0.08
+Nodes (26): 10-Foot TV User Interface Architecture, Universal Cross-Platform Architecture (webOS + Electron), QR Code Phone Setup & Background Server, Multi-Stage Playback & Stream Pipeline, 10-Foot TV Application Shell & Screens, ensureStarted(), getSetupInfo(), isWebOS() (+18 more)
 
 ### Community 33 - "legacyCompiler.mjs"
 Cohesion: 0.31
@@ -250,12 +253,8 @@ Cohesion: 0.42
 Nodes (9): _addContinueWatchingRow(), _addRow(), closeResumeModal(), _fmtRemaining(), _fmtTime(), init(), render(), resumeItem() (+1 more)
 
 ### Community 40 - "Vector Icon System"
-Cohesion: 0.40
+Cohesion: 0.38
 Nodes (9): buildEpisodePlayItem(), close(), focusEpisodeCard(), _formatEpisodeTitle(), init(), open(), renderEpisodesList(), renderScreen() (+1 more)
-
-### Community 41 - "package.json"
-Cohesion: 0.20
-Nodes (6): Windows Desktop Offline Download System, { app, BrowserWindow, Menu, ipcMain, powerMonitor }, companionCore, fs, http, path
 
 ### Community 42 - "HLS.js MSE Streaming Engine (Part 42)"
 Cohesion: 0.25
@@ -286,36 +285,32 @@ Cohesion: 0.40
 Nodes (4): description, main, name, version
 
 ### Community 51 - "Legacy JavaScript Polyfills"
-Cohesion: 0.70
-Nodes (4): _collectPoolMatches(), focusInput(), init(), search()
+Cohesion: 0.60
+Nodes (3): _collectPoolMatches(), init(), search()
 
 ### Community 54 - "webos-build/build.mjs"
 Cohesion: 0.20
 Nodes (5): DESKTOP_DOWNLOAD_FILES, EXCLUDE_TOP, HERE, OUT, SRC
 
-### Community 64 - "service.js"
-Cohesion: 0.33
-Nodes (4): ensureServer(), keepAlive(), log(), shutdownServer()
-
 ## Knowledge Gaps
-- **4 isolated node(s):** `LG webOS Compatibility Matrix (webOS 3.x - 25+)`, `LG webOS CLI Installation Guide`, `10-Foot TV Application Shell & Screens`, `Companion Phone Web Setup Interface`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 301 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **5 isolated node(s):** `LG webOS Compatibility Matrix (webOS 3.x - 25+)`, `LG webOS CLI Installation Guide`, `10-Foot TV Application Shell & Screens`, `Companion Phone Web Setup Interface`, `High-FPS Large Playlist Virtualization Engine`
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 311 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Multi-Stage Playback & Stream Pipeline` connect `HLS.js MSE Streaming Engine (Part 12)` to `Video Player & OSD Pipeline`?**
+- **Why does `Multi-Stage Playback & Stream Pipeline` connect `build.js` to `Video Player & OSD Pipeline`?**
   _High betweenness centrality (0.032) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `T()` (e.g. with `a()` and `l()`) actually correct?**
   _`T()` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `LG webOS Compatibility Matrix (webOS 3.x - 25+)`, `LG webOS CLI Installation Guide`, `10-Foot TV Application Shell & Screens` to the rest of the system?**
-  _4 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _5 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `HLS.js MSE Streaming Engine (Part 0)` be split into smaller, more focused modules?**
-  _Cohesion score 0.02612942612942613 - nodes in this community are weakly interconnected._
-- **Why does `Universal Cross-Platform Architecture (webOS + Electron)` connect `HLS.js MSE Streaming Engine (Part 12)` to `Theme Engine & Design Tokens`, `webos-build/build.mjs`?**
+  _Cohesion score 0.026557711950970377 - nodes in this community are weakly interconnected._
+- **Why does `Universal Cross-Platform Architecture (webOS + Electron)` connect `build.js` to `webos-build/build.mjs`?**
   _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **Are the 16 inferred relationships involving `e()` (e.g. with `hls.min.js` and `a()`) actually correct?**
   _`e()` has 16 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Video Player & OSD Pipeline` be split into smaller, more focused modules?**
-  _Cohesion score 0.08897243107769423 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08469449485783424 - nodes in this community are weakly interconnected._

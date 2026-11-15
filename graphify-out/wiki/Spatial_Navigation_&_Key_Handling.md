@@ -1,10 +1,9 @@
 # Spatial Navigation & Key Handling
 
-> 32 nodes · cohesion 0.17
+> 29 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **E()** (23 connections) — `IPTVPlayer/js/hls.min.js`
 - **i()** (23 connections) — `IPTVPlayer/js/hls.min.js`
 - **r()** (22 connections) — `IPTVPlayer/js/hls.min.js`
 - **n()** (21 connections) — `IPTVPlayer/js/hls.min.js`
@@ -13,33 +12,35 @@
 - **l()** (17 connections) — `IPTVPlayer/js/hls.min.js`
 - **s()** (14 connections) — `IPTVPlayer/js/hls.min.js`
 - **yt()** (12 connections) — `IPTVPlayer/js/hls.min.js`
-- **on()** (11 connections) — `IPTVPlayer/js/hls.min.js`
-- **f()** (8 connections) — `IPTVPlayer/js/hls.min.js`
 - **ne()** (6 connections) — `IPTVPlayer/js/hls.min.js`
 - **xn()** (6 connections) — `IPTVPlayer/js/hls.min.js`
 - **currentTime()** (5 connections) — `IPTVPlayer/js/hls.min.js`
 - **pt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **ve()** (5 connections) — `IPTVPlayer/js/hls.min.js`
 - **yr()** (5 connections) — `IPTVPlayer/js/hls.min.js`
 - **bufferedEnd()** (4 connections) — `IPTVPlayer/js/hls.min.js`
 - **es()** (4 connections) — `IPTVPlayer/js/hls.min.js`
 - **y()** (4 connections) — `IPTVPlayer/js/hls.min.js`
 - **ze()** (4 connections) — `IPTVPlayer/js/hls.min.js`
 - **duration()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **fe()** (3 connections) — `IPTVPlayer/js/hls.min.js`
 - **ti()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Za()** (3 connections) — `IPTVPlayer/js/hls.min.js`
 - **ae()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- *... and 7 more nodes in this community*
+- **assetPlayers()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **fr()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **interstitialPlayer()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ja()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- *... and 4 more nodes in this community*
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (35 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (19 shared connections)
-- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (18 shared connections)
-- [Settings & Preferences View](Settings_&_Preferences_View.md) (7 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (31 shared connections)
+- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (21 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (12 shared connections)
 - [Search Engine & Filter View](Search_Engine_&_Filter_View.md) (6 shared connections)
-- [Community 22](Community_22.md) (6 shared connections)
-- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (2 shared connections)
+- [Community 22](Community_22.md) (5 shared connections)
+- [Settings & Preferences View](Settings_&_Preferences_View.md) (4 shared connections)
+- [Community 25](Community_25.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (1 shared connections)
 - [HLS.js MSE Streaming Engine (Part 42)](HLS.js_MSE_Streaming_Engine_Part_42.md) (1 shared connections)
 
 ## Source Files
@@ -48,8 +49,8 @@
 
 ## Audit Trail
 
-- EXTRACTED: 95 (53%)
-- INFERRED: 84 (47%)
+- EXTRACTED: 74 (49%)
+- INFERRED: 77 (51%)
 - AMBIGUOUS: 0 (0%)
 
 ---

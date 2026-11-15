@@ -87,6 +87,43 @@ window.IPTV.Platform = {
         }
     },
 
+    bindTvInput(input, options = {}) {
+        if (!input) return;
+        input.readOnly = true;
+
+        const activate = () => {
+            if (input.readOnly) {
+                input.readOnly = false;
+                input.focus();
+                try { if (typeof input.select === 'function') input.select(); } catch (err) {}
+            }
+        };
+
+        const deactivate = () => {
+            input.readOnly = true;
+        };
+
+        input.addEventListener('click', activate);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                if (input.readOnly) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    activate();
+                } else if (typeof options.onEnter === 'function') {
+                    options.onEnter(e, deactivate);
+                }
+            } else if (e.key === 'Escape' || e.keyCode === 27) {
+                deactivate();
+                if (typeof input.blur === 'function') input.blur();
+                if (typeof options.onEscape === 'function') {
+                    options.onEscape(e);
+                }
+            }
+        });
+        input.addEventListener('blur', deactivate);
+    },
+
     init() {
         if (!this.isDesktop()) return;
         this._initDesktopViewportAndFullscreen();
@@ -171,24 +208,6 @@ window.IPTV.Platform = {
                 this.isFullScreen().then((isFs) => {
                     if (isFs) this.setFullScreen(false);
                 });
-            } else if (e.key === 'ArrowRight' && document.activeElement && document.activeElement.id === 'osd-fav') {
-                const fsBtn = document.getElementById('osd-fullscreen-btn');
-                if (fsBtn) {
-                    e.stopPropagation();
-                    fsBtn.focus();
-                }
-            } else if (e.key === 'ArrowLeft' && document.activeElement && document.activeElement.id === 'osd-fullscreen-btn') {
-                const favBtn = document.getElementById('osd-fav');
-                if (favBtn) {
-                    e.stopPropagation();
-                    favBtn.focus();
-                }
-            } else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && document.activeElement && document.activeElement.id === 'osd-fullscreen-btn') {
-                const pp = document.getElementById('osd-playpause');
-                if (pp) {
-                    e.stopPropagation();
-                    pp.focus();
-                }
             }
         }, true);
 

@@ -25,8 +25,7 @@
 
 ## Relationships
 
-- [Community 15](Community_15.md) (1 shared connections)
-- [Community 41](Community_41.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (2 shared connections)
 
 ## Source Files
 

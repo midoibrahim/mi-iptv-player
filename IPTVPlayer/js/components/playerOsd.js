@@ -49,7 +49,10 @@ window.IPTV.PlayerOsd = {
         if (els.fill) els.fill.style.width = `${pct}%`;
         if (els.thumb) els.thumb.style.left = `${pct}%`;
         if (els.cur) els.cur.textContent = this.fmtTime(currentTime, duration);
-        if (els.dur) els.dur.textContent = this.fmtTime(duration, duration);
+        if (els.dur) {
+            if (typeof els.dur.removeAttribute === 'function') els.dur.removeAttribute('data-live');
+            els.dur.textContent = this.fmtTime(duration, duration);
+        }
         if (els.bar) els.bar.setAttribute('aria-valuenow', Math.round(pct).toString());
     },
 
@@ -66,11 +69,12 @@ window.IPTV.PlayerOsd = {
         if (player.isLiveStream()) {
             if (fill) fill.style.width = '100%';
             if (thumb) thumb.style.left = '100%';
-            if (cur) cur.textContent = 'LIVE';
-            if (dur) {
+            if (cur && cur.textContent !== 'LIVE') cur.textContent = 'LIVE';
+            if (dur && (typeof dur.getAttribute !== 'function' || dur.getAttribute('data-live') !== '1')) {
                 dur.innerHTML = (window.IPTV && window.IPTV.Icons)
                     ? window.IPTV.Icons.get('liveDot', 'osd-live-svg') + '<span>LIVE</span>'
                     : 'LIVE';
+                if (typeof dur.setAttribute === 'function') dur.setAttribute('data-live', '1');
             }
             if (bar) {
                 bar.setAttribute('aria-valuenow', '100');
@@ -80,6 +84,7 @@ window.IPTV.PlayerOsd = {
         }
 
         // Movie or Series (VOD)
+        if (dur && typeof dur.hasAttribute === 'function' && dur.hasAttribute('data-live')) dur.removeAttribute('data-live');
         if (bar && !bar.hasAttribute('tabindex')) {
             bar.setAttribute('tabindex', '0');
         }

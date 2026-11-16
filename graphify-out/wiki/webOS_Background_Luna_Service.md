@@ -1,36 +1,45 @@
 # webOS Background Luna Service
 
-> 14 nodes · cohesion 0.18
+> 20 nodes · cohesion 0.15
 
 ## Key Concepts
 
-- **catalogStore.js** (13 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **favKey()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **isFavorite()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getFavoriteItems()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **toggleFavorite()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getCategories()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getLive()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getMovies()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getSeries()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **init()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setCatalog()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **legacyCompiler.mjs** (15 connections) — `scripts/legacyCompiler.mjs`
+- **webos-build/build.mjs** (13 connections) — `webos-build/build.mjs`
+- **buildLegacyApp()** (8 connections) — `scripts/legacyCompiler.mjs`
+- **ref_node_fs** (4 connections)
+- **ref_node_path** (4 connections)
+- **DESKTOP_DOWNLOAD_FILES** (3 connections) — `scripts/legacyCompiler.mjs`
+- **loadBuildTools()** (3 connections) — `scripts/legacyCompiler.mjs`
+- **resolveVarsWithMap()** (3 connections) — `scripts/legacyCompiler.mjs`
+- **verifyEs5Files()** (3 connections) — `scripts/legacyCompiler.mjs`
+- **ref_node_url** (2 connections)
+- **collectThemeTokens()** (2 connections) — `scripts/legacyCompiler.mjs`
+- **createLegacyCssPlugin()** (2 connections) — `scripts/legacyCompiler.mjs`
+- **stripDesktopDownloadHtmlTags()** (2 connections) — `scripts/legacyCompiler.mjs`
+- **ref_node_module** (1 connections)
+- **prefixSelectorForTheme()** (1 connections) — `scripts/legacyCompiler.mjs`
+- **EXCLUDE_TOP** (1 connections) — `webos-build/build.mjs`
+- **HERE** (1 connections) — `webos-build/build.mjs`
+- **log()** (1 connections) — `webos-build/build.mjs`
+- **OUT** (1 connections) — `webos-build/build.mjs`
+- **SRC** (1 connections) — `webos-build/build.mjs`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Community 15](Community_15.md) (8 shared connections)
+- [Community 4](Community_4.md) (2 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/catalogStore.js`
+- `scripts/legacyCompiler.mjs`
+- `webos-build/build.mjs`
 
 ## Audit Trail
 
-- EXTRACTED: 16 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 39 (95%)
+- INFERRED: 2 (5%)
 - AMBIGUOUS: 0 (0%)
 
 ---

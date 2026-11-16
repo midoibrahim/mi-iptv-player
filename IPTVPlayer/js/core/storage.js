@@ -315,7 +315,12 @@ window.IPTV.Storage = {
 window.IPTV.CatalogCache = {
     DB_NAME: 'mi_iptv_catalog_db',
     STORE_NAME: 'catalogs',
+    TTL_MS: 30 * 60 * 1000,
     _dbPromise: null,
+
+    isFresh(cached) {
+        return Boolean(cached && typeof cached.timestamp === 'number' && (Date.now() - cached.timestamp) < this.TTL_MS);
+    },
 
     _key(conn) {
         return window.IPTV.Storage ? window.IPTV.Storage.getConnectionKey(conn) : '';
@@ -356,7 +361,18 @@ window.IPTV.CatalogCache = {
                 const tx = db.transaction(this.STORE_NAME, 'readonly');
                 const store = tx.objectStore(this.STORE_NAME);
                 const req = store.get(key);
-                req.onsuccess = () => resolve(req.result || null);
+                req.onsuccess = () => {
+                    const result = req.result || null;
+                    if (result && Array.isArray(result.liveChannels)) {
+                        for (let i = 0; i < result.liveChannels.length; i++) {
+                            const ch = result.liveChannels[i];
+                            if (ch && typeof ch._idx !== 'number') {
+                                ch._idx = i;
+                            }
+                        }
+                    }
+                    resolve(result);
+                };
                 req.onerror = () => resolve(null);
             } catch(e) {
                 resolve(null);
@@ -374,8 +390,9 @@ window.IPTV.CatalogCache = {
                 const tx = db.transaction(this.STORE_NAME, 'readwrite');
                 const store = tx.objectStore(this.STORE_NAME);
 
-                const leanLive = (data.liveChannels || []).map(ch => ({
+                const leanLive = (data.liveChannels || []).map((ch, idx) => ({
                     id: ch.id,
+                    _idx: typeof ch._idx === 'number' ? ch._idx : idx,
                     name: ch.name,
                     type: 'live',
                     logo: ch.logo || '',

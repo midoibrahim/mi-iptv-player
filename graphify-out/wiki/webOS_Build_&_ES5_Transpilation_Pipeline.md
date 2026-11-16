@@ -1,46 +1,49 @@
 # webOS Build & ES5 Transpilation Pipeline
 
-> 24 nodes · cohesion 0.11
+> 53 nodes · cohesion 0.12
 
 ## Key Concepts
 
-- **webos-build/package.json** (14 connections) — `webos-build/package.json`
-- **devDependencies** (9 connections) — `webos-build/package.json`
-- **acorn@^8.19.0** (2 connections) — `webos-build/package.json`
-- **autoprefixer@^10.6.2** (2 connections) — `webos-build/package.json`
-- **@babel/core@^7.26.0** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env@^7.26.0** (2 connections) — `webos-build/package.json`
-- **core-js@^3.39.0** (2 connections) — `webos-build/package.json`
-- **esbuild@^0.24.0** (2 connections) — `webos-build/package.json`
-- **postcss@^8.4.49** (2 connections) — `webos-build/package.json`
-- **regenerator-runtime@^0.14.1** (2 connections) — `webos-build/package.json`
-- **scripts** (2 connections) — `webos-build/package.json`
-- **acorn** (2 connections) — `webos-build/package.json`
-- **autoprefixer** (2 connections) — `webos-build/package.json`
-- **@babel/core** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env** (2 connections) — `webos-build/package.json`
-- **core-js** (2 connections) — `webos-build/package.json`
-- **esbuild** (2 connections) — `webos-build/package.json`
-- **postcss** (2 connections) — `webos-build/package.json`
-- **regenerator-runtime** (2 connections) — `webos-build/package.json`
-- **description** (1 connections) — `webos-build/package.json`
-- **name** (1 connections) — `webos-build/package.json`
-- **private** (1 connections) — `webos-build/package.json`
-- **build** (1 connections) — `webos-build/package.json`
-- **type** (1 connections) — `webos-build/package.json`
+- **Downloader** (52 connections) — `windows/downloader.js`
+- **._executeDownload()** (19 connections) — `windows/downloader.js`
+- **._sendToRenderer()** (14 connections) — `windows/downloader.js`
+- **._processQueue()** (13 connections) — `windows/downloader.js`
+- **._serializeTask()** (12 connections) — `windows/downloader.js`
+- **.startDownload()** (12 connections) — `windows/downloader.js`
+- **._completeTask()** (11 connections) — `windows/downloader.js`
+- **._handleError()** (11 connections) — `windows/downloader.js`
+- **._runSegment()** (10 connections) — `windows/downloader.js`
+- **._attachStreamToSegment()** (9 connections) — `windows/downloader.js`
+- **._saveSegmentMeta()** (9 connections) — `windows/downloader.js`
+- **._abortTaskSockets()** (8 connections) — `windows/downloader.js`
+- **._handleTransientOrFatalError()** (8 connections) — `windows/downloader.js`
+- **.recoverStalledDownloads()** (7 connections) — `windows/downloader.js`
+- **._reportProgress()** (7 connections) — `windows/downloader.js`
+- **._syncPowerSaveBlocker()** (7 connections) — `windows/downloader.js`
+- **._formatBytes()** (6 connections) — `windows/downloader.js`
+- **.resumeDownload()** (6 connections) — `windows/downloader.js`
+- **._retrySegmentOrTask()** (6 connections) — `windows/downloader.js`
+- **.startBatchDownloads()** (6 connections) — `windows/downloader.js`
+- **.updateSettings()** (6 connections) — `windows/downloader.js`
+- **.cancelDownload()** (5 connections) — `windows/downloader.js`
+- **.convertItemToMp4()** (5 connections) — `windows/downloader.js`
+- **._ensureDir()** (5 connections) — `windows/downloader.js`
+- **.pauseDownload()** (5 connections) — `windows/downloader.js`
+- *... and 28 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Community 14](Community_14.md) (15 shared connections)
 
 ## Source Files
 
-- `webos-build/package.json`
+- `windows/downloadUtils.js`
+- `windows/downloader.js`
 
 ## Audit Trail
 
-- EXTRACTED: 31 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 178 (99%)
+- INFERRED: 2 (1%)
 - AMBIGUOUS: 0 (0%)
 
 ---

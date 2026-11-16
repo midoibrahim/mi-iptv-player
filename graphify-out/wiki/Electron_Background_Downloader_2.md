@@ -1,50 +1,45 @@
 # Electron Background Downloader
 
-> 30 nodes · cohesion 0.11
+> 16 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **keyHandler.js** (21 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **handleKeyDown()** (13 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **spatialNav.js** (8 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **navigate()** (6 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **focusElement()** (4 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **_ensureSideNavBinding()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **_findFirstFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **isFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **getDirection()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **init()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isBackKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isChannelDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isChannelUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isDesktopSearchShortcut()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isEnterKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isFavoriteKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isPlayerActive()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeMute()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **ensureVisible()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **getActiveRoot()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **2D Cartesian Spatial Navigation & Focus Memory** (2 connections) — `README.md`
-- **exitApp()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isBackwardKey()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- *... and 5 more nodes in this community*
+- **tvServer.js** (8 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **Universal Cross-Platform Architecture (webOS + Electron)** (4 connections) — `README.md`
+- **QR Code Phone Setup & Background Server** (4 connections) — `README.md`
+- **getSetupInfo()** (4 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **MI IPTV Player Documentation** (4 connections) — `README.md`
+- **10-Foot TV User Interface Architecture** (3 connections) — `README.md`
+- **ensureStarted()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **isWebOS()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **resolveApiBase()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **stop()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **Multi-Stage Playback & Stream Pipeline** (2 connections) — `README.md`
+- **pollCredentials()** (2 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **10-Foot TV Application Shell & Screens** (1 connections) — `IPTVPlayer/index.html`
+- **isRunning()** (1 connections) — `IPTVPlayer/js/services/tvServer.js`
+- **Companion Phone Web Setup Interface** (1 connections) — `IPTVPlayer/setup.html`
+- **LG webOS Compatibility Matrix (webOS 3.x - 25+)** (1 connections) — `README.md`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (1 shared connections)
+- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (1 shared connections)
+- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
+- [Community 41](Community_41.md) (1 shared connections)
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/keyHandler.js`
-- `IPTVPlayer/js/core/spatialNav.js`
+- `IPTVPlayer/index.html`
+- `IPTVPlayer/js/services/tvServer.js`
+- `IPTVPlayer/setup.html`
 - `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 47 (96%)
-- INFERRED: 2 (4%)
+- EXTRACTED: 20 (77%)
+- INFERRED: 6 (23%)
 - AMBIGUOUS: 0 (0%)
 
 ---

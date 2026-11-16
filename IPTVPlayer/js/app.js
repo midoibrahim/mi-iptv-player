@@ -322,6 +322,21 @@ class IPTVApp {
     disconnect() {
         window.IPTV.Storage.clearConnection();
         this.store.clear();
+        if (window.IPTV.Card && typeof window.IPTV.Card.clearLazyQueue === 'function') {
+            window.IPTV.Card.clearLazyQueue();
+        }
+        ['live', 'movies', 'series'].forEach(key => {
+            if (this.browseViews[key] && typeof this.browseViews[key].clear === 'function') {
+                this.browseViews[key].clear();
+            }
+        });
+        ['home-rows', 'search-results', 'favorites-content'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        });
+        if (this.seriesDetailView && typeof this.seriesDetailView.close === 'function') {
+            this.seriesDetailView.close(false);
+        }
         const mainShell = document.getElementById('main-shell');
         const loginScreen = document.getElementById('login-screen');
         if (mainShell) mainShell.classList.remove('active');
@@ -352,11 +367,49 @@ class IPTVApp {
         }
     }
 
-    _refreshBrowseViews() {
+    _refreshBrowseViews(preserveState = false) {
         const cats = this.store.getCategories();
-        this.browseViews.live.setData(this.store.getLive(), cats.live);
-        this.browseViews.movies.setData(this.store.getMovies(), cats.movies);
-        this.browseViews.series.setData(this.store.getSeries(), cats.series);
+        const opts = preserveState ? { preserveState: true } : undefined;
+        this.browseViews.live.setData(this.store.getLive(), cats.live, opts);
+        this.browseViews.movies.setData(this.store.getMovies(), cats.movies, opts);
+        this.browseViews.series.setData(this.store.getSeries(), cats.series, opts);
+    }
+
+    /**
+     * Silent stale-cache revalidation. Large playlist download + parse + IndexedDB write +
+     * browse re-bucketing all run on the renderer main thread, which is the same thread that
+     * feeds MSE (Hls.js / mpegts.js run without workers). Doing it during playback causes
+     * visible rebuffering, so both the fetch and the apply step wait until the player is closed.
+     */
+    _scheduleBackgroundRefresh(conn) {
+        const isPlaying = () => Boolean(this.playerService && typeof this.playerService.isVisible === 'function' && this.playerService.isVisible());
+        const run = () => {
+            if (this.store.getConnection() !== conn) return;
+            if (isPlaying()) {
+                this._bgRefreshTimer = setTimeout(run, 30000);
+                return;
+            }
+            this._fetchCatalogFromNetwork(conn, null).then((freshData) => {
+                if (this.store.getConnection() !== conn || !freshData) return;
+                const apply = () => {
+                    if (this.store.getConnection() !== conn) return;
+                    if (isPlaying()) {
+                        this._bgRefreshTimer = setTimeout(apply, 15000);
+                        return;
+                    }
+                    if (window.IPTV.CatalogCache) {
+                        window.IPTV.CatalogCache.set(conn, freshData);
+                    }
+                    this.store.setCatalog(conn, freshData);
+                    this._refreshBrowseViews(true);
+                };
+                apply();
+            }).catch((bgErr) => {
+                console.warn('Background catalog refresh skipped:', bgErr);
+            });
+        };
+        clearTimeout(this._bgRefreshTimer);
+        this._bgRefreshTimer = setTimeout(run, 3000);
     }
 
     async _fetchCatalogFromNetwork(conn, onProgress) {
@@ -388,17 +441,12 @@ class IPTVApp {
                 this.hideLoading();
                 this._applyCatalogData(conn, cached, true);
 
-                // Silently revalidate in the background without blocking UI
-                this._fetchCatalogFromNetwork(conn, null).then((freshData) => {
-                    if (this.store.getConnection() !== conn || !freshData) return;
-                    if (window.IPTV.CatalogCache) {
-                        window.IPTV.CatalogCache.set(conn, freshData);
-                    }
-                    this.store.setCatalog(conn, freshData);
-                    this._refreshBrowseViews();
-                }).catch((bgErr) => {
-                    console.warn('Background catalog refresh skipped:', bgErr);
-                });
+                const isCacheFresh = window.IPTV.CatalogCache &&
+                    typeof window.IPTV.CatalogCache.isFresh === 'function' &&
+                    window.IPTV.CatalogCache.isFresh(cached);
+                if (!isCacheFresh) {
+                    this._scheduleBackgroundRefresh(conn);
+                }
                 return;
             }
 

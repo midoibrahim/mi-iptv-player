@@ -2,7 +2,7 @@
 
 > God node · 27 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md)
+**Community:** [Community 13](Community_13.md)
 
 ## Connections by Relation
 

@@ -1,54 +1,56 @@
 # HLS.js MSE Streaming Engine (Part 5)
 
-> 88 nodes · cohesion 0.06
+> 32 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **Downloader** (52 connections) — `windows/downloader.js`
-- **downloader.js** (27 connections) — `windows/downloader.js`
-- **downloadUtils.js** (21 connections) — `windows/downloadUtils.js`
-- **._executeDownload()** (18 connections) — `windows/downloader.js`
-- **._sendToRenderer()** (14 connections) — `windows/downloader.js`
-- **main.js** (14 connections) — `windows/main.js`
-- **._processQueue()** (13 connections) — `windows/downloader.js`
-- **._serializeTask()** (12 connections) — `windows/downloader.js`
-- **.startDownload()** (12 connections) — `windows/downloader.js`
-- **._completeTask()** (11 connections) — `windows/downloader.js`
-- **._handleError()** (11 connections) — `windows/downloader.js`
-- **._attachStreamToSegment()** (9 connections) — `windows/downloader.js`
-- **._abortTaskSockets()** (8 connections) — `windows/downloader.js`
-- **._handleTransientOrFatalError()** (8 connections) — `windows/downloader.js`
-- **._runSegment()** (8 connections) — `windows/downloader.js`
-- **.recoverStalledDownloads()** (7 connections) — `windows/downloader.js`
-- **._reportProgress()** (7 connections) — `windows/downloader.js`
-- **._syncPowerSaveBlocker()** (7 connections) — `windows/downloader.js`
-- **._formatBytes()** (6 connections) — `windows/downloader.js`
-- **.resumeDownload()** (6 connections) — `windows/downloader.js`
-- **._saveSegmentMeta()** (6 connections) — `windows/downloader.js`
-- **.startBatchDownloads()** (6 connections) — `windows/downloader.js`
-- **.updateSettings()** (6 connections) — `windows/downloader.js`
-- **ref_path** (6 connections)
-- **.cancelDownload()** (5 connections) — `windows/downloader.js`
-- *... and 63 more nodes in this community*
+- **E()** (23 connections) — `IPTVPlayer/js/hls.min.js`
+- **i()** (23 connections) — `IPTVPlayer/js/hls.min.js`
+- **r()** (22 connections) — `IPTVPlayer/js/hls.min.js`
+- **n()** (21 connections) — `IPTVPlayer/js/hls.min.js`
+- **a()** (20 connections) — `IPTVPlayer/js/hls.min.js`
+- **o()** (20 connections) — `IPTVPlayer/js/hls.min.js`
+- **l()** (17 connections) — `IPTVPlayer/js/hls.min.js`
+- **s()** (14 connections) — `IPTVPlayer/js/hls.min.js`
+- **yt()** (12 connections) — `IPTVPlayer/js/hls.min.js`
+- **on()** (11 connections) — `IPTVPlayer/js/hls.min.js`
+- **f()** (8 connections) — `IPTVPlayer/js/hls.min.js`
+- **ne()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **xn()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **currentTime()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **pt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **ve()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **yr()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **bufferedEnd()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **es()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **y()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **ze()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **duration()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **fe()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **ti()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **ae()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- *... and 7 more nodes in this community*
 
 ## Relationships
 
-- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (7 shared connections)
-- [Community 32](Community_32.md) (3 shared connections)
-- [Package Configuration & Dependencies (17)](Package_Configuration_&_Dependencies_17.md) (2 shared connections)
-- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (1 shared connections)
-- [Download UI & Task Management](Download_UI_&_Task_Management.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (35 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (18 shared connections)
+- [Community 13](Community_13.md) (12 shared connections)
+- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (7 shared connections)
+- [QR Code Generation Library](QR_Code_Generation_Library.md) (7 shared connections)
+- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (6 shared connections)
+- [Community 33](Community_33.md) (6 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 42)](HLS.js_MSE_Streaming_Engine_Part_42.md) (1 shared connections)
 
 ## Source Files
 
-- `windows/downloadUtils.js`
-- `windows/downloader.js`
-- `windows/main.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 228 (94%)
-- INFERRED: 14 (6%)
+- EXTRACTED: 95 (53%)
+- INFERRED: 84 (47%)
 - AMBIGUOUS: 0 (0%)
 
 ---

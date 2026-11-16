@@ -1,39 +1,44 @@
 # HLS.js MSE Streaming Engine (Part 20)
 
-> 17 nodes · cohesion 0.31
+> 17 nodes · cohesion 0.12
 
 ## Key Concepts
 
-- **loginView.js** (16 connections) — `IPTVPlayer/js/views/loginView.js`
-- **_bindUI()** (8 connections) — `IPTVPlayer/js/views/loginView.js`
-- **renderProfiles()** (7 connections) — `IPTVPlayer/js/views/loginView.js`
-- **clearFormError()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
-- **handleRemoteCredentials()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
-- **initRemoteSetup()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
-- **showProfilesPage()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
-- **startRemotePolling()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
-- **stopRemotePolling()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
-- **isQrScreenActive()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
-- **_saveAndConnectProfile()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
-- **showAddProfileForm()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/loginView.js`
-- **closeDeleteModal()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
-- **_getApiBase()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
-- **openDeleteModal()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
-- **showFormError()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
+- **dt()** (22 connections) — `IPTVPlayer/js/hls.min.js`
+- **Me()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **ce()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **ke()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **b()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **ee()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **J()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **re()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **te()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **we()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **ct()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **De()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Oe()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **q()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **qe()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **W()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Z()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (17 shared connections)
+- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (7 shared connections)
+- [Community 13](Community_13.md) (3 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (3 shared connections)
+- [Community 33](Community_33.md) (2 shared connections)
+- [Vector Icon System](Vector_Icon_System.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/views/loginView.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 42 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 33 (66%)
+- INFERRED: 17 (34%)
 - AMBIGUOUS: 0 (0%)
 
 ---

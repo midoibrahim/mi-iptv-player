@@ -26,15 +26,50 @@ window.IPTV.BrowseView = class {
         this.sectionEl = document.getElementById(`section-${sectionId}`);
     }
 
-    setData(items, categories) {
+    setData(items, categories, options = {}) {
         this.items = items || [];
         this.categories = categories || [];
+
+        if (options && options.preserveState) {
+            if (this._isRendered) {
+                this._rebuildCategoryBuckets();
+                this._filteredItems = this.selectedCategory === 'all'
+                    ? this.items
+                    : ((this._byCategory && this._byCategory[this.selectedCategory]) || []);
+                if (!this.sectionEl || !this.sectionEl.classList.contains('active')) {
+                    this._isRendered = false;
+                }
+            }
+            return;
+        }
+
         this.selectedCategory = 'all';
         this._isRendered = false;
 
         // Only render immediately if this section is currently visible on screen
         if (this.sectionEl && this.sectionEl.classList.contains('active')) {
             this.ensureRendered();
+        }
+    }
+
+    clear() {
+        if (this._catChunkTimer) {
+            clearTimeout(this._catChunkTimer);
+            this._catChunkTimer = null;
+        }
+        this.items = [];
+        this.categories = [];
+        this.selectedCategory = 'all';
+        this._filteredItems = [];
+        this._byCategory = null;
+        this._renderedCount = 0;
+        this._renderedCatCount = 0;
+        this._isRendered = false;
+        if (this.sectionEl) {
+            this.sectionEl._lastFocusedEl = null;
+            this.sectionEl._lastFocusedCard = null;
+            this.sectionEl._lastFocusedCategory = null;
+            this.sectionEl.innerHTML = '';
         }
     }
 
@@ -164,6 +199,18 @@ window.IPTV.BrowseView = class {
         this._renderedCatCount = this.categories.length;
     }
 
+    _rebuildCategoryBuckets() {
+        const byCat = {};
+        for (let i = 0; i < this.items.length; i++) {
+            const item = this.items[i];
+            const cat = item.category || 'Uncategorized';
+            if (!byCat[cat]) byCat[cat] = [];
+            byCat[cat].push(item);
+        }
+        this._byCategory = byCat;
+        return byCat;
+    }
+
     _renderCategories() {
         const list = this.sectionEl.querySelector('.category-list');
         if (!list) return;
@@ -174,14 +221,7 @@ window.IPTV.BrowseView = class {
         list.innerHTML = '';
 
         // Single pass: pre-bucket items by category for O(1) category switching & row view
-        const byCat = {};
-        for (let i = 0; i < this.items.length; i++) {
-            const item = this.items[i];
-            const cat = item.category || 'Uncategorized';
-            if (!byCat[cat]) byCat[cat] = [];
-            byCat[cat].push(item);
-        }
-        this._byCategory = byCat;
+        const byCat = this._rebuildCategoryBuckets();
 
         const frag = document.createDocumentFragment();
 

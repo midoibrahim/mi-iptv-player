@@ -1,32 +1,36 @@
 # Package Configuration & Dependencies (35)
 
-> 10 nodes · cohesion 0.42
+> 10 nodes · cohesion 0.20
 
 ## Key Concepts
 
-- **channelDrawer.js** (9 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **appendChunk()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **close()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **handleKey()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **open()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **renderChannels()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **focusItem()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **renderCategories()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **toggle()** (2 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **init()** (1 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **main.js** (14 connections) — `windows/main.js`
+- **Windows Desktop Offline Download System** (3 connections) — `windows/main.js`
+- **{ app, BrowserWindow, Menu, ipcMain, powerMonitor }** (1 connections) — `windows/main.js`
+- **companionCore** (1 connections) — `windows/main.js`
+- **createWindow()** (1 connections) — `windows/main.js`
+- **fs** (1 connections) — `windows/main.js`
+- **http** (1 connections) — `windows/main.js`
+- **path** (1 connections) — `windows/main.js`
+- **setupIpcHandlers()** (1 connections) — `windows/main.js`
+- **startCompanionServer()** (1 connections) — `windows/main.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Community 14](Community_14.md) (2 shared connections)
+- [Community 41](Community_41.md) (2 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
+- [Community 18](Community_18.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/components/channelDrawer.js`
+- `windows/main.js`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 13 (81%)
+- INFERRED: 3 (19%)
 - AMBIGUOUS: 0 (0%)
 
 ---

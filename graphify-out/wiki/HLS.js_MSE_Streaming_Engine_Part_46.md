@@ -1,15 +1,16 @@
 # HLS.js MSE Streaming Engine (Part 46)
 
-> 6 nodes · cohesion 0.40
+> 7 nodes · cohesion 0.38
 
 ## Key Concepts
 
-- **backStack.js** (5 connections) — `IPTVPlayer/js/core/backStack.js`
-- **pop()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
-- **push()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
-- **handleBack()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
-- **register()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
+- **card.js** (6 connections) — `IPTVPlayer/js/components/card.js`
+- **create()** (3 connections) — `IPTVPlayer/js/components/card.js`
+- **_getIcon()** (2 connections) — `IPTVPlayer/js/components/card.js`
+- **_scheduleLazyImg()** (2 connections) — `IPTVPlayer/js/components/card.js`
+- **High-FPS Large Playlist Virtualization Engine** (1 connections) — `README.md`
+- **clearLazyQueue()** (1 connections) — `IPTVPlayer/js/components/card.js`
+- **eagerLoad()** (1 connections) — `IPTVPlayer/js/components/card.js`
 
 ## Relationships
 
@@ -17,12 +18,13 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/backStack.js`
+- `IPTVPlayer/js/components/card.js`
+- `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 7 (88%)
+- INFERRED: 1 (12%)
 - AMBIGUOUS: 0 (0%)
 
 ---

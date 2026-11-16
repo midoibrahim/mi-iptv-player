@@ -183,9 +183,29 @@ function proxyStream(req, res, target, port, agents, redirects) {
         // If this is an HLS playlist (.m3u8), buffer & rewrite relative segment/variant URLs
         // so that all child requests also route through /api/proxy with the final redirected base URL.
         if (isM3u8 && up.statusCode >= 200 && up.statusCode < 300) {
+            var MAX_M3U8_BYTES = 2 * 1024 * 1024;
             var chunks = [];
-            up.on('data', function (chunk) { chunks.push(chunk); });
+            var totalBytes = 0;
+            var abortedOverflow = false;
+            up.on('data', function (chunk) {
+                if (abortedOverflow) return;
+                totalBytes += chunk.length;
+                if (totalBytes > MAX_M3U8_BYTES) {
+                    abortedOverflow = true;
+                    chunks = [];
+                    if (typeof upstream.abort === 'function') upstream.abort();
+                    if (typeof up.destroy === 'function') up.destroy();
+                    if (!res.headersSent) {
+                        sendJson(res, 502, { error: 'Playlist exceeded maximum size limit' });
+                    } else {
+                        res.end();
+                    }
+                    return;
+                }
+                chunks.push(chunk);
+            });
             up.on('end', function () {
+                if (abortedOverflow) return;
                 try {
                     var text = Buffer.concat(chunks).toString('utf8');
                     var hostHeader = (req.headers && req.headers.host) ? req.headers.host : ('127.0.0.1:' + port);

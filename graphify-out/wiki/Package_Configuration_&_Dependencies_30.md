@@ -1,36 +1,39 @@
 # Package Configuration & Dependencies (30)
 
-> 12 nodes · cohesion 0.27
+> 14 nodes · cohesion 0.14
 
 ## Key Concepts
 
-- **Fs()** (9 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ks()** (7 connections) — `IPTVPlayer/js/hls.min.js`
-- **Hs()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **js()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **Vs()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **ys()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **Bs()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Gs()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ns()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **us()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ls()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Rs()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **build.js** (16 connections) — `windows/build.js`
+- **ref_child_process** (2 connections)
+- **appDir** (1 connections) — `windows/build.js`
+- **{ execSync }** (1 connections) — `windows/build.js`
+- **expectedExe** (1 connections) — `windows/build.js`
+- **fs** (1 connections) — `windows/build.js`
+- **iconFile** (1 connections) — `windows/build.js`
+- **IGNORED_NAMES** (1 connections) — `windows/build.js`
+- **outDir** (1 connections) — `windows/build.js`
+- **packagedDir** (1 connections) — `windows/build.js`
+- **path** (1 connections) — `windows/build.js`
+- **srcDir** (1 connections) — `windows/build.js`
+- **stagedCompanion** (1 connections) — `windows/build.js`
+- **zipOutput** (1 connections) — `windows/build.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (12 shared connections)
-- [HLS.js MSE Streaming Engine (Part 42)](HLS.js_MSE_Streaming_Engine_Part_42.md) (1 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
+- [Community 14](Community_14.md) (1 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (1 shared connections)
+- [Community 41](Community_41.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `windows/build.js`
 
 ## Audit Trail
 
-- EXTRACTED: 32 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 16 (94%)
+- INFERRED: 1 (6%)
 - AMBIGUOUS: 0 (0%)
 
 ---

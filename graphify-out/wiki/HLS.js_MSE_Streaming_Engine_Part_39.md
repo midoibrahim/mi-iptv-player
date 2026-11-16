@@ -1,19 +1,19 @@
 # HLS.js MSE Streaming Engine (Part 39)
 
-> 10 nodes · cohesion 0.42
+> 10 nodes · cohesion 0.38
 
 ## Key Concepts
 
-- **homeView.js** (9 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_addContinueWatchingRow()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **render()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **resumeItem()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **showResumeModal()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **closeResumeModal()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_fmtRemaining()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_addRow()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_fmtTime()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
+- **seriesDetailView.js** (9 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **renderEpisodesList()** (5 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **renderScreen()** (4 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **init()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **updateFavoriteState()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **buildEpisodePlayItem()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **close()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **focusEpisodeCard()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **_formatEpisodeTitle()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **open()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
 
 ## Relationships
 
@@ -21,11 +21,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/views/homeView.js`
+- `IPTVPlayer/js/views/seriesDetailView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
+- EXTRACTED: 17 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

@@ -1,30 +1,52 @@
 # Community 14
 
-> 7 nodes · cohesion 0.38
+> 23 nodes · cohesion 0.14
 
 ## Key Concepts
 
-- **card.js** (6 connections) — `IPTVPlayer/js/components/card.js`
-- **create()** (3 connections) — `IPTVPlayer/js/components/card.js`
-- **_getIcon()** (2 connections) — `IPTVPlayer/js/components/card.js`
-- **_scheduleLazyImg()** (2 connections) — `IPTVPlayer/js/components/card.js`
-- **clearLazyQueue()** (1 connections) — `IPTVPlayer/js/components/card.js`
-- **eagerLoad()** (1 connections) — `IPTVPlayer/js/components/card.js`
-- **High-FPS Large Playlist Virtualization Engine** (1 connections) — `README.md`
+- **downloader.js** (28 connections) — `windows/downloader.js`
+- **downloadUtils.js** (22 connections) — `windows/downloadUtils.js`
+- **resolveDownloadTarget()** (5 connections) — `windows/downloadUtils.js`
+- **ensureDir()** (4 connections) — `windows/downloadUtils.js`
+- **formatBytes()** (4 connections) — `windows/downloadUtils.js`
+- **sanitizeFileName()** (4 connections) — `windows/downloadUtils.js`
+- **serializeTask()** (4 connections) — `windows/downloadUtils.js`
+- **createSegments()** (3 connections) — `windows/downloadUtils.js`
+- **loadSegmentMeta()** (3 connections) — `windows/downloadUtils.js`
+- **removeSegmentMeta()** (3 connections) — `windows/downloadUtils.js`
+- **remuxToMp4()** (3 connections) — `windows/downloadUtils.js`
+- **saveSegmentMeta()** (3 connections) — `windows/downloadUtils.js`
+- **._sanitizeFileName()** (2 connections) — `windows/downloader.js`
+- **{ app, dialog, shell, powerSaveBlocker }** (1 connections) — `windows/downloader.js`
+- **fs** (1 connections) — `windows/downloader.js`
+- **http** (1 connections) — `windows/downloader.js`
+- **https** (1 connections) — `windows/downloader.js`
+- **path** (1 connections) — `windows/downloader.js`
+- **{ URL }** (1 connections) — `windows/downloader.js`
+- **fs** (1 connections) — `windows/downloadUtils.js`
+- **path** (1 connections) — `windows/downloadUtils.js`
+- **{ spawn }** (1 connections) — `windows/downloadUtils.js`
+- **{ URL }** (1 connections) — `windows/downloadUtils.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [webOS Build & ES5 Transpilation Pipeline](webOS_Build_&_ES5_Transpilation_Pipeline.md) (15 shared connections)
+- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (5 shared connections)
+- [Community 41](Community_41.md) (3 shared connections)
+- [Package Configuration & Dependencies (35)](Package_Configuration_&_Dependencies_35.md) (2 shared connections)
+- [Community 18](Community_18.md) (1 shared connections)
+- [Community 4](Community_4.md) (1 shared connections)
+- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/components/card.js`
-- `README.md`
+- `windows/downloadUtils.js`
+- `windows/downloader.js`
 
 ## Audit Trail
 
-- EXTRACTED: 7 (88%)
-- INFERRED: 1 (12%)
+- EXTRACTED: 50 (79%)
+- INFERRED: 13 (21%)
 - AMBIGUOUS: 0 (0%)
 
 ---

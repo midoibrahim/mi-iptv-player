@@ -1,36 +1,25 @@
 # Community 54
 
-> 10 nodes · cohesion 0.20
+> 3 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **webos-build/build.mjs** (13 connections) — `webos-build/build.mjs`
-- **ref_node_fs** (4 connections)
-- **ref_node_path** (4 connections)
-- **DESKTOP_DOWNLOAD_FILES** (3 connections) — `scripts/legacyCompiler.mjs`
-- **ref_node_url** (2 connections)
-- **log()** (1 connections) — `webos-build/build.mjs`
-- **EXCLUDE_TOP** (1 connections) — `webos-build/build.mjs`
-- **HERE** (1 connections) — `webos-build/build.mjs`
-- **OUT** (1 connections) — `webos-build/build.mjs`
-- **SRC** (1 connections) — `webos-build/build.mjs`
+- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Relationships
 
-- [Community 33](Community_33.md) (6 shared connections)
-- [Community 4](Community_4.md) (4 shared connections)
-- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (2 shared connections)
-- [Community 32](Community_32.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `scripts/legacyCompiler.mjs`
-- `webos-build/build.mjs`
+- `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Audit Trail
 
-- EXTRACTED: 20 (91%)
-- INFERRED: 2 (9%)
+- EXTRACTED: 3 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

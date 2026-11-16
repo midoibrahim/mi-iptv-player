@@ -900,8 +900,11 @@ test('PlaybackEngine.getEngineProfile adapts buffer caps for Smart TV vs Desktop
     loadScript(tvEnv, 'IPTVPlayer/js/services/playbackEngine.js');
     const tvProfile = tvEnv.window.IPTV.PlaybackEngine.getEngineProfile();
     assert.equal(tvProfile.enableWorker, false);
-    assert.equal(tvProfile.hlsMaxBufferSize, 15 * 1000 * 1000);
-    assert.equal(tvProfile.hlsMaxBufferLength, 12);
+    assert.equal(tvProfile.hlsMaxBufferSize, 30 * 1000 * 1000);
+    assert.equal(tvProfile.hlsMaxBufferLength, 30);
+    assert.equal(tvProfile.hlsBackBufferLength, 15);
+    assert.equal(tvProfile.mpegtsLazyLoad, false);
+    assert.equal(tvProfile.mpegtsAutoCleanup, true);
 
     const desktopEnv = createBrowserEnv({
         electronDesktop: {},
@@ -910,9 +913,12 @@ test('PlaybackEngine.getEngineProfile adapts buffer caps for Smart TV vs Desktop
     loadScript(desktopEnv, 'IPTVPlayer/js/core/platform.js');
     loadScript(desktopEnv, 'IPTVPlayer/js/services/playbackEngine.js');
     const deskProfile = desktopEnv.window.IPTV.PlaybackEngine.getEngineProfile();
-    assert.equal(deskProfile.enableWorker, true);
-    assert.equal(deskProfile.hlsMaxBufferSize, 30 * 1000 * 1000);
-    assert.equal(deskProfile.hlsMaxBufferLength, 20);
+    assert.equal(deskProfile.enableWorker, false);
+    assert.equal(deskProfile.hlsMaxBufferSize, 60 * 1000 * 1000);
+    assert.equal(deskProfile.hlsMaxBufferLength, 30);
+    assert.equal(deskProfile.hlsBackBufferLength, 30);
+    assert.equal(deskProfile.mpegtsLazyLoad, false);
+    assert.equal(deskProfile.mpegtsAutoCleanup, true);
 });
 
 test('IPTVPlayer/index.html defers hls.min.js and mpegts.js out of synchronous boot tags', () => {
@@ -1061,6 +1067,290 @@ test('downloadUtils.matchesDownloadItem and createSegments handle IDs, episodes,
     assert.equal(largeSegs[0].status, 'active');
     assert.equal(largeSegs[1].status, 'pending');
     assert.equal(largeSegs[largeSegs.length - 1].end, 120 * 1024 * 1024 - 1);
+
+    // saveSegmentMeta / loadSegmentMeta strip per-connection ?token= URLs back to task.url
+    const tmpDir = fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'iptv-dl-'));
+    try {
+        const partPath = path.join(tmpDir, 'ep6.mkv.part');
+        const metaPath = partPath + '.meta.json';
+        fs.writeFileSync(partPath, 'partial');
+        const tokenizedTask = {
+            url: 'http://tv.test:8080/series/u/p/241874.mkv',
+            resolvedUrl: 'http://cdn.edge:2052/stream/241874.mkv?token=abc123&exp=999',
+            totalBytes: 4000,
+            maxConnections: 1,
+            partPath,
+            metaPath,
+            segments: downloadUtils.createSegments(4000)
+        };
+        downloadUtils.saveSegmentMeta(tokenizedTask);
+        const saved = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+        assert.equal(saved.resolvedUrl, tokenizedTask.url);
+
+        // Even if an older meta file on disk stored a token URL, loadSegmentMeta falls back to task.url
+        saved.resolvedUrl = 'http://cdn.edge:2052/stream/241874.mkv?foo=1&token=expired';
+        fs.writeFileSync(metaPath, JSON.stringify(saved), 'utf8');
+        const resumedTask = {
+            url: tokenizedTask.url,
+            resolvedUrl: null,
+            partPath,
+            metaPath
+        };
+        assert.equal(downloadUtils.loadSegmentMeta(resumedTask), true);
+        assert.equal(resumedTask.resolvedUrl, tokenizedTask.url);
+        assert.equal(resumedTask.maxConnections, 1);
+    } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+});
+
+test('PlaybackEngine cleans up video listeners, deduplicates seeked handlers, and handles suspend/restore lifecycle', () => {
+    let avplaySuspended = false;
+    let avplayRestored = false;
+    let avplayPlayed = false;
+
+    const env = createBrowserEnv({
+        webapis: {
+            avplay: {
+                suspend: () => { avplaySuspended = true; },
+                restore: () => { avplayRestored = true; },
+                play: () => { avplayPlayed = true; },
+                pause: () => {},
+                stop: () => {},
+                close: () => {}
+            }
+        }
+    });
+    loadScript(env, 'IPTVPlayer/js/core/platform.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
+    const { PlaybackEngine } = env.window.IPTV;
+
+    const listeners = new Map();
+    const mockVideo = {
+        paused: false,
+        seeking: true,
+        currentTime: 10,
+        duration: 120,
+        style: {},
+        playCount: 0,
+        pauseCount: 0,
+        addEventListener(type, fn) {
+            if (!listeners.has(type)) listeners.set(type, new Set());
+            listeners.get(type).add(fn);
+        },
+        removeEventListener(type, fn) {
+            if (listeners.has(type)) listeners.get(type).delete(fn);
+        },
+        pause() { this.pauseCount++; this.paused = true; },
+        play() { this.playCount++; this.paused = false; return Promise.resolve(); },
+        load() {},
+        removeAttribute() {},
+        firstChild: null
+    };
+
+    const player = {
+        video: mockVideo,
+        visible: true,
+        _userPaused: false,
+        _avplayActive: false,
+        _loadSessionId: 1,
+        _initialSeekPending: null,
+        _updatePlayPauseIcon() {},
+        _updateProgress() {},
+        _markCandidateSuccess() {}
+    };
+
+    // 1. playNativeDirect adds playing/loadeddata/seeked and destroy removes ALL of them
+    PlaybackEngine.playNativeDirect(player, 'http://test.tv/movie.mp4', { id: '1' }, 'http://test.tv/movie.mp4', 1);
+    assert.equal(listeners.get('playing').size, 1);
+    assert.equal(listeners.get('loadeddata').size, 1);
+    assert.equal(listeners.get('seeked').size, 1);
+
+    PlaybackEngine.destroy(player);
+    assert.equal(listeners.get('playing').size, 0);
+    assert.equal(listeners.get('loadeddata').size, 0);
+    assert.equal(listeners.get('seeked').size, 0);
+
+    // 2. Rapid seekTo replaces prior pending seeked listener instead of stacking
+    PlaybackEngine.seekTo(player, 20, true);
+    PlaybackEngine.seekTo(player, 40, true);
+    PlaybackEngine.seekTo(player, 60, true);
+    assert.equal(listeners.get('seeked').size, 1);
+    PlaybackEngine.destroy(player);
+    assert.equal(listeners.get('seeked').size, 0);
+
+    // 3. HTML5/HLS visibility suspend & restore
+    let hlsStopped = false;
+    let hlsStarted = false;
+    player.hls = { stopLoad: () => { hlsStopped = true; }, startLoad: () => { hlsStarted = true; }, destroy: () => {} };
+    mockVideo.paused = false;
+    mockVideo.pauseCount = 0;
+    mockVideo.playCount = 0;
+    PlaybackEngine.suspend(player);
+    assert.equal(hlsStopped, true);
+    assert.equal(mockVideo.pauseCount, 1);
+    assert.equal(player._wasPlayingBeforeHidden, true);
+
+    PlaybackEngine.restore(player);
+    assert.equal(hlsStarted, true);
+    assert.equal(mockVideo.playCount, 1);
+
+    // User-paused stream stays paused on restore
+    player._userPaused = true;
+    mockVideo.playCount = 0;
+    PlaybackEngine.suspend(player);
+    assert.equal(player._wasPlayingBeforeHidden, false);
+    PlaybackEngine.restore(player);
+    assert.equal(mockVideo.playCount, 0);
+
+    // 4. Tizen AVPlay visibility suspend & restore
+    player._avplayActive = true;
+    player._avplayPaused = false;
+    player._userPaused = false;
+    PlaybackEngine.suspend(player);
+    assert.equal(avplaySuspended, true);
+    assert.equal(player._avplayPaused, true);
+    PlaybackEngine.restore(player);
+    assert.equal(avplayRestored, true);
+    assert.equal(avplayPlayed, true);
+    assert.equal(player._avplayPaused, false);
+});
+
+test('CatalogCache tracks TTL freshness/_idx and BrowseView/Card reclaim resources cleanly', async () => {
+    let ioDisconnected = false;
+    const sectionEl = {
+        classList: { contains: (c) => c === 'active' },
+        innerHTML: '<div>cached</div>',
+        querySelector: () => null,
+        querySelectorAll: () => []
+    };
+
+    const env = createBrowserEnv({
+        IntersectionObserver: function MockIO() {
+            return {
+                observe() {},
+                unobserve() {},
+                disconnect() { ioDisconnected = true; }
+            };
+        },
+        indexedDB: {
+            open() {
+                const req = {};
+                setTimeout(() => {
+                    const storeData = new Map();
+                    const fakeDb = {
+                        objectStoreNames: { contains: () => true },
+                        transaction() {
+                            const tx = {
+                                oncomplete: null,
+                                onerror: null,
+                                objectStore() {
+                                    return {
+                                        put(val, k) {
+                                            storeData.set(k, val);
+                                            setTimeout(() => tx.oncomplete && tx.oncomplete(), 0);
+                                        },
+                                        get(k) {
+                                            const gReq = {};
+                                            setTimeout(() => {
+                                                gReq.result = storeData.get(k);
+                                                gReq.onsuccess && gReq.onsuccess();
+                                            }, 0);
+                                            return gReq;
+                                        }
+                                    };
+                                }
+                            };
+                            return tx;
+                        }
+                    };
+                    req.onsuccess && req.onsuccess({ target: { result: fakeDb } });
+                }, 0);
+                return req;
+            }
+        }
+    });
+    env.window.document.getElementById = (id) => (id === 'section-movies' ? sectionEl : null);
+
+    loadScript(env, 'IPTVPlayer/js/core/storage.js');
+    loadScript(env, 'IPTVPlayer/js/components/card.js');
+    loadScript(env, 'IPTVPlayer/js/views/browseView.js');
+
+    const { CatalogCache, Card, BrowseView } = env.window.IPTV;
+
+    assert.equal(CatalogCache.isFresh({ timestamp: Date.now() - 5 * 60 * 1000 }), true);
+    assert.equal(CatalogCache.isFresh({ timestamp: Date.now() - 45 * 60 * 1000 }), false);
+    assert.equal(CatalogCache.isFresh(null), false);
+
+    const conn = { type: 'm3u', url: 'http://tv.test/list.m3u' };
+    await CatalogCache.set(conn, {
+        liveChannels: [{ id: 'c1', name: 'One', url: 'http://s/1.ts' }],
+        movies: [],
+        series: [],
+        categories: { live: [], movies: [], series: [] }
+    });
+    const loaded = await CatalogCache.get(conn);
+    assert.equal(loaded.liveChannels[0]._idx, 0);
+
+    // Card._io disconnect on clearLazyQueue
+    Card._immediateQuota = 0;
+    Card._scheduleLazyImg({ dataset: {}, style: {} }, 'http://img/poster.jpg');
+    Card.clearLazyQueue();
+    assert.equal(ioDisconnected, true);
+
+    // BrowseView preserveState & clear
+    const view = new BrowseView('movies', { title: 'Movies', cardType: 'movie', unitName: 'movies', app: {} });
+    view._isRendered = true;
+    view.selectedCategory = 'Sci-Fi';
+    view.setData([{ id: 'm1', name: 'Dune', category: 'Sci-Fi' }], [{ category_name: 'Sci-Fi' }], { preserveState: true });
+    assert.equal(view.selectedCategory, 'Sci-Fi');
+    assert.equal(view._byCategory['Sci-Fi'].length, 1);
+
+    view.clear();
+    assert.equal(view.items.length, 0);
+    assert.equal(view._isRendered, false);
+    assert.equal(sectionEl.innerHTML, '');
+});
+
+test('companionCore caps oversized .m3u8 proxy manifests at 2MB to prevent OOM', async () => {
+    const http = require('http');
+    const companionCore = require('../IPTVService/companionCore');
+
+    // Upstream server sending > 2 MB for an .m3u8 URL
+    const upstreamServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/vnd.apple.mpegurl' });
+        const chunk = Buffer.alloc(512 * 1024, 'A');
+        for (let i = 0; i < 6; i++) {
+            res.write(chunk);
+        }
+        res.end();
+    });
+
+    await new Promise((resolve) => upstreamServer.listen(0, '127.0.0.1', resolve));
+    const upstreamPort = upstreamServer.address().port;
+
+    const handler = companionCore.createCompanionHandler({ port: 8089, host: 'test' });
+    const proxyServer = http.createServer(handler);
+    await new Promise((resolve) => proxyServer.listen(0, '127.0.0.1', resolve));
+    const proxyPort = proxyServer.address().port;
+
+    try {
+        const targetUrl = encodeURIComponent(`http://127.0.0.1:${upstreamPort}/huge.m3u8`);
+        const result = await new Promise((resolve, reject) => {
+            http.get(`http://127.0.0.1:${proxyPort}/api/proxy?url=${targetUrl}`, (resp) => {
+                let body = '';
+                resp.on('data', (d) => { body += d.toString(); });
+                resp.on('end', () => resolve({ status: resp.statusCode, body }));
+            }).on('error', reject);
+        });
+
+        assert.equal(result.status, 502);
+        const parsed = JSON.parse(result.body);
+        assert.match(parsed.error, /maximum size limit/i);
+    } finally {
+        upstreamServer.close();
+        proxyServer.close();
+    }
 });
 
 
@@ -1073,4 +1363,62 @@ test('downloadUtils.matchesDownloadItem and createSegments handle IDs, episodes,
 
 
 
+
+
+
+test('PlaybackEngine stall monitor jumps mpegts buffer gaps, defers to Hls.js gap control, and self-stops on stale sessions', async () => {
+    const env = createBrowserEnv({ setInterval, clearInterval });
+    loadScript(env, 'IPTVPlayer/js/core/platform.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
+    const { PlaybackEngine } = env.window.IPTV;
+
+    const ranges = [[0, 10], [10.6, 30]];
+    const video = {
+        paused: false,
+        seeking: false,
+        currentTime: 10.2,
+        buffered: { length: 2, start: (i) => ranges[i][0], end: (i) => ranges[i][1] },
+        addEventListener() {},
+        removeEventListener() {}
+    };
+    const item = { id: 'live1', type: 'live' };
+    const player = {
+        video,
+        visible: true,
+        currentItem: item,
+        _loadSessionId: 7,
+        _streamStarted: true,
+        _userPaused: false,
+        _initialSeekPending: null,
+        isLiveStream: () => true
+    };
+
+    // 1. Gap jump: playhead parked in a hole between buffered ranges
+    PlaybackEngine.startStallMonitor(player, item, 7, 'mse-ts:http://x/live.ts', 'mpegts');
+    await new Promise(r => setTimeout(r, 2600));
+    assert.ok(Math.abs(video.currentTime - 10.7) < 0.001, 'playhead should jump to next buffered range');
+    PlaybackEngine.stopStallMonitor(player);
+    assert.equal(player._stallTimer, null);
+
+    // 2. Hls.js engine skips gap handling (GapController owns it)
+    video.currentTime = 10.2;
+    PlaybackEngine.startStallMonitor(player, item, 7, 'mse-hls:http://x/live.m3u8', 'hls');
+    await new Promise(r => setTimeout(r, 2600));
+    assert.equal(video.currentTime, 10.2);
+    PlaybackEngine.stopStallMonitor(player);
+
+    // 3. Stale session stops the monitor on its own
+    PlaybackEngine.startStallMonitor(player, item, 6, 'x', 'mpegts');
+    await new Promise(r => setTimeout(r, 700));
+    assert.equal(player._stallTimer, null);
+});
+
+test('downloadUtils.parseContentRange parses valid ranges and rejects malformed headers', () => {
+    const downloadUtils = require(path.join(ROOT, 'windows/downloadUtils.js'));
+
+    assert.deepEqual(downloadUtils.parseContentRange('bytes 1024-2047/4096'), { start: 1024, end: 2047, total: 4096 });
+    assert.deepEqual(downloadUtils.parseContentRange('bytes 0-99/*'), { start: 0, end: 99, total: 0 });
+    assert.equal(downloadUtils.parseContentRange('invalid'), null);
+    assert.equal(downloadUtils.parseContentRange(null), null);
+});
 

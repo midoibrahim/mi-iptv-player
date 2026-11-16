@@ -170,10 +170,17 @@ window.IPTV.PlayerService = {
             }
         });
 
-        // Lifecycle exit hooks (best effort save watch progress)
+        // Lifecycle exit & TV backgrounding hooks
         window.addEventListener('pagehide', () => this._recordWatchProgress());
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) this._recordWatchProgress();
+            if (document.hidden) {
+                this._recordWatchProgress();
+                if (this.visible && window.IPTV.PlaybackEngine && typeof window.IPTV.PlaybackEngine.suspend === 'function') {
+                    window.IPTV.PlaybackEngine.suspend(this);
+                }
+            } else if (this.visible && window.IPTV.PlaybackEngine && typeof window.IPTV.PlaybackEngine.restore === 'function') {
+                window.IPTV.PlaybackEngine.restore(this);
+            }
         });
 
         // Click on video to toggle OSD

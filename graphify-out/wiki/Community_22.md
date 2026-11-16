@@ -1,40 +1,39 @@
 # Community 22
 
-> 12 nodes · cohesion 0.20
+> 17 nodes · cohesion 0.31
 
 ## Key Concepts
 
-- **gt()** (14 connections) — `IPTVPlayer/js/hls.min.js`
-- **m()** (10 connections) — `IPTVPlayer/js/hls.min.js`
-- **v()** (8 connections) — `IPTVPlayer/js/hls.min.js`
-- **f()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **et()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **He()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **je()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **ut()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **u()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **vt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **l()** (1 connections) — `IPTVPlayer/js/hls.min.js`
-- **o()** (1 connections) — `IPTVPlayer/js/hls.min.js`
+- **loginView.js** (16 connections) — `IPTVPlayer/js/views/loginView.js`
+- **_bindUI()** (8 connections) — `IPTVPlayer/js/views/loginView.js`
+- **renderProfiles()** (7 connections) — `IPTVPlayer/js/views/loginView.js`
+- **clearFormError()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **handleRemoteCredentials()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **initRemoteSetup()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **showProfilesPage()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **startRemotePolling()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **stopRemotePolling()** (5 connections) — `IPTVPlayer/js/views/loginView.js`
+- **isQrScreenActive()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
+- **_saveAndConnectProfile()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
+- **showAddProfileForm()** (4 connections) — `IPTVPlayer/js/views/loginView.js`
+- **init()** (3 connections) — `IPTVPlayer/js/views/loginView.js`
+- **closeDeleteModal()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
+- **_getApiBase()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
+- **openDeleteModal()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
+- **showFormError()** (2 connections) — `IPTVPlayer/js/views/loginView.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (8 shared connections)
-- [HLS.js MSE Streaming Engine (Part 13)](HLS.js_MSE_Streaming_Engine_Part_13.md) (5 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (5 shared connections)
-- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (4 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (2 shared connections)
-- [HLS.js MSE Streaming Engine (Part 37)](HLS.js_MSE_Streaming_Engine_Part_37.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 42)](HLS.js_MSE_Streaming_Engine_Part_42.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/views/loginView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 25 (62%)
-- INFERRED: 15 (38%)
+- EXTRACTED: 42 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

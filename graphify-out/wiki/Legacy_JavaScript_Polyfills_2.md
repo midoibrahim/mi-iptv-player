@@ -1,12 +1,14 @@
 # Legacy JavaScript Polyfills
 
-> 3 nodes · cohesion 1.00
+> 5 nodes · cohesion 0.40
 
 ## Key Concepts
 
-- **buildCandidates()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
-- **getStrategy()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
-- **streamResolver.js** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
+- **IPTVService/package.json** (4 connections) — `IPTVService/package.json`
+- **description** (1 connections) — `IPTVService/package.json`
+- **main** (1 connections) — `IPTVService/package.json`
+- **name** (1 connections) — `IPTVService/package.json`
+- **version** (1 connections) — `IPTVService/package.json`
 
 ## Relationships
 
@@ -14,11 +16,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/streamResolver.js`
+- `IPTVService/package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 3 (100%)
+- EXTRACTED: 4 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

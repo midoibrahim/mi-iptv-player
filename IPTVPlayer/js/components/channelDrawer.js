@@ -79,6 +79,13 @@ window.IPTV.ChannelDrawer = {
         if (drawer) drawer.classList.add('hidden');
         if (backdrop) backdrop.classList.add('hidden');
 
+        const listEl = document.getElementById('drawer-channel-list');
+        if (listEl) listEl.innerHTML = '';
+        const catBar = document.getElementById('drawer-categories-bar');
+        if (catBar) catBar.innerHTML = '';
+        this.filteredChannels = [];
+        this.renderedCount = 0;
+
         if (this.player) {
             this.player.showOSD();
         }

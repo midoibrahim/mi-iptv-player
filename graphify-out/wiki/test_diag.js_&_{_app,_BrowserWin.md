@@ -1,39 +1,36 @@
 # test_diag.js & { app, BrowserWin...
 
-> 15 nodes · cohesion 0.23
+> 14 nodes · cohesion 0.24
 
 ## Key Concepts
 
-- **xtreamService.js** (11 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **loadAll()** (5 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **buildEpisodePlayItem()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **fetchJson()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **getSeriesInfo()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **resolveEpisodeUrl()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **streamUrl()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **m3uParser.js** (3 connections) — `IPTVPlayer/js/services/m3uParser.js`
-- **load()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
-- **parseExtinf()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
-- **buildCatMap()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **formatEpisodeTitle()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **loadSeriesSeasons()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **_yieldToMain()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **Xtream Codes & M3U Playlist Protocol Engine** (2 connections) — `README.md`
+- **webOSTV-dev.js** (13 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **b()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **h()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **R()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **t()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **u()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **m()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **p()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **C()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **i()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **n()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **o()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **v()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **y()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/services/m3uParser.js`
-- `IPTVPlayer/js/services/xtreamService.js`
-- `README.md`
+- `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
 
 ## Audit Trail
 
-- EXTRACTED: 22 (92%)
-- INFERRED: 2 (8%)
+- EXTRACTED: 25 (96%)
+- INFERRED: 1 (4%)
 - AMBIGUOUS: 0 (0%)
 
 ---

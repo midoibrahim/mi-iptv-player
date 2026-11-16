@@ -244,7 +244,7 @@ window.IPTV.SeriesDetailView = {
                 img.className = 'episode-thumb';
                 img.src = thumb;
                 img.alt = '';
-                img.loading = 'lazy';
+                img.decoding = 'async';
                 img.onerror = function() { this.style.display = 'none'; };
                 thumbContainer.appendChild(img);
             }
@@ -366,6 +366,21 @@ window.IPTV.SeriesDetailView = {
 
     close(restoreFocus = true) {
         if (this.screen) this.screen.classList.remove('active');
+        if (window.IPTV.Card && typeof window.IPTV.Card.clearLazyQueue === 'function') {
+            window.IPTV.Card.clearLazyQueue();
+        }
+        const tabsContainer = document.getElementById('series-seasons-tabs');
+        if (tabsContainer) tabsContainer.innerHTML = '';
+        const episodesGrid = document.getElementById('series-episodes-list');
+        if (episodesGrid) episodesGrid.innerHTML = '';
+        const posterEl = document.getElementById('series-poster');
+        if (posterEl) {
+            if (typeof posterEl.removeAttribute === 'function') posterEl.removeAttribute('src');
+            posterEl.style.display = 'none';
+        }
+        this.currentSeries = null;
+        this.seasonsData = null;
+
         const mainShell = document.getElementById('main-shell');
         if (mainShell) mainShell.classList.add('active');
 

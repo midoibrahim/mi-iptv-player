@@ -26,31 +26,44 @@ window.IPTV.PlaybackEngine = {
     },
 
     /**
-     * Returns platform-tuned MSE buffer limits & worker flags.
-     * Smart TVs (512MB-1.5GB RAM) use tighter buffers and disable Blob Workers
-     * for legacy Chromium/CSP safety; Desktop uses larger buffers & Worker demuxing.
+     * Returns platform-tuned MSE buffer limits, back-buffer eviction, and worker flags.
+     * Evicts watched segments to prevent MSE quota stalls while keeping continuous
+     * streaming (lazyLoad: false) and inline demuxing (enableWorker: false).
      */
     getEngineProfile() {
         const P = window.IPTV && window.IPTV.Platform;
         const isTv = Boolean(P && ((typeof P.isWebOS === 'function' && P.isWebOS()) || (typeof P.isTizen === 'function' && P.isTizen())));
-        const isDesktop = Boolean(P && typeof P.isDesktop === 'function' && P.isDesktop());
         if (isTv) {
             return {
                 enableWorker: false,
-                hlsMaxBufferLength: 12,
-                hlsMaxMaxBufferLength: 24,
-                hlsMaxBufferSize: 15 * 1000 * 1000,
-                mpegtsLazyMaxDuration: 15,
-                mpegtsLazyRecoverDuration: 8
+                hlsMaxBufferLength: 30,
+                hlsMaxMaxBufferLength: 60,
+                hlsMaxBufferSize: 30 * 1000 * 1000,
+                hlsBackBufferLength: 15,
+                hlsLiveBackBufferLength: 10,
+                hlsCapLevelToPlayerSize: true,
+                mpegtsLazyLoad: false,
+                // ~384KB (mpegts.js documented default). Larger initial stashes delay first
+                // frame AND every in-place reconnect, because data is only dispatched once full.
+                mpegtsStashInitialSize: 384 * 1024,
+                mpegtsAutoCleanup: true,
+                mpegtsAutoCleanupMaxBackward: 25,
+                mpegtsAutoCleanupMinBackward: 12
             };
         }
         return {
-            enableWorker: isDesktop && typeof Worker !== 'undefined',
-            hlsMaxBufferLength: 20,
-            hlsMaxMaxBufferLength: 40,
-            hlsMaxBufferSize: 30 * 1000 * 1000,
-            mpegtsLazyMaxDuration: 30,
-            mpegtsLazyRecoverDuration: 15
+            enableWorker: false,
+            hlsMaxBufferLength: 30,
+            hlsMaxMaxBufferLength: 60,
+            hlsMaxBufferSize: 60 * 1000 * 1000,
+            hlsBackBufferLength: 30,
+            hlsLiveBackBufferLength: 15,
+            hlsCapLevelToPlayerSize: false,
+            mpegtsLazyLoad: false,
+            mpegtsStashInitialSize: 384 * 1024,
+            mpegtsAutoCleanup: true,
+            mpegtsAutoCleanupMaxBackward: 60,
+            mpegtsAutoCleanupMinBackward: 30
         };
     },
 
@@ -159,15 +172,104 @@ window.IPTV.PlaybackEngine = {
             }
         };
 
+        if (player._onSeekedHandler) {
+            try { player.video.removeEventListener('seeked', player._onSeekedHandler); } catch (e) {}
+            player._onSeekedHandler = null;
+        }
+
         const onSeeked = () => {
             player.video.removeEventListener('seeked', onSeeked);
+            if (player._onSeekedHandler === onSeeked) {
+                player._onSeekedHandler = null;
+            }
             ensurePlaying();
             player._updateProgress();
         };
+        player._onSeekedHandler = onSeeked;
         player.video.addEventListener('seeked', onSeeked);
 
         if (!player.video.seeking) {
             ensurePlaying();
+        }
+    },
+
+    _addCandidateListener(player, type, fn) {
+        if (!player || !player.video || !type || typeof fn !== 'function') return;
+        if (!Array.isArray(player._candidateListeners)) {
+            player._candidateListeners = [];
+        }
+        player.video.addEventListener(type, fn);
+        player._candidateListeners.push({ type, fn });
+    },
+
+    _clearVideoListeners(player) {
+        if (!player || !player.video) return;
+        if (Array.isArray(player._candidateListeners)) {
+            for (let i = 0; i < player._candidateListeners.length; i++) {
+                const entry = player._candidateListeners[i];
+                try { player.video.removeEventListener(entry.type, entry.fn); } catch (e) {}
+            }
+            player._candidateListeners = [];
+        }
+        if (player._onSeekedHandler) {
+            try { player.video.removeEventListener('seeked', player._onSeekedHandler); } catch (e) {}
+            player._onSeekedHandler = null;
+        }
+    },
+
+    suspend(player) {
+        if (!player || !player.visible) return;
+        player._wasPlayingBeforeHidden = !this.isPaused(player) && !player._userPaused;
+        this.clearWatchdog(player);
+
+        if (player._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                if (typeof window.webapis.avplay.suspend === 'function') {
+                    window.webapis.avplay.suspend();
+                } else if (typeof window.webapis.avplay.pause === 'function') {
+                    window.webapis.avplay.pause();
+                }
+                player._avplayPaused = true;
+            } catch (e) {}
+            return;
+        }
+
+        if (player.hls && typeof player.hls.stopLoad === 'function') {
+            try { player.hls.stopLoad(); } catch (e) {}
+        }
+        if (player.video) {
+            try { player.video.pause(); } catch (e) {}
+        }
+    },
+
+    restore(player) {
+        if (!player || !player.visible) return;
+        const shouldResume = Boolean(player._wasPlayingBeforeHidden && !player._userPaused);
+        player._wasPlayingBeforeHidden = false;
+
+        if (player._avplayActive && window.webapis && window.webapis.avplay) {
+            try {
+                if (typeof window.webapis.avplay.restore === 'function') {
+                    window.webapis.avplay.restore();
+                }
+                if (shouldResume) {
+                    if (typeof window.webapis.avplay.play === 'function') {
+                        window.webapis.avplay.play();
+                    }
+                    player._avplayPaused = false;
+                    if (typeof player._updatePlayPauseIcon === 'function') {
+                        player._updatePlayPauseIcon(true);
+                    }
+                }
+            } catch (e) {}
+            return;
+        }
+
+        if (shouldResume) {
+            if (player.hls && typeof player.hls.startLoad === 'function') {
+                try { player.hls.startLoad(); } catch (e) {}
+            }
+            this.play(player);
         }
     },
 
@@ -176,6 +278,111 @@ window.IPTV.PlaybackEngine = {
             clearTimeout(player._candidateWatchdog);
             player._candidateWatchdog = null;
         }
+    },
+
+    stopStallMonitor(player) {
+        if (player && player._stallTimer) {
+            clearInterval(player._stallTimer);
+            player._stallTimer = null;
+        }
+        if (player && player._reconnectTimer) {
+            clearTimeout(player._reconnectTimer);
+            player._reconnectTimer = null;
+        }
+        if (player && player._tsHealthyTimer) {
+            clearTimeout(player._tsHealthyTimer);
+            player._tsHealthyTimer = null;
+        }
+    },
+
+    /**
+     * Playback stall monitor (runs after the first frame has rendered).
+     * - mpegts.js / native: jumps small buffered gaps (timestamp discontinuities are common
+     *   on IPTV TS streams and mpegts.js has no built-in gap controller) and nudges stuck decoders.
+     *   Hls.js has its own GapController, so gap handling is skipped for it.
+     * - Live (all engines): if the picture is frozen for 10s with nothing buffered, reloads
+     *   the same candidate in place (up to 3 times) before falling back to the next candidate.
+     */
+    startStallMonitor(player, item, sessionId, rawCandidateUrl, engine) {
+        if (player && player._stallTimer) {
+            clearInterval(player._stallTimer);
+            player._stallTimer = null;
+        }
+        if (!player || !player.video) return;
+        const isLive = player.isLiveStream();
+        let lastTime = -1;
+        let stuckSince = 0;
+
+        player._stallTimer = setInterval(() => {
+            if (player._loadSessionId !== sessionId || !player.visible || player.currentItem !== item || player._avplayActive) {
+                this.stopStallMonitor(player);
+                return;
+            }
+            const v = player.video;
+            if (!v || !player._streamStarted || v.paused || player._userPaused || v.seeking || player._initialSeekPending !== null) {
+                lastTime = v ? v.currentTime : -1;
+                stuckSince = 0;
+                return;
+            }
+            const t = v.currentTime;
+            if (t !== lastTime) {
+                lastTime = t;
+                stuckSince = 0;
+                return;
+            }
+            const now = Date.now();
+            if (!stuckSince) {
+                stuckSince = now;
+                return;
+            }
+            const stuckMs = now - stuckSince;
+
+            let inRange = false;
+            let ahead = 0;
+            let nextStart = -1;
+            try {
+                const b = v.buffered;
+                for (let i = 0; i < b.length; i++) {
+                    const s = b.start(i);
+                    const e = b.end(i);
+                    if (t >= s - 0.05 && t < e) {
+                        inRange = true;
+                        ahead = e - t;
+                    } else if (s > t && (nextStart < 0 || s < nextStart)) {
+                        nextStart = s;
+                    }
+                }
+            } catch (e) {}
+
+            if (engine !== 'hls') {
+                if (!inRange && nextStart > 0 && (nextStart - t) < 6 && stuckMs >= 800) {
+                    console.warn(`[PlaybackEngine] Jumping buffer gap ${t.toFixed(2)} -> ${nextStart.toFixed(2)}`);
+                    try { v.currentTime = nextStart + 0.1; } catch (e) {}
+                    stuckSince = 0;
+                    return;
+                }
+                if (inRange && ahead > 1.5 && stuckMs >= 2000) {
+                    console.warn('[PlaybackEngine] Decoder stuck with data buffered, nudging playhead');
+                    try { v.currentTime = t + 0.1; } catch (e) {}
+                    stuckSince = 0;
+                    return;
+                }
+            }
+
+            if (isLive && stuckMs >= 10000 && ahead < 1) {
+                this.stopStallMonitor(player);
+                player._liveReloads = (player._liveReloads || 0) + 1;
+                if (player._liveReloads <= 3) {
+                    console.warn(`[PlaybackEngine] Live stream frozen for 10s, reloading in place (${player._liveReloads}/3)`);
+                    player.currentCandidateIndex = Math.max(0, player.currentCandidateIndex);
+                    this.loadCandidate(player, rawCandidateUrl, item);
+                } else {
+                    console.warn('[PlaybackEngine] Live stream repeatedly frozen, trying next candidate');
+                    player._liveReloads = 0;
+                    this.tryNextCandidate(player, item, sessionId);
+                }
+            }
+        }, 500);
     },
 
     startWatchdog(player, item, sessionId, timeoutMs = 8500) {
@@ -205,6 +412,8 @@ window.IPTV.PlaybackEngine = {
     destroy(player) {
         if (!player) return;
         this.clearWatchdog(player);
+        this.stopStallMonitor(player);
+        this._clearVideoListeners(player);
         if (player.video) {
             player.video.onerror = null;
             player.video.onplaying = null;
@@ -389,9 +598,29 @@ window.IPTV.PlaybackEngine = {
 
         console.log(`[PlaybackEngine] Loading stream candidate [${player.currentCandidateIndex + 1}/${player.currentCandidates.length}]: ${rawCandidateUrl}`);
 
+        // Per-item resilience counters (survive in-place reloads of the same item)
+        if (player._resilienceItem !== item) {
+            player._resilienceItem = item;
+            player._liveReloads = 0;
+        }
+        player._streamStarted = false;
+        player._hlsNetRetries = 0;
+        player._tsReconnects = 0;
+
         this.startWatchdog(player, item, currentSessionId, isLive ? 7000 : 12000);
 
         const profile = this.getEngineProfile();
+
+        // Arms the stall monitor once the first frame actually renders
+        const armStallMonitor = (engine) => {
+            const onFirstPlaying = () => {
+                if (player._loadSessionId !== currentSessionId) return;
+                player.video.removeEventListener('playing', onFirstPlaying);
+                player._streamStarted = true;
+                this.startStallMonitor(player, item, currentSessionId, rawCandidateUrl, engine);
+            };
+            this._addCandidateListener(player, 'playing', onFirstPlaying);
+        };
 
         // 1. HLS (.m3u8) streams via Hls.js MSE
         if (isM3u8 && (forceMseHls || typeof window.MediaSource !== 'undefined')) {
@@ -406,15 +635,30 @@ window.IPTV.PlaybackEngine = {
                         lowLatencyMode: false,
                         maxBufferLength: profile.hlsMaxBufferLength,
                         maxMaxBufferLength: profile.hlsMaxMaxBufferLength,
-                        maxBufferSize: profile.hlsMaxBufferSize
+                        maxBufferSize: profile.hlsMaxBufferSize,
+                        backBufferLength: profile.hlsBackBufferLength,
+                        liveBackBufferLength: profile.hlsLiveBackBufferLength,
+                        // Smoothness / resilience tuning for IPTV providers
+                        maxBufferHole: 0.5,
+                        nudgeMaxRetry: 6,
+                        startFragPrefetch: true,
+                        capLevelToPlayerSize: profile.hlsCapLevelToPlayerSize,
+                        liveSyncDurationCount: 3,
+                        liveMaxLatencyDurationCount: 10,
+                        manifestLoadingMaxRetry: 2,
+                        levelLoadingMaxRetry: 4,
+                        fragLoadingMaxRetry: 6
                     };
                     if (player._initialSeekPending !== null && player._initialSeekPending > 0) {
                         hlsConfig.startPosition = player._initialSeekPending;
                     }
+                    player._hlsMediaRecovered = false;
+                    player._hlsCodecSwapped = false;
                     const hls = new Hls(hlsConfig);
                     player.hls = hls;
                     hls.loadSource(url);
                     hls.attachMedia(player.video);
+                    armStallMonitor('hls');
 
                     hls.on(Hls.Events.MANIFEST_PARSED, () => {
                         if (player._loadSessionId !== currentSessionId) return;
@@ -423,12 +667,43 @@ window.IPTV.PlaybackEngine = {
                         if (p && typeof p.catch === 'function') p.catch(() => {});
                     });
 
+                    hls.on(Hls.Events.FRAG_BUFFERED, () => {
+                        if (player._loadSessionId !== currentSessionId) return;
+                        player._hlsNetRetries = 0;
+                    });
+
                     hls.on(Hls.Events.ERROR, (event, data) => {
                         if (player._loadSessionId !== currentSessionId) return;
-                        if (data.fatal) {
-                            console.warn('[PlaybackEngine] HLS fatal error:', data.type, data.details);
-                            this.tryNextCandidate(player, item, currentSessionId);
+                        if (!data.fatal) return;
+
+                        // Network hiccup after playback started: resume loading in place instead of
+                        // tearing down and restarting the whole candidate chain (= long black "loading").
+                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && player._streamStarted && player._hlsNetRetries < 4) {
+                            player._hlsNetRetries++;
+                            const delay = 500 * player._hlsNetRetries;
+                            console.warn(`[PlaybackEngine] HLS network error (${data.details}), resuming load in ${delay}ms (${player._hlsNetRetries}/4)`);
+                            clearTimeout(player._reconnectTimer);
+                            player._reconnectTimer = setTimeout(() => {
+                                if (player._loadSessionId !== currentSessionId || player.hls !== hls) return;
+                                try { hls.startLoad(); } catch (err) { this.tryNextCandidate(player, item, currentSessionId); }
+                            }, delay);
+                            return;
                         }
+
+                        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && typeof hls.recoverMediaError === 'function') {
+                            if (!player._hlsMediaRecovered) {
+                                player._hlsMediaRecovered = true;
+                                console.warn('[PlaybackEngine] HLS media error, attempting in-place recovery:', data.details);
+                                try { hls.recoverMediaError(); return; } catch (err) {}
+                            } else if (!player._hlsCodecSwapped && typeof hls.swapAudioCodec === 'function') {
+                                player._hlsCodecSwapped = true;
+                                console.warn('[PlaybackEngine] HLS media error persists, swapping audio codec and recovering');
+                                try { hls.swapAudioCodec(); hls.recoverMediaError(); return; } catch (err) {}
+                            }
+                        }
+
+                        console.warn('[PlaybackEngine] HLS fatal error:', data.type, data.details);
+                        this.tryNextCandidate(player, item, currentSessionId);
                     });
                     return;
                 } catch (e) {
@@ -451,8 +726,12 @@ window.IPTV.PlaybackEngine = {
                         url: url
                     }, {
                         enableWorker: profile.enableWorker,
-                        lazyLoadMaxDuration: profile.mpegtsLazyMaxDuration,
-                        lazyLoadRecoverDuration: profile.mpegtsLazyRecoverDuration,
+                        enableStashBuffer: true,
+                        stashInitialSize: profile.mpegtsStashInitialSize,
+                        lazyLoad: profile.mpegtsLazyLoad,
+                        autoCleanupSourceBuffer: profile.mpegtsAutoCleanup,
+                        autoCleanupMaxBackwardDuration: profile.mpegtsAutoCleanupMaxBackward,
+                        autoCleanupMinBackwardDuration: profile.mpegtsAutoCleanupMinBackward,
                         seekType: isLive ? 'range' : 'param'
                     });
                     player.mpegtsPlayer = tsPlayer;
@@ -467,11 +746,53 @@ window.IPTV.PlaybackEngine = {
                         player.video.removeEventListener('playing', onMsePlaying);
                         player.video.removeEventListener('loadeddata', onMsePlaying);
                     };
-                    player.video.addEventListener('playing', onMsePlaying);
-                    player.video.addEventListener('loadeddata', onMsePlaying);
+                    this._addCandidateListener(player, 'playing', onMsePlaying);
+                    this._addCandidateListener(player, 'loadeddata', onMsePlaying);
+                    armStallMonitor('mpegts');
+
+                    // Live TS: providers routinely drop/close the HTTP connection. Reconnect the
+                    // same player in place (fast) instead of restarting the whole candidate chain.
+                    const reconnectLiveTs = (reason) => {
+                        if (player._loadSessionId !== currentSessionId || player.mpegtsPlayer !== tsPlayer) return false;
+                        if (!isLive || !player._streamStarted || player._tsReconnects >= 5) return false;
+                        player._tsReconnects++;
+                        const delay = 300 * player._tsReconnects;
+                        console.warn(`[PlaybackEngine] Live TS ${reason}, reconnecting in place in ${delay}ms (${player._tsReconnects}/5)`);
+                        clearTimeout(player._reconnectTimer);
+                        player._reconnectTimer = setTimeout(() => {
+                            if (player._loadSessionId !== currentSessionId || player.mpegtsPlayer !== tsPlayer) return;
+                            try {
+                                tsPlayer.unload();
+                                tsPlayer.load();
+                                const rp = tsPlayer.play();
+                                if (rp && typeof rp.catch === 'function') rp.catch(() => {});
+                            } catch (err) {
+                                this.tryNextCandidate(player, item, currentSessionId);
+                            }
+                        }, delay);
+                        return true;
+                    };
+
+                    // Reset the reconnect budget once playback is healthy again
+                    this._addCandidateListener(player, 'playing', () => {
+                        if (player._loadSessionId !== currentSessionId) return;
+                        clearTimeout(player._tsHealthyTimer);
+                        player._tsHealthyTimer = setTimeout(() => {
+                            if (player._loadSessionId === currentSessionId) player._tsReconnects = 0;
+                        }, 30000);
+                    });
+
+                    if (mpegts.Events.LOADING_COMPLETE) {
+                        tsPlayer.on(mpegts.Events.LOADING_COMPLETE, () => {
+                            // A live stream should never "complete"; the server closed the socket.
+                            reconnectLiveTs('stream ended by server');
+                        });
+                    }
 
                     tsPlayer.on(mpegts.Events.ERROR, (errType, errDetail) => {
                         if (player._loadSessionId !== currentSessionId) return;
+                        const isNetErr = mpegts.ErrorTypes && errType === mpegts.ErrorTypes.NETWORK_ERROR;
+                        if (isNetErr && reconnectLiveTs(`network error (${errDetail})`)) return;
                         player.video.removeEventListener('playing', onMsePlaying);
                         player.video.removeEventListener('loadeddata', onMsePlaying);
                         console.warn('[PlaybackEngine] mpegts error:', errType, errDetail);
@@ -485,6 +806,7 @@ window.IPTV.PlaybackEngine = {
         }
 
         // 3. Direct native hardware video playback
+        armStallMonitor('native');
         this.playNativeDirect(player, url, item, rawCandidateUrl, currentSessionId);
     },
 
@@ -506,8 +828,8 @@ window.IPTV.PlaybackEngine = {
             player.video.removeEventListener('playing', onPlaying);
             player.video.removeEventListener('loadeddata', onPlaying);
         };
-        player.video.addEventListener('playing', onPlaying);
-        player.video.addEventListener('loadeddata', onPlaying);
+        this._addCandidateListener(player, 'playing', onPlaying);
+        this._addCandidateListener(player, 'loadeddata', onPlaying);
 
         const onSeeked = () => {
             if (player._loadSessionId !== sessionId) return;
@@ -515,7 +837,7 @@ window.IPTV.PlaybackEngine = {
             player._markCandidateSuccess(rawCandidateUrl || url);
             player.video.removeEventListener('seeked', onSeeked);
         };
-        player.video.addEventListener('seeked', onSeeked);
+        this._addCandidateListener(player, 'seeked', onSeeked);
 
         player.video.onerror = () => {
             if (player._loadSessionId !== sessionId) return;

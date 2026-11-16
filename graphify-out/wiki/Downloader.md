@@ -2,7 +2,7 @@
 
 > God node · 52 connections · `windows/downloader.js`
 
-**Community:** [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md)
+**Community:** [webOS Build & ES5 Transpilation Pipeline](webOS_Build_&_ES5_Transpilation_Pipeline.md)
 
 ## Connections by Relation
 
@@ -13,23 +13,23 @@
 - ._executeDownload() `EXTRACTED`
 - ._sendToRenderer() `EXTRACTED`
 - ._processQueue() `EXTRACTED`
-- .startDownload() `EXTRACTED`
 - ._serializeTask() `EXTRACTED`
-- ._handleError() `EXTRACTED`
+- .startDownload() `EXTRACTED`
 - ._completeTask() `EXTRACTED`
-- ._attachStreamToSegment() `EXTRACTED`
-- ._handleTransientOrFatalError() `EXTRACTED`
+- ._handleError() `EXTRACTED`
 - ._runSegment() `EXTRACTED`
-- ._abortTaskSockets() `EXTRACTED`
-- .recoverStalledDownloads() `EXTRACTED`
-- ._syncPowerSaveBlocker() `EXTRACTED`
-- ._reportProgress() `EXTRACTED`
-- .resumeDownload() `EXTRACTED`
-- ._formatBytes() `EXTRACTED`
-- .updateSettings() `EXTRACTED`
-- .startBatchDownloads() `EXTRACTED`
+- ._attachStreamToSegment() `EXTRACTED`
 - ._saveSegmentMeta() `EXTRACTED`
-- ._scheduleRetry() `EXTRACTED`
+- ._abortTaskSockets() `EXTRACTED`
+- ._handleTransientOrFatalError() `EXTRACTED`
+- .recoverStalledDownloads() `EXTRACTED`
+- ._reportProgress() `EXTRACTED`
+- ._syncPowerSaveBlocker() `EXTRACTED`
+- ._formatBytes() `EXTRACTED`
+- .resumeDownload() `EXTRACTED`
+- ._retrySegmentOrTask() `EXTRACTED`
+- .startBatchDownloads() `EXTRACTED`
+- .updateSettings() `EXTRACTED`
 - *…and 31 more `method` connection(s) not listed (lowest-degree first to go)*
 
 ---

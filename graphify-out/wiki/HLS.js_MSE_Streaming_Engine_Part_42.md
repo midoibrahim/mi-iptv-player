@@ -16,10 +16,10 @@
 ## Relationships
 
 - [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (8 shared connections)
-- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
-- [Community 22](Community_22.md) (1 shared connections)
+- [Community 32](Community_32.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (1 shared connections)
+- [Community 13](Community_13.md) (1 shared connections)
+- [Community 33](Community_33.md) (1 shared connections)
 
 ## Source Files
 

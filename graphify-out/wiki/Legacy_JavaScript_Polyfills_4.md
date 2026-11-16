@@ -4,8 +4,8 @@
 
 ## Key Concepts
 
-- **get()** (1 connections) — `IPTVPlayer/js/core/icons.js`
 - **icons.js** (1 connections) — `IPTVPlayer/js/core/icons.js`
+- **get()** (1 connections) — `IPTVPlayer/js/core/icons.js`
 
 ## Relationships
 

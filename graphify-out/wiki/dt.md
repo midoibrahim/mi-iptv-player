@@ -2,7 +2,7 @@
 
 > God node · 22 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md)
+**Community:** [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md)
 
 ## Connections by Relation
 
@@ -24,15 +24,15 @@
 - ke() `INFERRED`
 - y() `INFERRED`
 - b() `INFERRED`
-- re() `INFERRED`
-- we() `INFERRED`
-- z() `INFERRED`
 - ee() `INFERRED`
 - J() `INFERRED`
+- re() `INFERRED`
 - te() `INFERRED`
+- we() `INFERRED`
 - w() `INFERRED`
-- W() `INFERRED`
+- z() `INFERRED`
 - q() `INFERRED`
+- W() `INFERRED`
 
 ---
 

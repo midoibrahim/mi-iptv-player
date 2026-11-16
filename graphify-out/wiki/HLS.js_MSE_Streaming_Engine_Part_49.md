@@ -1,14 +1,15 @@
 # HLS.js MSE Streaming Engine (Part 49)
 
-> 5 nodes · cohesion 0.60
+> 6 nodes · cohesion 0.60
 
 ## Key Concepts
 
-- **eventBus.js** (4 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **emit()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **off()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **on()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
-- **toast()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **theme.js** (5 connections) — `IPTVPlayer/js/core/theme.js`
+- **applyTheme()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **getSavedTheme()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **init()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **_resolveThemeId()** (3 connections) — `IPTVPlayer/js/core/theme.js`
+- **getThemes()** (1 connections) — `IPTVPlayer/js/core/theme.js`
 
 ## Relationships
 
@@ -16,11 +17,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/eventBus.js`
+- `IPTVPlayer/js/core/theme.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 9 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

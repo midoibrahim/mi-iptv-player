@@ -1,15 +1,15 @@
 # HLS.js MSE Streaming Engine (Part 47)
 
-> 6 nodes · cohesion 0.33
+> 6 nodes · cohesion 0.40
 
 ## Key Concepts
 
-- **qrcode.min.js** (5 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QR8bitByte()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRBitBuffer()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRCodeModel()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRPolynomial()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
-- **QRRSBlock()** (1 connections) — `IPTVPlayer/js/core/qrcode.min.js`
+- **backStack.js** (5 connections) — `IPTVPlayer/js/core/backStack.js`
+- **pop()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
+- **push()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
+- **clear()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
+- **handleBack()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
+- **register()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
 
 ## Relationships
 
@@ -17,11 +17,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/qrcode.min.js`
+- `IPTVPlayer/js/core/backStack.js`
 
 ## Audit Trail
 
-- EXTRACTED: 5 (100%)
+- EXTRACTED: 6 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

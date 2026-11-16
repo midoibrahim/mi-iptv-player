@@ -2,7 +2,7 @@
 
 > God node · 23 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md)
+**Community:** [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md)
 
 ## Connections by Relation
 

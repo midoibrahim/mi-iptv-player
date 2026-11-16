@@ -1,27 +1,25 @@
 # webOS Background Luna Service
 
-> 18 nodes · cohesion 0.11
+> 16 nodes · cohesion 0.16
 
 ## Key Concepts
 
-- **package.json** (9 connections) — `package.json`
-- **scripts** (9 connections) — `package.json`
-- **author** (1 connections) — `package.json`
-- **description** (1 connections) — `package.json`
-- **keywords** (1 connections) — `package.json`
-- **license** (1 connections) — `package.json`
-- **name** (1 connections) — `package.json`
-- **private** (1 connections) — `package.json`
-- **build:all** (1 connections) — `package.json`
-- **build:tizen** (1 connections) — `package.json`
-- **build:webos** (1 connections) — `package.json`
-- **build:windows** (1 connections) — `package.json`
-- **setup** (1 connections) — `package.json`
-- **start:server** (1 connections) — `package.json`
-- **start:windows** (1 connections) — `package.json`
-- **test** (1 connections) — `package.json`
-- **version** (1 connections) — `package.json`
-- **workspaces** (1 connections) — `package.json`
+- **playerOsd.js** (15 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updateProgressUI()** (4 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **osdEls()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updateProgress()** (3 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **fmtTime()** (2 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **autoHide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **bindScrubbing()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **hide()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **isVisible()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **navigate()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **show()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **showBanner()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **showSeekHUD()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **toggle()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updateFavoriteState()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
+- **updatePlayPauseIcon()** (1 connections) — `IPTVPlayer/js/components/playerOsd.js`
 
 ## Relationships
 
@@ -29,11 +27,11 @@
 
 ## Source Files
 
-- `package.json`
+- `IPTVPlayer/js/components/playerOsd.js`
 
 ## Audit Trail
 
-- EXTRACTED: 17 (100%)
+- EXTRACTED: 19 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

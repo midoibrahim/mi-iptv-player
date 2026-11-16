@@ -1,8 +1,8 @@
 # IPTVApp
 
-> God node · 23 connections · `IPTVPlayer/js/app.js`
+> God node · 24 connections · `IPTVPlayer/js/app.js`
 
-**Community:** [HLS.js MSE Streaming Engine (Part 12)](HLS.js_MSE_Streaming_Engine_Part_12.md)
+**Community:** [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md)
 
 ## Connections by Relation
 
@@ -13,27 +13,27 @@
 - 10-Foot TV User Interface Architecture `INFERRED`
 
 ### method
-- ._init() `EXTRACTED`
 - .connect() `EXTRACTED`
-- .navigateTo() `EXTRACTED`
+- ._init() `EXTRACTED`
 - ._applyCatalogData() `EXTRACTED`
+- .navigateTo() `EXTRACTED`
+- ._scheduleBackgroundRefresh() `EXTRACTED`
 - .toast() `EXTRACTED`
 - ._bindNavigation() `EXTRACTED`
-- ._registerBackGuards() `EXTRACTED`
 - .disconnect() `EXTRACTED`
-- ._refreshBrowseViews() `EXTRACTED`
-- ._stepChannel() `EXTRACTED`
-- .renderFavorites() `EXTRACTED`
-- .constructor() `EXTRACTED`
-- .registerSectionHook() `EXTRACTED`
 - ._fetchCatalogFromNetwork() `EXTRACTED`
+- ._refreshBrowseViews() `EXTRACTED`
+- ._registerBackGuards() `EXTRACTED`
+- .renderFavorites() `EXTRACTED`
+- ._stepChannel() `EXTRACTED`
+- .constructor() `EXTRACTED`
+- .hideLoading() `EXTRACTED`
+- .nextChannel() `EXTRACTED`
 - .onItemClick() `EXTRACTED`
 - .prevChannel() `EXTRACTED`
-- .nextChannel() `EXTRACTED`
-- .showLoading() `EXTRACTED`
-- .hideLoading() `EXTRACTED`
+- .registerSectionHook() `EXTRACTED`
 - .setLoadingText() `EXTRACTED`
-- *…and 1 more `method` connection(s) not listed (lowest-degree first to go)*
+- *…and 2 more `method` connection(s) not listed (lowest-degree first to go)*
 
 ---
 

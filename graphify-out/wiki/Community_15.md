@@ -1,35 +1,44 @@
 # Community 15
 
-> 13 nodes · cohesion 0.33
+> 21 nodes · cohesion 0.10
 
 ## Key Concepts
 
-- **browseView.js** (12 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_refreshContent()** (6 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_bindControls()** (5 connections) — `IPTVPlayer/js/views/browseView.js`
-- **render()** (5 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_renderCategories()** (4 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_appendNextGridBatch()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_createCategoryLi()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
-- **ensureRendered()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_flushRemainingCategories()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_renderGrid()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
-- **_renderRows()** (2 connections) — `IPTVPlayer/js/views/browseView.js`
-- **setData()** (2 connections) — `IPTVPlayer/js/views/browseView.js`
-- **constructor()** (1 connections) — `IPTVPlayer/js/views/browseView.js`
+- **tizen-build/build.mjs** (26 connections) — `tizen-build/build.mjs`
+- **walkDir()** (6 connections) — `scripts/legacyCompiler.mjs`
+- **buildWgtArchive()** (3 connections) — `tizen-build/build.mjs`
+- **crc32()** (2 connections) — `tizen-build/build.mjs`
+- **ref_node_child_process** (1 connections)
+- **ref_node_zlib** (1 connections)
+- **CRC_TABLE** (1 connections) — `tizen-build/build.mjs`
+- **DIST** (1 connections) — `tizen-build/build.mjs`
+- **EXCLUDE_TOP** (1 connections) — `tizen-build/build.mjs`
+- **findTizenCli()** (1 connections) — `tizen-build/build.mjs`
+- **HERE** (1 connections) — `tizen-build/build.mjs`
+- **log()** (1 connections) — `tizen-build/build.mjs`
+- **OUT** (1 connections) — `tizen-build/build.mjs`
+- **ROOT** (1 connections) — `tizen-build/build.mjs`
+- **sizeKb** (1 connections) — `tizen-build/build.mjs`
+- **SRC** (1 connections) — `tizen-build/build.mjs`
+- **tizenCli** (1 connections) — `tizen-build/build.mjs`
+- **usbUserwidgetDir** (1 connections) — `tizen-build/build.mjs`
+- **usbWgtPath** (1 connections) — `tizen-build/build.mjs`
+- **WEBOS_BUILD_DIR** (1 connections) — `tizen-build/build.mjs`
+- **wgtPath** (1 connections) — `tizen-build/build.mjs`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (8 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/views/browseView.js`
+- `scripts/legacyCompiler.mjs`
+- `tizen-build/build.mjs`
 
 ## Audit Trail
 
-- EXTRACTED: 26 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 30 (97%)
+- INFERRED: 1 (3%)
 - AMBIGUOUS: 0 (0%)
 
 ---

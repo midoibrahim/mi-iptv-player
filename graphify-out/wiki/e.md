@@ -10,8 +10,8 @@
 - [e()](e.md) `EXTRACTED`
 - t() `EXTRACTED`
 - [i()](i.md) `EXTRACTED`
-- [r()](r.md) `EXTRACTED`
 - k() `EXTRACTED`
+- [r()](r.md) `EXTRACTED`
 - p() `EXTRACTED`
 
 ### contains
@@ -30,8 +30,8 @@
 - l() `INFERRED`
 - c() `INFERRED`
 - [r()](r.md) `INFERRED`
-- d() `INFERRED`
 - [a()](a.md) `INFERRED`
+- d() `INFERRED`
 - [n()](n.md) `INFERRED`
 - [a()](a.md) `INFERRED`
 

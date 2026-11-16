@@ -33,7 +33,7 @@
 
 ## Relationships
 
-- [Community 32](Community_32.md) (1 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (1 shared connections)
 
 ## Source Files
 

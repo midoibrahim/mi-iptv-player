@@ -1,32 +1,34 @@
 # Vector Icon System
 
-> 10 nodes · cohesion 0.38
+> 9 nodes · cohesion 0.25
 
 ## Key Concepts
 
-- **seriesDetailView.js** (9 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderEpisodesList()** (5 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderScreen()** (4 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **updateFavoriteState()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **buildEpisodePlayItem()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **close()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **focusEpisodeCard()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **_formatEpisodeTitle()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **open()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **pe()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **jt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **ft()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **ot()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **bt()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Wl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **jl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Kt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **qt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (9 shared connections)
+- [Community 13](Community_13.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (1 shared connections)
+- [Community 33](Community_33.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/views/seriesDetailView.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 17 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 21 (95%)
+- INFERRED: 1 (5%)
 - AMBIGUOUS: 0 (0%)
 
 ---

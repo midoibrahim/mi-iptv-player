@@ -107,6 +107,17 @@ function serializeTask(task) {
     };
 }
 
+function parseContentRange(headerVal) {
+    if (!headerVal || typeof headerVal !== 'string') return null;
+    const m = headerVal.match(/^bytes\s+(\d+)-(\d+)\/(\d+|\*)/i);
+    if (!m) return null;
+    return {
+        start: parseInt(m[1], 10),
+        end: parseInt(m[2], 10),
+        total: m[3] === '*' ? 0 : parseInt(m[3], 10)
+    };
+}
+
 function remuxToMp4(inputPath, callback) {
     const ext = path.extname(inputPath).toLowerCase();
     if (ext === '.mp4') {
@@ -116,11 +127,13 @@ function remuxToMp4(inputPath, callback) {
     const outputPath = inputPath.replace(/\.[a-zA-Z0-9]+$/, '.mp4');
     const args = [
         '-y',
+        '-fflags', '+genpts',
         '-i', inputPath,
         '-c:v', 'copy',
         '-c:a', 'aac',
         '-ar', '48000',
         '-b:a', '128k',
+        '-movflags', '+faststart',
         outputPath
     ];
 
@@ -145,6 +158,12 @@ function remuxToMp4(inputPath, callback) {
         if (code === 0 && fs.existsSync(outputPath)) {
             try {
                 const stat = fs.statSync(outputPath);
+                const inputStat = fs.existsSync(inputPath) ? fs.statSync(inputPath) : null;
+                if (inputStat && inputStat.size > 1024 * 1024 && stat.size < inputStat.size * 0.8) {
+                    console.warn(`[Downloader] FFmpeg remux output suspiciously smaller than input (${stat.size} vs ${inputStat.size}), keeping original file`);
+                    try { fs.unlinkSync(outputPath); } catch (e) {}
+                    return done(new Error('Remux output truncated'), inputPath);
+                }
                 if (stat.size > 1024) {
                     try { fs.unlinkSync(inputPath); } catch (e) {}
                     console.log(`[Downloader] Successfully converted to Universal MP4: ${path.basename(outputPath)}`);
@@ -225,9 +244,12 @@ function createSegments(totalBytes) {
 function saveSegmentMeta(task) {
     if (!task || !Array.isArray(task.segments) || !task.metaPath) return;
     try {
+        const resolvedUrl = (task.resolvedUrl && /[?&]token=/i.test(task.resolvedUrl) && task.url)
+            ? task.url
+            : (task.resolvedUrl || task.url);
         const payload = {
             totalBytes: task.totalBytes,
-            resolvedUrl: task.resolvedUrl || task.url,
+            resolvedUrl,
             maxConnections: task.maxConnections,
             segments: task.segments.map(s => ({
                 index: s.index,
@@ -247,7 +269,9 @@ function loadSegmentMeta(task) {
         const data = JSON.parse(fs.readFileSync(task.metaPath, 'utf8'));
         if (data && Array.isArray(data.segments) && data.segments.length > 0 && data.totalBytes > 0) {
             task.totalBytes = data.totalBytes;
-            task.resolvedUrl = data.resolvedUrl || task.url;
+            task.resolvedUrl = (data.resolvedUrl && /[?&]token=/i.test(data.resolvedUrl) && task.url)
+                ? task.url
+                : (data.resolvedUrl || task.url);
             task.maxConnections = data.maxConnections || 8;
             task.segments = data.segments.map(s => ({
                 index: s.index,
@@ -279,6 +303,7 @@ module.exports = {
     formatBytes,
     resolveDownloadTarget,
     serializeTask,
+    parseContentRange,
     remuxToMp4,
     matchesDownloadItem,
     createSegments,

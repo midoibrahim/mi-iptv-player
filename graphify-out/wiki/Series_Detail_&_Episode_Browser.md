@@ -1,23 +1,23 @@
 # Series Detail & Episode Browser
 
-> 14 nodes · cohesion 0.20
+> 14 nodes · cohesion 0.18
 
 ## Key Concepts
 
-- **platform.js** (13 connections) — `IPTVPlayer/js/core/platform.js`
-- **_initDesktopViewportAndFullscreen()** (5 connections) — `IPTVPlayer/js/core/platform.js`
-- **init()** (3 connections) — `IPTVPlayer/js/core/platform.js`
-- **isDesktop()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **isFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **setFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **toggleFullScreen()** (2 connections) — `IPTVPlayer/js/core/platform.js`
-- **bindTvInput()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **downloads()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **exitApp()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **hasDownloads()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **isTizen()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **isWebOS()** (1 connections) — `IPTVPlayer/js/core/platform.js`
-- **setKeepScreenOn()** (1 connections) — `IPTVPlayer/js/core/platform.js`
+- **catalogStore.js** (13 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **favKey()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **isFavorite()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getFavoriteItems()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **toggleFavorite()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **clear()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getCategories()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getLive()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getMovies()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getSeries()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **init()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **setCatalog()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **setConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
 
 ## Relationships
 
@@ -25,11 +25,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/platform.js`
+- `IPTVPlayer/js/core/catalogStore.js`
 
 ## Audit Trail
 
-- EXTRACTED: 18 (100%)
+- EXTRACTED: 16 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

@@ -1,45 +1,51 @@
 # Community 4
 
-> 21 nodes · cohesion 0.10
+> 37 nodes · cohesion 0.05
 
 ## Key Concepts
 
-- **tizen-build/build.mjs** (26 connections) — `tizen-build/build.mjs`
-- **walkDir()** (6 connections) — `scripts/legacyCompiler.mjs`
-- **buildWgtArchive()** (3 connections) — `tizen-build/build.mjs`
-- **crc32()** (2 connections) — `tizen-build/build.mjs`
-- **findTizenCli()** (1 connections) — `tizen-build/build.mjs`
-- **log()** (1 connections) — `tizen-build/build.mjs`
-- **CRC_TABLE** (1 connections) — `tizen-build/build.mjs`
-- **DIST** (1 connections) — `tizen-build/build.mjs`
-- **EXCLUDE_TOP** (1 connections) — `tizen-build/build.mjs`
-- **HERE** (1 connections) — `tizen-build/build.mjs`
-- **OUT** (1 connections) — `tizen-build/build.mjs`
-- **ROOT** (1 connections) — `tizen-build/build.mjs`
-- **sizeKb** (1 connections) — `tizen-build/build.mjs`
-- **SRC** (1 connections) — `tizen-build/build.mjs`
-- **tizenCli** (1 connections) — `tizen-build/build.mjs`
-- **usbUserwidgetDir** (1 connections) — `tizen-build/build.mjs`
-- **usbWgtPath** (1 connections) — `tizen-build/build.mjs`
-- **WEBOS_BUILD_DIR** (1 connections) — `tizen-build/build.mjs`
-- **wgtPath** (1 connections) — `tizen-build/build.mjs`
-- **ref_node_child_process** (1 connections)
-- **ref_node_zlib** (1 connections)
+- **characterization.test.js** (41 connections) — `tests/characterization.test.js`
+- **ref_node_assert** (1 connections)
+- **ref_node_events** (1 connections)
+- **ref_node_os** (1 connections)
+- **ref_node_test** (1 connections)
+- **ref_node_vm** (1 connections)
+- **add()** (1 connections) — `tests/characterization.test.js`
+- **addEventListener()** (1 connections) — `tests/characterization.test.js`
+- **assert** (1 connections) — `tests/characterization.test.js`
+- **contains()** (1 connections) — `tests/characterization.test.js`
+- **createBrowserEnv()** (1 connections) — `tests/characterization.test.js`
+- **disconnect()** (1 connections) — `tests/characterization.test.js`
+- **focus()** (1 connections) — `tests/characterization.test.js`
+- **fs** (1 connections) — `tests/characterization.test.js`
+- **getElementById()** (1 connections) — `tests/characterization.test.js`
+- **invoke()** (1 connections) — `tests/characterization.test.js`
+- **load()** (1 connections) — `tests/characterization.test.js`
+- **loadScript()** (1 connections) — `tests/characterization.test.js`
+- **_markCandidateSuccess()** (1 connections) — `tests/characterization.test.js`
+- **observe()** (1 connections) — `tests/characterization.test.js`
+- **open()** (1 connections) — `tests/characterization.test.js`
+- **path** (1 connections) — `tests/characterization.test.js`
+- **pause()** (1 connections) — `tests/characterization.test.js`
+- **play()** (1 connections) — `tests/characterization.test.js`
+- **preventDefault()** (1 connections) — `tests/characterization.test.js`
+- *... and 12 more nodes in this community*
 
 ## Relationships
 
-- [Community 33](Community_33.md) (4 shared connections)
-- [Community 54](Community_54.md) (4 shared connections)
+- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (1 shared connections)
+- [Community 41](Community_41.md) (1 shared connections)
+- [Community 14](Community_14.md) (1 shared connections)
 
 ## Source Files
 
-- `scripts/legacyCompiler.mjs`
-- `tizen-build/build.mjs`
+- `tests/characterization.test.js`
 
 ## Audit Trail
 
-- EXTRACTED: 30 (97%)
-- INFERRED: 1 (3%)
+- EXTRACTED: 41 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

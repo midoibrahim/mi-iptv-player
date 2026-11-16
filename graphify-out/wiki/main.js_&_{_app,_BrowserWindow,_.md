@@ -1,43 +1,41 @@
 # main.js & { app, BrowserWindow, ...
 
-> 18 nodes · cohesion 0.18
+> 17 nodes · cohesion 0.12
 
 ## Key Concepts
 
-- **companionCore.js** (14 connections) — `IPTVService/companionCore.js`
-- **service.js** (10 connections) — `IPTVService/service.js`
-- **handle()** (5 connections) — `IPTVService/companionCore.js`
-- **proxyStream()** (5 connections) — `IPTVService/companionCore.js`
-- **log()** (4 connections) — `IPTVService/service.js`
-- **ref_http** (4 connections)
-- **createCompanionHandler()** (3 connections) — `IPTVService/companionCore.js`
-- **getLanIp()** (3 connections) — `IPTVService/companionCore.js`
-- **sendJson()** (3 connections) — `IPTVService/companionCore.js`
-- **ensureServer()** (3 connections) — `IPTVService/service.js`
-- **shutdownServer()** (3 connections) — `IPTVService/service.js`
-- **serveStatic()** (2 connections) — `IPTVService/companionCore.js`
-- **keepAlive()** (2 connections) — `IPTVService/service.js`
-- **ref_https** (2 connections)
-- **IMPORTANT: webOS 3.x ships Node 0.12 -> this file must remain strict ES5** (1 connections) — `IPTVService/companionCore.js`
-- **IMPORTANT: webOS 3.x ships Node 0.12 -> this file must stay plain ES5** (1 connections) — `IPTVService/service.js`
-- **ref_os** (1 connections)
-- **ref_webos_service** (1 connections)
+- **hu()** (11 connections) — `IPTVPlayer/js/hls.min.js`
+- **ga()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **uu()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ua()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **wa()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ll()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Rl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Xt()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ba()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **fa()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ju()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ma()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Oa()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **qu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **va()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Xu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Yu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (7 shared connections)
-- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (1 shared connections)
-- [Community 32](Community_32.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (17 shared connections)
+- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (6 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVService/companionCore.js`
-- `IPTVService/service.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 32 (84%)
-- INFERRED: 6 (16%)
+- EXTRACTED: 40 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

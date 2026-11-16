@@ -24,17 +24,15 @@ window.IPTV.Card = {
 
     _scheduleLazyImg(img, src) {
         if (!img || !src) return;
+        img.src = src;
 
         // First 16 cards in any render burst load immediately (above-the-fold)
         if (this._immediateQuota > 0) {
             this._immediateQuota--;
             clearTimeout(this._quotaResetTimer);
             this._quotaResetTimer = setTimeout(() => { this._immediateQuota = 16; }, 180);
-            img.src = src;
             return;
         }
-
-        img.dataset.src = src;
 
         // Modern TVs (Chromium 51+): use native IntersectionObserver
         if (typeof window.IntersectionObserver === 'function') {
@@ -56,28 +54,6 @@ window.IPTV.Card = {
             this._io.observe(img);
             return;
         }
-
-        // Legacy webOS 3.x (Chromium 38): staggered non-blocking queue that skips detached nodes
-        this._lazyQueue.push(img);
-        if (!this._lazyTimer) {
-            const pump = () => {
-                let loaded = 0;
-                while (this._lazyQueue.length > 0 && loaded < 6) {
-                    const nextImg = this._lazyQueue.shift();
-                    if (nextImg && nextImg.dataset && nextImg.dataset.src && document.contains(nextImg)) {
-                        nextImg.src = nextImg.dataset.src;
-                        delete nextImg.dataset.src;
-                        loaded++;
-                    }
-                }
-                if (this._lazyQueue.length > 0) {
-                    this._lazyTimer = setTimeout(pump, 55);
-                } else {
-                    this._lazyTimer = null;
-                }
-            };
-            this._lazyTimer = setTimeout(pump, 55);
-        }
     },
 
     eagerLoad(cardEl) {
@@ -94,6 +70,9 @@ window.IPTV.Card = {
         if (this._lazyTimer) {
             clearTimeout(this._lazyTimer);
             this._lazyTimer = null;
+        }
+        if (this._io) {
+            try { this._io.disconnect(); } catch (e) {}
         }
     },
 
@@ -127,7 +106,6 @@ window.IPTV.Card = {
             img.className = 'card-poster';
             img.alt = '';
             img.decoding = 'async';
-            img.loading = 'lazy';
             img.onerror = function() {
                 this.replaceWith(createFallback());
             };

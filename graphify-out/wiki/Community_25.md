@@ -1,24 +1,23 @@
 # Community 25
 
-> 15 nodes · cohesion 0.23
+> 14 nodes · cohesion 0.18
 
 ## Key Concepts
 
-- **xtreamService.js** (11 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **loadAll()** (5 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **m3uParser.js** (3 connections) — `IPTVPlayer/js/services/m3uParser.js`
-- **buildEpisodePlayItem()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **fetchJson()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **getSeriesInfo()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **resolveEpisodeUrl()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **streamUrl()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **Xtream Codes & M3U Playlist Protocol Engine** (2 connections) — `README.md`
-- **load()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
-- **parseExtinf()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
-- **buildCatMap()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **formatEpisodeTitle()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **loadSeriesSeasons()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
-- **_yieldToMain()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **catalogStore.js** (13 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **favKey()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **isFavorite()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getFavoriteItems()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **toggleFavorite()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **clear()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getCategories()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getLive()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getMovies()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **getSeries()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **init()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **setCatalog()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **setConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
 
 ## Relationships
 
@@ -26,14 +25,12 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/m3uParser.js`
-- `IPTVPlayer/js/services/xtreamService.js`
-- `README.md`
+- `IPTVPlayer/js/core/catalogStore.js`
 
 ## Audit Trail
 
-- EXTRACTED: 22 (92%)
-- INFERRED: 2 (8%)
+- EXTRACTED: 16 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

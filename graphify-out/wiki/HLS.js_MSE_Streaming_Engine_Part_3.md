@@ -34,12 +34,12 @@
 ## Relationships
 
 - [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (4 shared connections)
-- [Community 33](Community_33.md) (4 shared connections)
-- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (3 shared connections)
-- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (2 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (2 shared connections)
-- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (1 shared connections)
-- [Community 13](Community_13.md) (1 shared connections)
+- [QR Code Generation Library](QR_Code_Generation_Library.md) (4 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (3 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (2 shared connections)
+- [Community 18](Community_18.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (1 shared connections)
+- [Community 15](Community_15.md) (1 shared connections)
 
 ## Source Files
 

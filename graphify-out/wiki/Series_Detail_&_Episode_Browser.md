@@ -1,36 +1,36 @@
 # Series Detail & Episode Browser
 
-> 14 nodes · cohesion 0.18
+> 14 nodes · cohesion 0.24
 
 ## Key Concepts
 
-- **catalogStore.js** (13 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **favKey()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **isFavorite()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getFavoriteItems()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **toggleFavorite()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getCategories()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getLive()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getMovies()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getSeries()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **init()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setCatalog()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **webOSTV-dev.js** (13 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **b()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **h()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **R()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **t()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **u()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **m()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **p()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **C()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **i()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **n()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **o()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **v()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **y()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Community 18](Community_18.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/catalogStore.js`
+- `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
 
 ## Audit Trail
 
-- EXTRACTED: 16 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 25 (96%)
+- INFERRED: 1 (4%)
 - AMBIGUOUS: 0 (0%)
 
 ---

@@ -1,34 +1,30 @@
 # HLS.js MSE Streaming Engine (Part 42)
 
-> 8 nodes · cohesion 0.25
+> 7 nodes · cohesion 0.38
 
 ## Key Concepts
 
-- **xo()** (9 connections) — `IPTVPlayer/js/hls.min.js`
-- **Mo()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **jo()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Ws()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Yo()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Co()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Lo()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **wo()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **card.js** (6 connections) — `IPTVPlayer/js/components/card.js`
+- **create()** (3 connections) — `IPTVPlayer/js/components/card.js`
+- **_getIcon()** (2 connections) — `IPTVPlayer/js/components/card.js`
+- **_scheduleLazyImg()** (2 connections) — `IPTVPlayer/js/components/card.js`
+- **High-FPS Large Playlist Virtualization Engine** (1 connections) — `README.md`
+- **clearLazyQueue()** (1 connections) — `IPTVPlayer/js/components/card.js`
+- **eagerLoad()** (1 connections) — `IPTVPlayer/js/components/card.js`
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (8 shared connections)
-- [Community 32](Community_32.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (1 shared connections)
-- [Community 13](Community_13.md) (1 shared connections)
-- [Community 33](Community_33.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `IPTVPlayer/js/components/card.js`
+- `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 20 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 7 (88%)
+- INFERRED: 1 (12%)
 - AMBIGUOUS: 0 (0%)
 
 ---

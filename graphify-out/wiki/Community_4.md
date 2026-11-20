@@ -1,51 +1,51 @@
 # Community 4
 
-> 37 nodes · cohesion 0.05
+> 41 nodes · cohesion 0.07
 
 ## Key Concepts
 
-- **characterization.test.js** (41 connections) — `tests/characterization.test.js`
-- **ref_node_assert** (1 connections)
-- **ref_node_events** (1 connections)
-- **ref_node_os** (1 connections)
-- **ref_node_test** (1 connections)
-- **ref_node_vm** (1 connections)
-- **add()** (1 connections) — `tests/characterization.test.js`
-- **addEventListener()** (1 connections) — `tests/characterization.test.js`
-- **assert** (1 connections) — `tests/characterization.test.js`
-- **contains()** (1 connections) — `tests/characterization.test.js`
-- **createBrowserEnv()** (1 connections) — `tests/characterization.test.js`
-- **disconnect()** (1 connections) — `tests/characterization.test.js`
-- **focus()** (1 connections) — `tests/characterization.test.js`
-- **fs** (1 connections) — `tests/characterization.test.js`
-- **getElementById()** (1 connections) — `tests/characterization.test.js`
-- **invoke()** (1 connections) — `tests/characterization.test.js`
-- **load()** (1 connections) — `tests/characterization.test.js`
-- **loadScript()** (1 connections) — `tests/characterization.test.js`
-- **_markCandidateSuccess()** (1 connections) — `tests/characterization.test.js`
-- **observe()** (1 connections) — `tests/characterization.test.js`
-- **open()** (1 connections) — `tests/characterization.test.js`
-- **path** (1 connections) — `tests/characterization.test.js`
-- **pause()** (1 connections) — `tests/characterization.test.js`
-- **play()** (1 connections) — `tests/characterization.test.js`
-- **preventDefault()** (1 connections) — `tests/characterization.test.js`
-- *... and 12 more nodes in this community*
+- **tizen-build/build.mjs** (26 connections) — `tizen-build/build.mjs`
+- **legacyCompiler.mjs** (15 connections) — `scripts/legacyCompiler.mjs`
+- **webos-build/build.mjs** (13 connections) — `webos-build/build.mjs`
+- **buildLegacyApp()** (8 connections) — `scripts/legacyCompiler.mjs`
+- **walkDir()** (6 connections) — `scripts/legacyCompiler.mjs`
+- **ref_node_fs** (4 connections)
+- **ref_node_path** (4 connections)
+- **DESKTOP_DOWNLOAD_FILES** (3 connections) — `scripts/legacyCompiler.mjs`
+- **loadBuildTools()** (3 connections) — `scripts/legacyCompiler.mjs`
+- **resolveVarsWithMap()** (3 connections) — `scripts/legacyCompiler.mjs`
+- **verifyEs5Files()** (3 connections) — `scripts/legacyCompiler.mjs`
+- **buildWgtArchive()** (3 connections) — `tizen-build/build.mjs`
+- **ref_node_url** (2 connections)
+- **collectThemeTokens()** (2 connections) — `scripts/legacyCompiler.mjs`
+- **createLegacyCssPlugin()** (2 connections) — `scripts/legacyCompiler.mjs`
+- **stripDesktopDownloadHtmlTags()** (2 connections) — `scripts/legacyCompiler.mjs`
+- **crc32()** (2 connections) — `tizen-build/build.mjs`
+- **ref_node_child_process** (1 connections)
+- **ref_node_module** (1 connections)
+- **ref_node_zlib** (1 connections)
+- **prefixSelectorForTheme()** (1 connections) — `scripts/legacyCompiler.mjs`
+- **CRC_TABLE** (1 connections) — `tizen-build/build.mjs`
+- **DIST** (1 connections) — `tizen-build/build.mjs`
+- **EXCLUDE_TOP** (1 connections) — `tizen-build/build.mjs`
+- **findTizenCli()** (1 connections) — `tizen-build/build.mjs`
+- *... and 16 more nodes in this community*
 
 ## Relationships
 
-- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (2 shared connections)
-- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (1 shared connections)
-- [Community 41](Community_41.md) (1 shared connections)
-- [Community 14](Community_14.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (2 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
 
 ## Source Files
 
-- `tests/characterization.test.js`
+- `scripts/legacyCompiler.mjs`
+- `tizen-build/build.mjs`
+- `webos-build/build.mjs`
 
 ## Audit Trail
 
-- EXTRACTED: 41 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 61 (95%)
+- INFERRED: 3 (5%)
 - AMBIGUOUS: 0 (0%)
 
 ---

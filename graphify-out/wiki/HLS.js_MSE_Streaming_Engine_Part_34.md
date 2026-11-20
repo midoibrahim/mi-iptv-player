@@ -1,38 +1,32 @@
 # HLS.js MSE Streaming Engine (Part 34)
 
-> 12 nodes · cohesion 0.26
+> 10 nodes · cohesion 0.42
 
 ## Key Concepts
 
-- **companionCore.js** (14 connections) — `IPTVService/companionCore.js`
-- **handle()** (5 connections) — `IPTVService/companionCore.js`
-- **proxyStream()** (5 connections) — `IPTVService/companionCore.js`
-- **ref_fs** (5 connections)
-- **createCompanionHandler()** (3 connections) — `IPTVService/companionCore.js`
-- **getLanIp()** (3 connections) — `IPTVService/companionCore.js`
-- **sendJson()** (3 connections) — `IPTVService/companionCore.js`
-- **ref_url** (3 connections)
-- **serveStatic()** (2 connections) — `IPTVService/companionCore.js`
-- **ref_https** (2 connections)
-- **IMPORTANT: webOS 3.x ships Node 0.12 -> this file must remain strict ES5** (1 connections) — `IPTVService/companionCore.js`
-- **ref_os** (1 connections)
+- **channelDrawer.js** (9 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **appendChunk()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **close()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **handleKey()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **open()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **renderChannels()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **focusItem()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **renderCategories()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **toggle()** (2 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **init()** (1 connections) — `IPTVPlayer/js/components/channelDrawer.js`
 
 ## Relationships
 
-- [Community 14](Community_14.md) (5 shared connections)
-- [Community 41](Community_41.md) (3 shared connections)
-- [Community 4](Community_4.md) (1 shared connections)
-- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
-- [Package Configuration & Dependencies (35)](Package_Configuration_&_Dependencies_35.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVService/companionCore.js`
+- `IPTVPlayer/js/components/channelDrawer.js`
 
 ## Audit Trail
 
-- EXTRACTED: 24 (83%)
-- INFERRED: 5 (17%)
+- EXTRACTED: 19 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

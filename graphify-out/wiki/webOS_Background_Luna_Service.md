@@ -1,45 +1,40 @@
 # webOS Background Luna Service
 
-> 20 nodes · cohesion 0.15
+> 18 nodes · cohesion 0.11
 
 ## Key Concepts
 
-- **legacyCompiler.mjs** (15 connections) — `scripts/legacyCompiler.mjs`
-- **webos-build/build.mjs** (13 connections) — `webos-build/build.mjs`
-- **buildLegacyApp()** (8 connections) — `scripts/legacyCompiler.mjs`
-- **ref_node_fs** (4 connections)
-- **ref_node_path** (4 connections)
-- **DESKTOP_DOWNLOAD_FILES** (3 connections) — `scripts/legacyCompiler.mjs`
-- **loadBuildTools()** (3 connections) — `scripts/legacyCompiler.mjs`
-- **resolveVarsWithMap()** (3 connections) — `scripts/legacyCompiler.mjs`
-- **verifyEs5Files()** (3 connections) — `scripts/legacyCompiler.mjs`
-- **ref_node_url** (2 connections)
-- **collectThemeTokens()** (2 connections) — `scripts/legacyCompiler.mjs`
-- **createLegacyCssPlugin()** (2 connections) — `scripts/legacyCompiler.mjs`
-- **stripDesktopDownloadHtmlTags()** (2 connections) — `scripts/legacyCompiler.mjs`
-- **ref_node_module** (1 connections)
-- **prefixSelectorForTheme()** (1 connections) — `scripts/legacyCompiler.mjs`
-- **EXCLUDE_TOP** (1 connections) — `webos-build/build.mjs`
-- **HERE** (1 connections) — `webos-build/build.mjs`
-- **log()** (1 connections) — `webos-build/build.mjs`
-- **OUT** (1 connections) — `webos-build/build.mjs`
-- **SRC** (1 connections) — `webos-build/build.mjs`
+- **package.json** (9 connections) — `package.json`
+- **scripts** (9 connections) — `package.json`
+- **author** (1 connections) — `package.json`
+- **description** (1 connections) — `package.json`
+- **keywords** (1 connections) — `package.json`
+- **license** (1 connections) — `package.json`
+- **name** (1 connections) — `package.json`
+- **private** (1 connections) — `package.json`
+- **build:all** (1 connections) — `package.json`
+- **build:tizen** (1 connections) — `package.json`
+- **build:webos** (1 connections) — `package.json`
+- **build:windows** (1 connections) — `package.json`
+- **setup** (1 connections) — `package.json`
+- **start:server** (1 connections) — `package.json`
+- **start:windows** (1 connections) — `package.json`
+- **test** (1 connections) — `package.json`
+- **version** (1 connections) — `package.json`
+- **workspaces** (1 connections) — `package.json`
 
 ## Relationships
 
-- [Community 15](Community_15.md) (8 shared connections)
-- [Community 4](Community_4.md) (2 shared connections)
-- [Electron Background Downloader](Electron_Background_Downloader.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `scripts/legacyCompiler.mjs`
-- `webos-build/build.mjs`
+- `package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 39 (95%)
-- INFERRED: 2 (5%)
+- EXTRACTED: 17 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

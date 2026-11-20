@@ -1,12 +1,11 @@
 # Legacy JavaScript Polyfills
 
-> 3 nodes · cohesion 1.00
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **streamResolver.js** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
-- **buildCandidates()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
-- **getStrategy()** (2 connections) — `IPTVPlayer/js/services/streamResolver.js`
+- **polyfills.js** (1 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **NOTE: function expression (not declaration) - Chromium 38 rejects block-level** (1 connections) — `IPTVPlayer/js/core/polyfills.js`
 
 ## Relationships
 
@@ -14,11 +13,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/streamResolver.js`
+- `IPTVPlayer/js/core/polyfills.js`
 
 ## Audit Trail
 
-- EXTRACTED: 3 (100%)
+- EXTRACTED: 1 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

@@ -1,31 +1,33 @@
 # Search Engine & Filter View
 
-> 10 nodes · cohesion 0.42
+> 8 nodes · cohesion 0.25
 
 ## Key Concepts
 
-- **homeView.js** (9 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_addContinueWatchingRow()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **render()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **resumeItem()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **showResumeModal()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
-- **closeResumeModal()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_fmtRemaining()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_addRow()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
-- **_fmtTime()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
+- **xo()** (9 connections) — `IPTVPlayer/js/hls.min.js`
+- **Mo()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **jo()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ws()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Yo()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Co()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Lo()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **wo()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (8 shared connections)
+- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (1 shared connections)
+- [Community 15](Community_15.md) (1 shared connections)
+- [QR Code Generation Library](QR_Code_Generation_Library.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/views/homeView.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
+- EXTRACTED: 20 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

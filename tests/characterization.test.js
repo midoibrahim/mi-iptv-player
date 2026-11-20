@@ -1422,3 +1422,46 @@ test('downloadUtils.parseContentRange parses valid ranges and rejects malformed 
     assert.equal(downloadUtils.parseContentRange(null), null);
 });
 
+test('BrowseView renders .header-category and updates it when category selection changes', () => {
+    const contentEl = { className: '', scrollTop: 0, innerHTML: '' };
+    const countHeader = { textContent: '' };
+    const catHeader = { textContent: '', title: '' };
+    let capturedHtml = '';
+
+    const sectionEl = {
+        get innerHTML() { return capturedHtml; },
+        set innerHTML(val) { capturedHtml = val; },
+        querySelector(sel) {
+            if (sel === '.browse-content') return contentEl;
+            if (sel === '.header-count') return countHeader;
+            if (sel === '.header-category') return catHeader;
+            return null;
+        },
+        querySelectorAll: () => []
+    };
+
+    const env = createBrowserEnv();
+    env.window.document.getElementById = (id) => (id === 'section-live' ? sectionEl : null);
+    loadScript(env, 'IPTVPlayer/js/views/browseView.js');
+    const { BrowseView } = env.window.IPTV;
+
+    const view = new BrowseView('live', { title: 'Live TV', cardType: 'live', unitName: 'channels', app: {} });
+    view._bindControls = () => {};
+    view._renderCategories = () => {};
+    view._renderGrid = () => {};
+    view.items = [{ id: '1', name: 'News 1', category: 'News' }];
+    view._byCategory = { News: view.items };
+
+    view.render();
+    assert.match(capturedHtml, /<span class="header-category">All<\/span>/);
+    assert.equal(catHeader.textContent, 'All');
+    assert.equal(catHeader.title, 'All');
+
+    view.selectedCategory = 'News';
+    view._refreshContent();
+    assert.equal(catHeader.textContent, 'News');
+    assert.equal(catHeader.title, 'News');
+    assert.equal(countHeader.textContent, '1 channels');
+});
+
+

@@ -1,14 +1,12 @@
 # Legacy JavaScript Polyfills
 
-> 5 nodes · cohesion 0.60
+> 3 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **searchView.js** (4 connections) — `IPTVPlayer/js/views/searchView.js`
-- **search()** (3 connections) — `IPTVPlayer/js/views/searchView.js`
-- **_collectPoolMatches()** (2 connections) — `IPTVPlayer/js/views/searchView.js`
-- **init()** (2 connections) — `IPTVPlayer/js/views/searchView.js`
-- **focusInput()** (1 connections) — `IPTVPlayer/js/views/searchView.js`
+- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Relationships
 
@@ -16,11 +14,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/views/searchView.js`
+- `IPTVPlayer/js/services/watchProgressTracker.js`
 
 ## Audit Trail
 
-- EXTRACTED: 6 (100%)
+- EXTRACTED: 3 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

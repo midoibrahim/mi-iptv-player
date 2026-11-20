@@ -203,7 +203,24 @@
 }
 .header-info {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+.header-category {
+    margin-left: 18px;
+    padding: 6px 20px;
+    background: var(--accent-subtle);
+    color: var(--accent);
+    border: 1.5px solid var(--accent-border);
+    border-radius: var(--radius-full);
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 800;
+    max-width: 680px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .header-count {
     margin-left: 20px;

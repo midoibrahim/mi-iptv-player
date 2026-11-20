@@ -1,17 +1,15 @@
 # HLS.js MSE Streaming Engine (Part 44)
 
-> 8 nodes · cohesion 0.43
+> 6 nodes · cohesion 0.40
 
 ## Key Concepts
 
-- **pairingRelay.js** (7 connections) — `IPTVPlayer/js/services/pairingRelay.js`
-- **createSession()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
-- **deleteSession()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
-- **pollSession()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
-- **stop()** (3 connections) — `IPTVPlayer/js/services/pairingRelay.js`
-- **decrypt()** (2 connections) — `IPTVPlayer/js/services/pairingRelay.js`
-- **_generateKey()** (2 connections) — `IPTVPlayer/js/services/pairingRelay.js`
-- **encrypt()** (1 connections) — `IPTVPlayer/js/services/pairingRelay.js`
+- **backStack.js** (5 connections) — `IPTVPlayer/js/core/backStack.js`
+- **pop()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
+- **push()** (2 connections) — `IPTVPlayer/js/core/backStack.js`
+- **clear()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
+- **handleBack()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
+- **register()** (1 connections) — `IPTVPlayer/js/core/backStack.js`
 
 ## Relationships
 
@@ -19,11 +17,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/pairingRelay.js`
+- `IPTVPlayer/js/core/backStack.js`
 
 ## Audit Trail
 
-- EXTRACTED: 12 (100%)
+- EXTRACTED: 6 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

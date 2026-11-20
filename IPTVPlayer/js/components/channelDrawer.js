@@ -148,6 +148,11 @@ window.IPTV.ChannelDrawer = {
         if (!listEl) return;
         listEl.innerHTML = '';
 
+        const drawerTitle = document.querySelector('#player-channel-drawer .drawer-title');
+        if (drawerTitle) {
+            drawerTitle.textContent = this.selectedCategory ? `Channels · ${this.selectedCategory}` : 'Channels · All';
+        }
+
         const allChannels = window.IPTV.CatalogStore ? window.IPTV.CatalogStore.getLive() : [];
         const selCat = this.selectedCategory;
 

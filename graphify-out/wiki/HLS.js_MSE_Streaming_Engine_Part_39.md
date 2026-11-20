@@ -1,19 +1,17 @@
 # HLS.js MSE Streaming Engine (Part 39)
 
-> 10 nodes · cohesion 0.38
+> 8 nodes · cohesion 0.43
 
 ## Key Concepts
 
-- **seriesDetailView.js** (9 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderEpisodesList()** (5 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **renderScreen()** (4 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **init()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **updateFavoriteState()** (3 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **buildEpisodePlayItem()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **close()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **focusEpisodeCard()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **_formatEpisodeTitle()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
-- **open()** (2 connections) — `IPTVPlayer/js/views/seriesDetailView.js`
+- **downloadStore.js** (7 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **collectPendingEpisodes()** (4 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **getDownloadedItem()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isCompleted()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **buildEpisodePayload()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDesktop()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDownloading()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **applySnapshot()** (1 connections) — `IPTVPlayer/js/services/downloadStore.js`
 
 ## Relationships
 
@@ -21,11 +19,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/views/seriesDetailView.js`
+- `IPTVPlayer/js/services/downloadStore.js`
 
 ## Audit Trail
 
-- EXTRACTED: 17 (100%)
+- EXTRACTED: 12 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

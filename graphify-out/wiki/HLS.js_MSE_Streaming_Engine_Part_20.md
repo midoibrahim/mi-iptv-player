@@ -4,32 +4,29 @@
 
 ## Key Concepts
 
-- **dt()** (22 connections) — `IPTVPlayer/js/hls.min.js`
-- **Me()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **ce()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **ke()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **b()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ee()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **J()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **re()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **te()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **we()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ct()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **De()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Oe()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **q()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **qe()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **W()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Z()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **hu()** (11 connections) — `IPTVPlayer/js/hls.min.js`
+- **ga()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **uu()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ua()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **wa()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ll()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Rl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Xt()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ba()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **fa()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ju()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ma()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Oa()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **qu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **va()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Xu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Yu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
 - [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (17 shared connections)
-- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (7 shared connections)
-- [Community 13](Community_13.md) (3 shared connections)
-- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (3 shared connections)
-- [Community 33](Community_33.md) (2 shared connections)
-- [Vector Icon System](Vector_Icon_System.md) (1 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (6 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (1 shared connections)
 
 ## Source Files
 
@@ -37,8 +34,8 @@
 
 ## Audit Trail
 
-- EXTRACTED: 33 (66%)
-- INFERRED: 17 (34%)
+- EXTRACTED: 40 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

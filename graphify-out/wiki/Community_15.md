@@ -1,44 +1,53 @@
 # Community 15
 
-> 21 nodes · cohesion 0.10
+> 23 nodes · cohesion 0.10
 
 ## Key Concepts
 
-- **tizen-build/build.mjs** (26 connections) — `tizen-build/build.mjs`
-- **walkDir()** (6 connections) — `scripts/legacyCompiler.mjs`
-- **buildWgtArchive()** (3 connections) — `tizen-build/build.mjs`
-- **crc32()** (2 connections) — `tizen-build/build.mjs`
-- **ref_node_child_process** (1 connections)
-- **ref_node_zlib** (1 connections)
-- **CRC_TABLE** (1 connections) — `tizen-build/build.mjs`
-- **DIST** (1 connections) — `tizen-build/build.mjs`
-- **EXCLUDE_TOP** (1 connections) — `tizen-build/build.mjs`
-- **findTizenCli()** (1 connections) — `tizen-build/build.mjs`
-- **HERE** (1 connections) — `tizen-build/build.mjs`
-- **log()** (1 connections) — `tizen-build/build.mjs`
-- **OUT** (1 connections) — `tizen-build/build.mjs`
-- **ROOT** (1 connections) — `tizen-build/build.mjs`
-- **sizeKb** (1 connections) — `tizen-build/build.mjs`
-- **SRC** (1 connections) — `tizen-build/build.mjs`
-- **tizenCli** (1 connections) — `tizen-build/build.mjs`
-- **usbUserwidgetDir** (1 connections) — `tizen-build/build.mjs`
-- **usbWgtPath** (1 connections) — `tizen-build/build.mjs`
-- **WEBOS_BUILD_DIR** (1 connections) — `tizen-build/build.mjs`
-- **wgtPath** (1 connections) — `tizen-build/build.mjs`
+- **T()** (27 connections) — `IPTVPlayer/js/hls.min.js`
+- **c()** (12 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ue()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ni()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **be()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Dd()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Le()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **lt()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Pd()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **tt()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **xe()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **In()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **an()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ci()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Gi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **ie()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Ii()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Mi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Oi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Pl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **pu()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Vl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **t()** (1 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (8 shared connections)
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (22 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (12 shared connections)
+- [Community 18](Community_18.md) (5 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (3 shared connections)
+- [Community 37](Community_37.md) (2 shared connections)
+- [QR Code Generation Library](QR_Code_Generation_Library.md) (1 shared connections)
+- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (1 shared connections)
+- [Search Engine & Filter View](Search_Engine_&_Filter_View.md) (1 shared connections)
 
 ## Source Files
 
-- `scripts/legacyCompiler.mjs`
-- `tizen-build/build.mjs`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 30 (97%)
-- INFERRED: 1 (3%)
+- EXTRACTED: 65 (87%)
+- INFERRED: 10 (13%)
 - AMBIGUOUS: 0 (0%)
 
 ---

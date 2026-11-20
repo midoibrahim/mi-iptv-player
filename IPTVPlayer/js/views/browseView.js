@@ -97,6 +97,7 @@ window.IPTV.BrowseView = class {
                 <div class="section-header">
                     <div class="header-info">
                         <h2>${this.title}</h2>
+                        <span class="header-category">All</span>
                         <span class="header-count">0 ${this.unitName}</span>
                     </div>
                     <div class="section-controls">
@@ -291,7 +292,16 @@ window.IPTV.BrowseView = class {
     _refreshContent() {
         const content = this.sectionEl.querySelector('.browse-content');
         const countHeader = this.sectionEl.querySelector('.header-count');
+        const catHeader = this.sectionEl.querySelector('.header-category');
         if (!content) return;
+
+        const catLabel = (!this.selectedCategory || this.selectedCategory === 'all')
+            ? 'All'
+            : this.selectedCategory;
+        if (catHeader) {
+            catHeader.textContent = catLabel;
+            catHeader.title = catLabel;
+        }
 
         // O(1) category lookup via pre-built _byCategory bucket
         this._filteredItems = this.selectedCategory === 'all'

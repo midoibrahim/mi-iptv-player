@@ -1,33 +1,34 @@
 # HLS.js MSE Streaming Engine (Part 12)
 
-> 24 nodes · cohesion 0.11
+> 25 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **webos-build/package.json** (14 connections) — `webos-build/package.json`
-- **devDependencies** (9 connections) — `webos-build/package.json`
-- **acorn** (2 connections) — `webos-build/package.json`
-- **autoprefixer** (2 connections) — `webos-build/package.json`
-- **@babel/core** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env** (2 connections) — `webos-build/package.json`
-- **core-js** (2 connections) — `webos-build/package.json`
-- **esbuild** (2 connections) — `webos-build/package.json`
-- **postcss** (2 connections) — `webos-build/package.json`
-- **regenerator-runtime** (2 connections) — `webos-build/package.json`
-- **acorn@^8.19.0** (2 connections) — `webos-build/package.json`
-- **autoprefixer@^10.6.2** (2 connections) — `webos-build/package.json`
-- **@babel/core@^7.26.0** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env@^7.26.0** (2 connections) — `webos-build/package.json`
-- **core-js@^3.39.0** (2 connections) — `webos-build/package.json`
-- **esbuild@^0.24.0** (2 connections) — `webos-build/package.json`
-- **postcss@^8.4.49** (2 connections) — `webos-build/package.json`
-- **regenerator-runtime@^0.14.1** (2 connections) — `webos-build/package.json`
-- **scripts** (2 connections) — `webos-build/package.json`
-- **description** (1 connections) — `webos-build/package.json`
-- **name** (1 connections) — `webos-build/package.json`
-- **private** (1 connections) — `webos-build/package.json`
-- **build** (1 connections) — `webos-build/package.json`
-- **type** (1 connections) — `webos-build/package.json`
+- **playbackEngine.js** (24 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **loadCandidate()** (9 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **tryNextCandidate()** (7 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **destroy()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **playTizenAvPlay()** (6 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **clearWatchdog()** (5 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **startWatchdog()** (5 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **playNativeDirect()** (4 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **startStallMonitor()** (4 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **_addCandidateListener()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **destroyTizenAvPlay()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **isTizenAvPlayAvailable()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **stopStallMonitor()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **suspend()** (3 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **_clearVideoListeners()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **getEngineProfile()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **isPaused()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **loadScriptOnce()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **play()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **restore()** (2 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **canSeek()** (1 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **getCurrentTime()** (1 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **getDuration()** (1 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **pause()** (1 connections) — `IPTVPlayer/js/services/playbackEngine.js`
+- **seekTo()** (1 connections) — `IPTVPlayer/js/services/playbackEngine.js`
 
 ## Relationships
 
@@ -35,11 +36,11 @@
 
 ## Source Files
 
-- `webos-build/package.json`
+- `IPTVPlayer/js/services/playbackEngine.js`
 
 ## Audit Trail
 
-- EXTRACTED: 31 (100%)
+- EXTRACTED: 51 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

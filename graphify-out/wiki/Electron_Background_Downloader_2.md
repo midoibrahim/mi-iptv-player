@@ -1,45 +1,39 @@
 # Electron Background Downloader
 
-> 16 nodes · cohesion 0.17
+> 15 nodes · cohesion 0.23
 
 ## Key Concepts
 
-- **tvServer.js** (8 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **Universal Cross-Platform Architecture (webOS + Electron)** (4 connections) — `README.md`
-- **QR Code Phone Setup & Background Server** (4 connections) — `README.md`
-- **getSetupInfo()** (4 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **MI IPTV Player Documentation** (4 connections) — `README.md`
-- **10-Foot TV User Interface Architecture** (3 connections) — `README.md`
-- **ensureStarted()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **isWebOS()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **resolveApiBase()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **stop()** (3 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **Multi-Stage Playback & Stream Pipeline** (2 connections) — `README.md`
-- **pollCredentials()** (2 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **10-Foot TV Application Shell & Screens** (1 connections) — `IPTVPlayer/index.html`
-- **isRunning()** (1 connections) — `IPTVPlayer/js/services/tvServer.js`
-- **Companion Phone Web Setup Interface** (1 connections) — `IPTVPlayer/setup.html`
-- **LG webOS Compatibility Matrix (webOS 3.x - 25+)** (1 connections) — `README.md`
+- **xtreamService.js** (11 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **loadAll()** (5 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **m3uParser.js** (3 connections) — `IPTVPlayer/js/services/m3uParser.js`
+- **buildEpisodePlayItem()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **fetchJson()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **getSeriesInfo()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **resolveEpisodeUrl()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **streamUrl()** (3 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **Xtream Codes & M3U Playlist Protocol Engine** (2 connections) — `README.md`
+- **load()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
+- **parseExtinf()** (2 connections) — `IPTVPlayer/js/services/m3uParser.js`
+- **buildCatMap()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **formatEpisodeTitle()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **loadSeriesSeasons()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
+- **_yieldToMain()** (2 connections) — `IPTVPlayer/js/services/xtreamService.js`
 
 ## Relationships
 
-- [Browse View & Playlist Virtualization](Browse_View_&_Playlist_Virtualization.md) (1 shared connections)
-- [webOS Background Luna Service](webOS_Background_Luna_Service.md) (1 shared connections)
-- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
-- [Community 41](Community_41.md) (1 shared connections)
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/index.html`
-- `IPTVPlayer/js/services/tvServer.js`
-- `IPTVPlayer/setup.html`
+- `IPTVPlayer/js/services/m3uParser.js`
+- `IPTVPlayer/js/services/xtreamService.js`
 - `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 20 (77%)
-- INFERRED: 6 (23%)
+- EXTRACTED: 22 (92%)
+- INFERRED: 2 (8%)
 - AMBIGUOUS: 0 (0%)
 
 ---

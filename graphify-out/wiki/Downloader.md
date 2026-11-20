@@ -2,7 +2,7 @@
 
 > God node · 52 connections · `windows/downloader.js`
 
-**Community:** [webOS Build & ES5 Transpilation Pipeline](webOS_Build_&_ES5_Transpilation_Pipeline.md)
+**Community:** [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md)
 
 ## Connections by Relation
 

@@ -1,52 +1,46 @@
 # Community 14
 
-> 23 nodes · cohesion 0.14
+> 24 nodes · cohesion 0.11
 
 ## Key Concepts
 
-- **downloader.js** (28 connections) — `windows/downloader.js`
-- **downloadUtils.js** (22 connections) — `windows/downloadUtils.js`
-- **resolveDownloadTarget()** (5 connections) — `windows/downloadUtils.js`
-- **ensureDir()** (4 connections) — `windows/downloadUtils.js`
-- **formatBytes()** (4 connections) — `windows/downloadUtils.js`
-- **sanitizeFileName()** (4 connections) — `windows/downloadUtils.js`
-- **serializeTask()** (4 connections) — `windows/downloadUtils.js`
-- **createSegments()** (3 connections) — `windows/downloadUtils.js`
-- **loadSegmentMeta()** (3 connections) — `windows/downloadUtils.js`
-- **removeSegmentMeta()** (3 connections) — `windows/downloadUtils.js`
-- **remuxToMp4()** (3 connections) — `windows/downloadUtils.js`
-- **saveSegmentMeta()** (3 connections) — `windows/downloadUtils.js`
-- **._sanitizeFileName()** (2 connections) — `windows/downloader.js`
-- **{ app, dialog, shell, powerSaveBlocker }** (1 connections) — `windows/downloader.js`
-- **fs** (1 connections) — `windows/downloader.js`
-- **http** (1 connections) — `windows/downloader.js`
-- **https** (1 connections) — `windows/downloader.js`
-- **path** (1 connections) — `windows/downloader.js`
-- **{ URL }** (1 connections) — `windows/downloader.js`
-- **fs** (1 connections) — `windows/downloadUtils.js`
-- **path** (1 connections) — `windows/downloadUtils.js`
-- **{ spawn }** (1 connections) — `windows/downloadUtils.js`
-- **{ URL }** (1 connections) — `windows/downloadUtils.js`
+- **webos-build/package.json** (14 connections) — `webos-build/package.json`
+- **devDependencies** (9 connections) — `webos-build/package.json`
+- **acorn** (2 connections) — `webos-build/package.json`
+- **autoprefixer** (2 connections) — `webos-build/package.json`
+- **@babel/core** (2 connections) — `webos-build/package.json`
+- **@babel/preset-env** (2 connections) — `webos-build/package.json`
+- **core-js** (2 connections) — `webos-build/package.json`
+- **esbuild** (2 connections) — `webos-build/package.json`
+- **postcss** (2 connections) — `webos-build/package.json`
+- **regenerator-runtime** (2 connections) — `webos-build/package.json`
+- **acorn@^8.19.0** (2 connections) — `webos-build/package.json`
+- **autoprefixer@^10.6.2** (2 connections) — `webos-build/package.json`
+- **@babel/core@^7.26.0** (2 connections) — `webos-build/package.json`
+- **@babel/preset-env@^7.26.0** (2 connections) — `webos-build/package.json`
+- **core-js@^3.39.0** (2 connections) — `webos-build/package.json`
+- **esbuild@^0.24.0** (2 connections) — `webos-build/package.json`
+- **postcss@^8.4.49** (2 connections) — `webos-build/package.json`
+- **regenerator-runtime@^0.14.1** (2 connections) — `webos-build/package.json`
+- **scripts** (2 connections) — `webos-build/package.json`
+- **description** (1 connections) — `webos-build/package.json`
+- **name** (1 connections) — `webos-build/package.json`
+- **private** (1 connections) — `webos-build/package.json`
+- **build** (1 connections) — `webos-build/package.json`
+- **type** (1 connections) — `webos-build/package.json`
 
 ## Relationships
 
-- [webOS Build & ES5 Transpilation Pipeline](webOS_Build_&_ES5_Transpilation_Pipeline.md) (15 shared connections)
-- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (5 shared connections)
-- [Community 41](Community_41.md) (3 shared connections)
-- [Package Configuration & Dependencies (35)](Package_Configuration_&_Dependencies_35.md) (2 shared connections)
-- [Community 18](Community_18.md) (1 shared connections)
-- [Community 4](Community_4.md) (1 shared connections)
-- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `windows/downloadUtils.js`
-- `windows/downloader.js`
+- `webos-build/package.json`
 
 ## Audit Trail
 
-- EXTRACTED: 50 (79%)
-- INFERRED: 13 (21%)
+- EXTRACTED: 31 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

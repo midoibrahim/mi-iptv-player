@@ -33,16 +33,16 @@
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (35 shared connections)
-- [Community 13](Community_13.md) (22 shared connections)
+- [Electron Background Downloader](Electron_Background_Downloader.md) (35 shared connections)
+- [Community 15](Community_15.md) (22 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (17 shared connections)
 - [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (17 shared connections)
-- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (17 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (16 shared connections)
-- [QR Code Generation Library](QR_Code_Generation_Library.md) (13 shared connections)
-- [Community 32](Community_32.md) (12 shared connections)
-- [Vector Icon System](Vector_Icon_System.md) (9 shared connections)
-- [HLS.js MSE Streaming Engine (Part 42)](HLS.js_MSE_Streaming_Engine_Part_42.md) (8 shared connections)
-- [Community 33](Community_33.md) (8 shared connections)
+- [Community 18](Community_18.md) (16 shared connections)
+- [Settings & Preferences View](Settings_&_Preferences_View.md) (13 shared connections)
+- [Package Configuration & Dependencies (30)](Package_Configuration_&_Dependencies_30.md) (12 shared connections)
+- [Community 37](Community_37.md) (9 shared connections)
+- [Search Engine & Filter View](Search_Engine_&_Filter_View.md) (8 shared connections)
+- [QR Code Generation Library](QR_Code_Generation_Library.md) (8 shared connections)
 - [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (4 shared connections)
 
 ## Source Files

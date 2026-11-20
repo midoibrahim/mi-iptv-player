@@ -1,50 +1,56 @@
 # Electron Background Downloader
 
-> 30 nodes · cohesion 0.11
+> 32 nodes · cohesion 0.17
 
 ## Key Concepts
 
-- **keyHandler.js** (21 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **handleKeyDown()** (13 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **spatialNav.js** (8 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **navigate()** (6 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **focusElement()** (4 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **_ensureSideNavBinding()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **_findFirstFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **isFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **2D Cartesian Spatial Navigation & Focus Memory** (2 connections) — `README.md`
-- **getDirection()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **init()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isBackKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isChannelDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isChannelUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isDesktopSearchShortcut()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isEnterKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isFavoriteKey()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isPlayerActive()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeDown()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeMute()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isVolumeUp()** (2 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **ensureVisible()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **getActiveRoot()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
-- **exitApp()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- **isBackwardKey()** (1 connections) — `IPTVPlayer/js/core/keyHandler.js`
-- *... and 5 more nodes in this community*
+- **E()** (23 connections) — `IPTVPlayer/js/hls.min.js`
+- **i()** (23 connections) — `IPTVPlayer/js/hls.min.js`
+- **r()** (22 connections) — `IPTVPlayer/js/hls.min.js`
+- **n()** (21 connections) — `IPTVPlayer/js/hls.min.js`
+- **a()** (20 connections) — `IPTVPlayer/js/hls.min.js`
+- **o()** (20 connections) — `IPTVPlayer/js/hls.min.js`
+- **l()** (17 connections) — `IPTVPlayer/js/hls.min.js`
+- **s()** (14 connections) — `IPTVPlayer/js/hls.min.js`
+- **yt()** (12 connections) — `IPTVPlayer/js/hls.min.js`
+- **on()** (11 connections) — `IPTVPlayer/js/hls.min.js`
+- **f()** (8 connections) — `IPTVPlayer/js/hls.min.js`
+- **ne()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **xn()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **currentTime()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **pt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **ve()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **yr()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **bufferedEnd()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **es()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **y()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **ze()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **duration()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **fe()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **ti()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **ae()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- *... and 7 more nodes in this community*
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (35 shared connections)
+- [Community 18](Community_18.md) (18 shared connections)
+- [Community 15](Community_15.md) (12 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (7 shared connections)
+- [Settings & Preferences View](Settings_&_Preferences_View.md) (7 shared connections)
+- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (6 shared connections)
+- [QR Code Generation Library](QR_Code_Generation_Library.md) (6 shared connections)
+- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (2 shared connections)
+- [Search Engine & Filter View](Search_Engine_&_Filter_View.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/keyHandler.js`
-- `IPTVPlayer/js/core/spatialNav.js`
-- `README.md`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 47 (96%)
-- INFERRED: 2 (4%)
+- EXTRACTED: 95 (53%)
+- INFERRED: 84 (47%)
 - AMBIGUOUS: 0 (0%)
 
 ---

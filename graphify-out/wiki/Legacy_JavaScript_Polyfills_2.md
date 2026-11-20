@@ -1,14 +1,11 @@
 # Legacy JavaScript Polyfills
 
-> 5 nodes · cohesion 0.40
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **IPTVService/package.json** (4 connections) — `IPTVService/package.json`
-- **description** (1 connections) — `IPTVService/package.json`
-- **main** (1 connections) — `IPTVService/package.json`
-- **name** (1 connections) — `IPTVService/package.json`
-- **version** (1 connections) — `IPTVService/package.json`
+- **icons.js** (1 connections) — `IPTVPlayer/js/core/icons.js`
+- **get()** (1 connections) — `IPTVPlayer/js/core/icons.js`
 
 ## Relationships
 
@@ -16,11 +13,11 @@
 
 ## Source Files
 
-- `IPTVService/package.json`
+- `IPTVPlayer/js/core/icons.js`
 
 ## Audit Trail
 
-- EXTRACTED: 4 (100%)
+- EXTRACTED: 1 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

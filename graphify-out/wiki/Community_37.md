@@ -1,32 +1,34 @@
 # Community 37
 
-> 10 nodes · cohesion 0.42
+> 9 nodes · cohesion 0.25
 
 ## Key Concepts
 
-- **channelDrawer.js** (9 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **appendChunk()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **close()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **handleKey()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **open()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **renderChannels()** (4 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **focusItem()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **renderCategories()** (3 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **toggle()** (2 connections) — `IPTVPlayer/js/components/channelDrawer.js`
-- **init()** (1 connections) — `IPTVPlayer/js/components/channelDrawer.js`
+- **pe()** (6 connections) — `IPTVPlayer/js/hls.min.js`
+- **jt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **ft()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **ot()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **bt()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **Wl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **jl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **Kt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **qt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (9 shared connections)
+- [Community 15](Community_15.md) (2 shared connections)
+- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
+- [QR Code Generation Library](QR_Code_Generation_Library.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/components/channelDrawer.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 19 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 21 (95%)
+- INFERRED: 1 (5%)
 - AMBIGUOUS: 0 (0%)
 
 ---

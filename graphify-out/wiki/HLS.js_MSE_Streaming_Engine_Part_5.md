@@ -1,56 +1,50 @@
 # HLS.js MSE Streaming Engine (Part 5)
 
-> 32 nodes · cohesion 0.17
+> 39 nodes · cohesion 0.05
 
 ## Key Concepts
 
-- **E()** (23 connections) — `IPTVPlayer/js/hls.min.js`
-- **i()** (23 connections) — `IPTVPlayer/js/hls.min.js`
-- **r()** (22 connections) — `IPTVPlayer/js/hls.min.js`
-- **n()** (21 connections) — `IPTVPlayer/js/hls.min.js`
-- **a()** (20 connections) — `IPTVPlayer/js/hls.min.js`
-- **o()** (20 connections) — `IPTVPlayer/js/hls.min.js`
-- **l()** (17 connections) — `IPTVPlayer/js/hls.min.js`
-- **s()** (14 connections) — `IPTVPlayer/js/hls.min.js`
-- **yt()** (12 connections) — `IPTVPlayer/js/hls.min.js`
-- **on()** (11 connections) — `IPTVPlayer/js/hls.min.js`
-- **f()** (8 connections) — `IPTVPlayer/js/hls.min.js`
-- **ne()** (6 connections) — `IPTVPlayer/js/hls.min.js`
-- **xn()** (6 connections) — `IPTVPlayer/js/hls.min.js`
-- **currentTime()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **pt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **ve()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **yr()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **bufferedEnd()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **es()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **y()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **ze()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **duration()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **fe()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ti()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **ae()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- *... and 7 more nodes in this community*
+- **characterization.test.js** (43 connections) — `tests/characterization.test.js`
+- **ref_node_assert** (1 connections)
+- **ref_node_events** (1 connections)
+- **ref_node_os** (1 connections)
+- **ref_node_test** (1 connections)
+- **ref_node_vm** (1 connections)
+- **add()** (1 connections) — `tests/characterization.test.js`
+- **addEventListener()** (1 connections) — `tests/characterization.test.js`
+- **assert** (1 connections) — `tests/characterization.test.js`
+- **contains()** (1 connections) — `tests/characterization.test.js`
+- **createBrowserEnv()** (1 connections) — `tests/characterization.test.js`
+- **disconnect()** (1 connections) — `tests/characterization.test.js`
+- **focus()** (1 connections) — `tests/characterization.test.js`
+- **fs** (1 connections) — `tests/characterization.test.js`
+- **getElementById()** (1 connections) — `tests/characterization.test.js`
+- **innerHTML()** (1 connections) — `tests/characterization.test.js`
+- **invoke()** (1 connections) — `tests/characterization.test.js`
+- **load()** (1 connections) — `tests/characterization.test.js`
+- **loadScript()** (1 connections) — `tests/characterization.test.js`
+- **_markCandidateSuccess()** (1 connections) — `tests/characterization.test.js`
+- **observe()** (1 connections) — `tests/characterization.test.js`
+- **open()** (1 connections) — `tests/characterization.test.js`
+- **path** (1 connections) — `tests/characterization.test.js`
+- **pause()** (1 connections) — `tests/characterization.test.js`
+- **play()** (1 connections) — `tests/characterization.test.js`
+- *... and 14 more nodes in this community*
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (35 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (18 shared connections)
-- [Community 13](Community_13.md) (12 shared connections)
-- [HLS.js MSE Streaming Engine (Part 20)](HLS.js_MSE_Streaming_Engine_Part_20.md) (7 shared connections)
-- [QR Code Generation Library](QR_Code_Generation_Library.md) (7 shared connections)
-- [main.js & { app, BrowserWindow, ...](main.js_&_{_app,_BrowserWindow,_.md) (6 shared connections)
-- [Community 33](Community_33.md) (6 shared connections)
-- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (2 shared connections)
-- [HLS.js MSE Streaming Engine (Part 42)](HLS.js_MSE_Streaming_Engine_Part_42.md) (1 shared connections)
+- [test_diag.js & { app, BrowserWin...](test_diag.js_&_{_app,_BrowserWin.md) (2 shared connections)
+- [Community 4](Community_4.md) (2 shared connections)
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `tests/characterization.test.js`
 
 ## Audit Trail
 
-- EXTRACTED: 95 (53%)
-- INFERRED: 84 (47%)
+- EXTRACTED: 43 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

@@ -1,36 +1,32 @@
 # Package Configuration & Dependencies (35)
 
-> 10 nodes · cohesion 0.20
+> 10 nodes · cohesion 0.42
 
 ## Key Concepts
 
-- **main.js** (14 connections) — `windows/main.js`
-- **Windows Desktop Offline Download System** (3 connections) — `windows/main.js`
-- **{ app, BrowserWindow, Menu, ipcMain, powerMonitor }** (1 connections) — `windows/main.js`
-- **companionCore** (1 connections) — `windows/main.js`
-- **createWindow()** (1 connections) — `windows/main.js`
-- **fs** (1 connections) — `windows/main.js`
-- **http** (1 connections) — `windows/main.js`
-- **path** (1 connections) — `windows/main.js`
-- **setupIpcHandlers()** (1 connections) — `windows/main.js`
-- **startCompanionServer()** (1 connections) — `windows/main.js`
+- **homeView.js** (9 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_addContinueWatchingRow()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **render()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **resumeItem()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **showResumeModal()** (4 connections) — `IPTVPlayer/js/views/homeView.js`
+- **closeResumeModal()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_fmtRemaining()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
+- **init()** (3 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_addRow()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
+- **_fmtTime()** (2 connections) — `IPTVPlayer/js/views/homeView.js`
 
 ## Relationships
 
-- [Community 14](Community_14.md) (2 shared connections)
-- [Community 41](Community_41.md) (2 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
-- [Community 18](Community_18.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 34)](HLS.js_MSE_Streaming_Engine_Part_34.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `windows/main.js`
+- `IPTVPlayer/js/views/homeView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 13 (81%)
-- INFERRED: 3 (19%)
+- EXTRACTED: 19 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

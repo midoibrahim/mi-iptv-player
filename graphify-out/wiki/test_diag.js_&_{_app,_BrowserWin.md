@@ -1,36 +1,39 @@
 # test_diag.js & { app, BrowserWin...
 
-> 14 nodes · cohesion 0.24
+> 13 nodes · cohesion 0.23
 
 ## Key Concepts
 
-- **webOSTV-dev.js** (13 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **b()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **h()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **R()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **t()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **u()** (4 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **m()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **p()** (3 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **C()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **i()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **n()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **o()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **v()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
-- **y()** (2 connections) — `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- **companionCore.js** (14 connections) — `IPTVService/companionCore.js`
+- **handle()** (5 connections) — `IPTVService/companionCore.js`
+- **proxyStream()** (5 connections) — `IPTVService/companionCore.js`
+- **ref_fs** (5 connections)
+- **ref_http** (5 connections)
+- **createCompanionHandler()** (3 connections) — `IPTVService/companionCore.js`
+- **getLanIp()** (3 connections) — `IPTVService/companionCore.js`
+- **sendJson()** (3 connections) — `IPTVService/companionCore.js`
+- **ref_url** (3 connections)
+- **serveStatic()** (2 connections) — `IPTVService/companionCore.js`
+- **ref_https** (2 connections)
+- **IMPORTANT: webOS 3.x ships Node 0.12 -> this file must remain strict ES5** (1 connections) — `IPTVService/companionCore.js`
+- **ref_os** (1 connections)
 
 ## Relationships
 
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
+- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (6 shared connections)
+- [Community 32](Community_32.md) (3 shared connections)
+- [HLS.js MSE Streaming Engine (Part 43)](HLS.js_MSE_Streaming_Engine_Part_43.md) (2 shared connections)
+- [HLS.js MSE Streaming Engine (Part 5)](HLS.js_MSE_Streaming_Engine_Part_5.md) (2 shared connections)
+- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/webOSTVjs-1.2.13/webOSTV-dev.js`
+- `IPTVService/companionCore.js`
 
 ## Audit Trail
 
-- EXTRACTED: 25 (96%)
-- INFERRED: 1 (4%)
+- EXTRACTED: 28 (85%)
+- INFERRED: 5 (15%)
 - AMBIGUOUS: 0 (0%)
 
 ---

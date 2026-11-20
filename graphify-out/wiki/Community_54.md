@@ -1,12 +1,10 @@
 # Community 54
 
-> 3 nodes · cohesion 1.00
+> 1 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **watchProgressTracker.js** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
-- **getAdjacentEpisodes()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
-- **recordProgress()** (2 connections) — `IPTVPlayer/js/services/watchProgressTracker.js`
+- **.abort()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
 
 ## Relationships
 
@@ -14,11 +12,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/services/watchProgressTracker.js`
+- `IPTVPlayer/js/core/polyfills.js`
 
 ## Audit Trail
 
-- EXTRACTED: 3 (100%)
+- EXTRACTED: 0 (0%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

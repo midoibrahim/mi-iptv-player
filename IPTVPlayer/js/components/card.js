@@ -8,11 +8,16 @@ window.IPTV = window.IPTV || {};
 
 window.IPTV.Card = {
     _iconCache: {},
-    _io: null,
+    _iconNodeCache: {},
     _lazyQueue: [],
     _lazyTimer: null,
     _immediateQuota: 16,
     _quotaResetTimer: null,
+
+    _isTv() {
+        const P = window.IPTV && window.IPTV.Platform;
+        return Boolean(P && ((typeof P.isWebOS === 'function' && P.isWebOS()) || (typeof P.isTizen === 'function' && P.isTizen())));
+    },
 
     _getIcon(key, cls) {
         const cacheKey = key + ':' + cls;
@@ -22,37 +27,68 @@ window.IPTV.Card = {
         return this._iconCache[cacheKey];
     },
 
+    _appendIcon(container, key, cls) {
+        const cacheKey = key + ':' + cls;
+        let tpl = this._iconNodeCache[cacheKey];
+        if (tpl === undefined) {
+            const html = this._getIcon(key, cls);
+            try {
+                const holder = document.createElement('div');
+                holder.innerHTML = html;
+                tpl = (holder.firstElementChild && typeof holder.firstElementChild.cloneNode === 'function')
+                    ? holder.firstElementChild
+                    : null;
+            } catch (e) {
+                tpl = null;
+            }
+            this._iconNodeCache[cacheKey] = tpl;
+        }
+        if (tpl && typeof container.appendChild === 'function') {
+            container.appendChild(tpl.cloneNode(true));
+        } else {
+            container.innerHTML = this._getIcon(key, cls);
+        }
+    },
+
     _scheduleLazyImg(img, src) {
         if (!img || !src) return;
-        img.src = src;
 
-        // First 16 cards in any render burst load immediately (above-the-fold)
+        // Desktop: assign immediately (windowed grid already caps mounted cards to ~45)
+        if (!this._isTv()) {
+            img.src = src;
+            return;
+        }
+
+        // Smart TVs: first 16 cards in any render burst load immediately (above-the-fold)
         if (this._immediateQuota > 0) {
             this._immediateQuota--;
             clearTimeout(this._quotaResetTimer);
             this._quotaResetTimer = setTimeout(() => { this._immediateQuota = 16; }, 180);
+            img.src = src;
             return;
         }
 
-        // Modern TVs (Chromium 51+): use native IntersectionObserver
-        if (typeof window.IntersectionObserver === 'function') {
-            if (!this._io) {
-                this._io = new IntersectionObserver((entries) => {
-                    for (let i = 0; i < entries.length; i++) {
-                        const entry = entries[i];
-                        if (entry.isIntersecting || entry.intersectionRatio > 0) {
-                            const target = entry.target;
-                            this._io.unobserve(target);
-                            if (target.dataset && target.dataset.src) {
-                                target.src = target.dataset.src;
-                                delete target.dataset.src;
-                            }
-                        }
+        // Remaining TV cards stagger LIFO (newest visible cards load first!)
+        img.dataset.src = src;
+        this._lazyQueue.push(img);
+        if (!this._lazyTimer) {
+            const pump = () => {
+                let loaded = 0;
+                while (this._lazyQueue.length > 0 && loaded < 8) {
+                    const nextImg = this._lazyQueue.pop();
+                    if (nextImg && nextImg.dataset && nextImg.dataset.src && (typeof document === 'undefined' || !document.contains || document.contains(nextImg))) {
+                        nextImg.src = nextImg.dataset.src;
+                        delete nextImg.dataset.src;
+                        loaded++;
                     }
-                }, { rootMargin: '360px' });
-            }
-            this._io.observe(img);
-            return;
+                }
+                if (this._lazyQueue.length > 0) {
+                    this._lazyTimer = setTimeout(pump, 35);
+                } else {
+                    this._lazyTimer = null;
+                }
+            };
+            this._lazyTimer = setTimeout(pump, 35);
         }
     },
 
@@ -70,9 +106,6 @@ window.IPTV.Card = {
         if (this._lazyTimer) {
             clearTimeout(this._lazyTimer);
             this._lazyTimer = null;
-        }
-        if (this._io) {
-            try { this._io.disconnect(); } catch (e) {}
         }
     },
 
@@ -148,7 +181,7 @@ window.IPTV.Card = {
         const favBtn = document.createElement('button');
         favBtn.className = isFavorite ? 'card-fav-btn active' : 'card-fav-btn';
         favBtn.tabIndex = -1;
-        favBtn.innerHTML = this._getIcon('favorites', 'card-fav-svg');
+        this._appendIcon(favBtn, 'favorites', 'card-fav-svg');
         favBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const store = window.IPTV.CatalogStore;
@@ -164,19 +197,20 @@ window.IPTV.Card = {
             const dlBtn = document.createElement('button');
             dlBtn.className = 'card-download-btn';
             dlBtn.tabIndex = -1;
+            let dlIconKey = 'download';
             dlBtn.title = type === 'series' ? 'Browse Episodes to Download' : 'Download to PC';
-            dlBtn.innerHTML = this._getIcon('download', 'card-dl-svg');
 
             if (type === 'movie' && window.IPTV.DownloadManager) {
                 if (window.IPTV.DownloadManager.isCompleted(item)) {
                     dlBtn.classList.add('downloaded');
                     dlBtn.title = 'Downloaded to PC';
-                    dlBtn.innerHTML = this._getIcon('check', 'card-dl-svg');
+                    dlIconKey = 'check';
                 } else if (window.IPTV.DownloadManager.isDownloading(item.url || item.id)) {
                     dlBtn.classList.add('downloading');
                     dlBtn.title = 'Downloading...';
                 }
             }
+            this._appendIcon(dlBtn, dlIconKey, 'card-dl-svg');
             dlBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (type === 'series') {

@@ -37,6 +37,7 @@
     height: 100%;
     overflow: hidden;
     box-shadow: var(--shadow-card);
+    contain: layout style;
 }
 
 .category-sidebar-header {
@@ -101,6 +102,9 @@
     overflow-x: hidden;
     flex: 1;
     padding: 4px 6px 8px 4px;
+    contain: layout style;
+    overflow-anchor: none;
+    will-change: scroll-position;
 }
 .category-list > li + li {
     margin-top: 10px;
@@ -128,7 +132,7 @@
     font-weight: 600;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background var(--transition), color var(--transition), transform var(--transition), border-color var(--transition);
+    transition: transform 0.07s ease-out;
 }
 .category-item span:first-child {
     flex: 1;
@@ -286,6 +290,9 @@
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
+    contain: layout style;
+    overflow-anchor: none;
+    will-change: scroll-position;
 }
 .browse-content.grid-view {
     display: flex;
@@ -296,6 +303,19 @@
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+}
+.browse-content.grid-view.is-windowed {
+    display: block;
+}
+.browse-grid-stage {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    align-content: flex-start;
+    width: 100%;
+    min-width: 0;
+    box-sizing: content-box;
 }
 .browse-content.grid-view .card {
     width: 226px;

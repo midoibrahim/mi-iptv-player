@@ -2,7 +2,7 @@
 
 > God node · 22 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [Electron Background Downloader](Electron_Background_Downloader.md)
+**Community:** [Community 6](Community_6.md)
 
 ## Connections by Relation
 

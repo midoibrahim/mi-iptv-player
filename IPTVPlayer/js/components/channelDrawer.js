@@ -29,10 +29,10 @@ window.IPTV.ChannelDrawer = {
             window.IPTV.SpatialNav.focusElement(el);
         } else {
             el.focus();
+            try {
+                el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            } catch (e) {}
         }
-        try {
-            el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-        } catch (e) {}
     },
 
     toggle() {
@@ -108,39 +108,45 @@ window.IPTV.ChannelDrawer = {
             ? window.IPTV.CatalogStore.getCategories().live
             : [];
 
+        const frag = document.createDocumentFragment();
         const allBtn = document.createElement('button');
         allBtn.className = `drawer-cat-btn ${!this.selectedCategory ? 'active' : ''}`;
         allBtn.textContent = 'All Channels';
+        allBtn.dataset.cat = '';
         allBtn.tabIndex = 0;
-        allBtn.addEventListener('click', () => {
-            this.selectedCategory = null;
-            catBar.querySelectorAll('.drawer-cat-btn').forEach(b => b.classList.remove('active'));
-            allBtn.classList.add('active');
-            this.renderChannels();
-        });
-        catBar.appendChild(allBtn);
+        frag.appendChild(allBtn);
 
-        cats.forEach(cat => {
+        let activeBtn = !this.selectedCategory ? allBtn : null;
+        for (let i = 0; i < cats.length; i++) {
+            const cat = cats[i];
             const catName = typeof cat === 'string' ? cat : (cat.category_name || cat.name || '');
-            if (!catName) return;
+            if (!catName) continue;
             const btn = document.createElement('button');
             const isActive = this.selectedCategory === catName;
             btn.className = `drawer-cat-btn ${isActive ? 'active' : ''}`;
             btn.textContent = catName;
+            btn.dataset.cat = catName;
             btn.tabIndex = 0;
-            btn.addEventListener('click', () => {
-                this.selectedCategory = catName;
-                catBar.querySelectorAll('.drawer-cat-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.renderChannels();
-            });
-            catBar.appendChild(btn);
-            if (isActive) {
-                setTimeout(() => {
-                    try { btn.scrollIntoView({ inline: 'center' }); } catch (e) {}
-                }, 40);
-            }
-        });
+            frag.appendChild(btn);
+            if (isActive) activeBtn = btn;
+        }
+        catBar.appendChild(frag);
+
+        catBar.onclick = (e) => {
+            const btn = e.target && e.target.closest ? e.target.closest('.drawer-cat-btn') : null;
+            if (!btn) return;
+            this.selectedCategory = btn.dataset.cat || null;
+            const prev = catBar.querySelector('.drawer-cat-btn.active');
+            if (prev) prev.classList.remove('active');
+            btn.classList.add('active');
+            this.renderChannels();
+        };
+
+        if (activeBtn && this.selectedCategory) {
+            setTimeout(() => {
+                try { activeBtn.scrollIntoView({ inline: 'center' }); } catch (e) {}
+            }, 40);
+        }
     },
 
     renderChannels() {

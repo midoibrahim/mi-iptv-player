@@ -1,17 +1,19 @@
 # Community 41
 
-> 8 nodes · cohesion 0.46
+> 10 nodes · cohesion 0.40
 
 ## Key Concepts
 
-- **settingsView.js** (7 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **init()** (5 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_bindUI()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_loadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_setupDownloadSettings()** (3 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_saveSettings()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **_setupThemeSelector()** (2 connections) — `IPTVPlayer/js/views/settingsView.js`
-- **updateInfo()** (1 connections) — `IPTVPlayer/js/views/settingsView.js`
+- **downloadStore.js** (9 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **getDownloadedItem()** (5 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **collectPendingEpisodes()** (4 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **_ensureHistoryIndex()** (4 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isCompleted()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **_seriesEpKey()** (3 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **applySnapshot()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **buildEpisodePayload()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDesktop()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
+- **isDownloading()** (2 connections) — `IPTVPlayer/js/services/downloadStore.js`
 
 ## Relationships
 
@@ -19,11 +21,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/views/settingsView.js`
+- `IPTVPlayer/js/services/downloadStore.js`
 
 ## Audit Trail
 
-- EXTRACTED: 13 (100%)
+- EXTRACTED: 18 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

@@ -21,7 +21,13 @@ window.IPTV.BrowseView = class {
         this._isRendered = false;
         this._filteredItems = [];
         this._renderedCount = 0;
-        this._batchSize = 36; // Fast 36-card batch per page
+        this._batchSize = 36; // Used for fallback non-windowed mode
+        this._winStartRow = -1;
+        this._winEndRow = -1;
+        this._mountedCards = new Map();
+        this._winRaf = null;
+        this._contentReleased = false;
+        this._savedContentScrollTop = 0;
 
         this.sectionEl = document.getElementById(`section-${sectionId}`);
     }
@@ -64,6 +70,15 @@ window.IPTV.BrowseView = class {
         this._byCategory = null;
         this._renderedCount = 0;
         this._renderedCatCount = 0;
+        this._winStartRow = -1;
+        this._winEndRow = -1;
+        if (this._mountedCards) this._mountedCards.clear();
+        if (this._winRaf && typeof cancelAnimationFrame === 'function') {
+            cancelAnimationFrame(this._winRaf);
+            this._winRaf = null;
+        }
+        this._contentReleased = false;
+        this._savedContentScrollTop = 0;
         this._isRendered = false;
         if (this.sectionEl) {
             this.sectionEl._lastFocusedEl = null;
@@ -74,9 +89,54 @@ window.IPTV.BrowseView = class {
     }
 
     ensureRendered() {
-        if (this._isRendered) return;
+        if (this._isRendered) {
+            if (this._contentReleased) {
+                this.hydrateContentDom();
+            }
+            return;
+        }
         this._isRendered = true;
         this.render();
+    }
+
+    releaseContentDom() {
+        if (!this._isRendered || !this.sectionEl || this._contentReleased) return;
+        const content = this.sectionEl.querySelector('.browse-content');
+        if (!content) return;
+        this._savedContentScrollTop = content.scrollTop || 0;
+        if (this.sectionEl._lastFocusedCard && this.sectionEl._lastFocusedCard.dataset && this.sectionEl._lastFocusedCard.dataset.gridIdx !== undefined) {
+            this.sectionEl._lastFocusedIndex = Number(this.sectionEl._lastFocusedCard.dataset.gridIdx);
+        }
+        this._contentReleased = true;
+        this._winStartRow = -1;
+        this._winEndRow = -1;
+        this._gridStage = null;
+        if (this._mountedCards) this._mountedCards.clear();
+        if (content.classList) content.classList.remove('is-windowed');
+        if (content.style) {
+            content.style.paddingTop = '';
+            content.style.paddingBottom = '';
+        }
+        content.innerHTML = '';
+    }
+
+    hydrateContentDom() {
+        if (!this._contentReleased || !this.sectionEl) return;
+        this._contentReleased = false;
+        const content = this.sectionEl.querySelector('.browse-content');
+        if (!content) return;
+        const savedScroll = this._savedContentScrollTop || 0;
+        if (this.viewMode === 'rows') {
+            this._renderRows(content, this._filteredItems);
+            content.scrollTop = savedScroll;
+        } else {
+            this._renderGrid(content, this._filteredItems, savedScroll);
+            if (typeof this.sectionEl._lastFocusedIndex === 'number' && this._mountedCards && this._mountedCards.has(this.sectionEl._lastFocusedIndex)) {
+                const card = this._mountedCards.get(this.sectionEl._lastFocusedIndex);
+                this.sectionEl._lastFocusedCard = card;
+                this.sectionEl._lastFocusedEl = card;
+            }
+        }
     }
 
     render() {
@@ -129,27 +189,42 @@ window.IPTV.BrowseView = class {
             }
 
             if (catList) {
+                let catFilterTimer = null;
                 searchInput.addEventListener('input', () => {
-                    this._flushRemainingCategories();
-                    const q = searchInput.value.toLowerCase().trim();
-                    catList.querySelectorAll('.category-item').forEach(li => {
-                        const text = li.textContent.toLowerCase();
-                        li.style.display = text.includes(q) ? 'flex' : 'none';
-                    });
+                    clearTimeout(catFilterTimer);
+                    catFilterTimer = setTimeout(() => {
+                        this._flushRemainingCategories();
+                        const q = searchInput.value.toLowerCase().trim();
+                        const items = catList.children;
+                        for (let i = 0; i < items.length; i++) {
+                            const li = items[i];
+                            const text = li.textContent.toLowerCase();
+                            li.style.display = text.indexOf(q) !== -1 ? 'flex' : 'none';
+                        }
+                    }, 90);
                 });
             }
         }
 
-        // Progressive scroll pagination on browse-content
+        // Row-windowed scroll updater on browse-content (caps DOM cards on large playlists)
         if (contentEl) {
             const checkLoadMore = () => {
                 if (this.viewMode !== 'grid') return;
+                if (this._isWindowedGrid()) {
+                    this._scheduleGridWindowUpdate(contentEl);
+                    return;
+                }
                 if (this._renderedCount >= this._filteredItems.length) return;
                 if (contentEl.scrollTop + contentEl.clientHeight >= contentEl.scrollHeight - 450) {
                     this._appendNextGridBatch(contentEl);
                 }
             };
             contentEl._onScrollCheck = checkLoadMore;
+            contentEl._syncWindowNow = () => {
+                if (this.viewMode === 'grid' && this._isWindowedGrid() && !this._contentReleased) {
+                    this._updateGridWindow(contentEl, false);
+                }
+            };
             contentEl.addEventListener('scroll', checkLoadMore, { passive: true });
         }
 
@@ -326,16 +401,192 @@ window.IPTV.BrowseView = class {
         }
     }
 
-    _renderGrid(container, items) {
+    _getGridMetrics(container) {
+        const isLive = this.cardType === 'live' || this.cardType === 'channel';
+        const P = window.IPTV && window.IPTV.Platform;
+        const isTv = Boolean(P && ((typeof P.isWebOS === 'function' && P.isWebOS()) || (typeof P.isTizen === 'function' && P.isTizen())));
+        const cols = isLive ? 4 : 5;
+        const rowHeight = isLive ? 268 : 414;
+        const viewportHeight = (container && container.clientHeight > 0) ? container.clientHeight : 760;
+        return {
+            cols,
+            rowHeight,
+            viewportHeight,
+            basePadTop: 14,
+            basePadBottom: 56,
+            overscanBefore: isTv ? 2 : 3,
+            overscanAfter: isTv ? 3 : 4
+        };
+    }
+
+    _isWindowedGrid() {
+        return this.viewMode === 'grid' && Array.isArray(this._filteredItems) && this._filteredItems.length > 60;
+    }
+
+    _scheduleGridWindowUpdate(container) {
+        if (this._winRaf) return;
+        const run = () => {
+            this._winRaf = null;
+            if (!this._contentReleased && this._isWindowedGrid()) {
+                this._updateGridWindow(container, false);
+            }
+        };
+        if (typeof requestAnimationFrame === 'function') {
+            this._winRaf = requestAnimationFrame(run);
+        } else {
+            run();
+        }
+    }
+
+    _createGridCard(index) {
+        const item = this._filteredItems[index];
+        const card = window.IPTV.Card.create(item, this.cardType, {
+            isFavorite: window.IPTV.CatalogStore.isFavorite(item),
+            onClick: (selectedItem, type) => this.app.onItemClick(selectedItem, type)
+        });
+        if (card && card.dataset) {
+            card.dataset.gridIdx = String(index);
+        }
+        return card;
+    }
+
+    _renderGrid(container, items, initialScrollTop = 0) {
+        if (this._winRaf && typeof cancelAnimationFrame === 'function') {
+            cancelAnimationFrame(this._winRaf);
+            this._winRaf = null;
+        }
         container.innerHTML = '';
         this._renderedCount = 0;
+        this._winStartRow = -1;
+        this._winEndRow = -1;
+        this._gridStage = null;
+        if (this._mountedCards) this._mountedCards.clear();
+        if (container.style) {
+            container.style.paddingTop = '';
+            container.style.paddingBottom = '';
+        }
 
         if (items.length === 0) {
+            if (container.classList) container.classList.remove('is-windowed');
             container.innerHTML = '<p class="empty-state">No content available in this category.</p>';
             return;
         }
 
+        if (this._isWindowedGrid()) {
+            if (container.classList) container.classList.add('is-windowed');
+            const stage = document.createElement('div');
+            stage.className = 'browse-grid-stage';
+            container.appendChild(stage);
+            this._gridStage = stage;
+            container.scrollTop = initialScrollTop || 0;
+            this._updateGridWindow(container, true);
+            return;
+        }
+
+        if (container.classList) container.classList.remove('is-windowed');
         this._appendNextGridBatch(container);
+        if (initialScrollTop > 0) {
+            container.scrollTop = initialScrollTop;
+        }
+    }
+
+    _updateGridWindow(container, force = false) {
+        if (!container || !this._filteredItems || this._filteredItems.length === 0) return;
+
+        let stage = this._gridStage;
+        if (!stage || stage.parentNode !== container) {
+            stage = document.createElement('div');
+            stage.className = 'browse-grid-stage';
+            container.innerHTML = '';
+            container.appendChild(stage);
+            this._gridStage = stage;
+            this._mountedCards.clear();
+            this._winStartRow = -1;
+            this._winEndRow = -1;
+            force = true;
+        }
+
+        const m = this._getGridMetrics(container);
+        const totalItems = this._filteredItems.length;
+        const totalRows = Math.ceil(totalItems / m.cols);
+        const scrollTop = Math.max(0, (container.scrollTop || 0) - m.basePadTop);
+        const firstVisibleRow = Math.floor(scrollTop / m.rowHeight);
+        const visibleRows = Math.max(1, Math.ceil(m.viewportHeight / m.rowHeight));
+
+        const startRow = Math.max(0, firstVisibleRow - m.overscanBefore);
+        const endRow = Math.min(totalRows - 1, firstVisibleRow + visibleRows + m.overscanAfter - 1);
+
+        if (!force && startRow === this._winStartRow && endRow === this._winEndRow) {
+            return;
+        }
+
+        const startIdx = startRow * m.cols;
+        const endIdx = Math.min(totalItems - 1, ((endRow + 1) * m.cols) - 1);
+
+        const prevStartRow = this._winStartRow;
+        const prevEndRow = this._winEndRow;
+        const prevStartIdx = prevStartRow >= 0 ? prevStartRow * m.cols : -1;
+        const prevEndIdx = prevEndRow >= 0 ? Math.min(totalItems - 1, ((prevEndRow + 1) * m.cols) - 1) : -1;
+        const hasOverlap = !force && prevStartRow >= 0 && startIdx <= prevEndIdx && endIdx >= prevStartIdx;
+
+        if (hasOverlap) {
+            // 1. Detach cards that scrolled out of the window & abort in-flight image decodes
+            for (const [idx, card] of this._mountedCards.entries()) {
+                if (idx < startIdx || idx > endIdx) {
+                    if (card._img) {
+                        card._img.onerror = null;
+                        if (typeof card._img.removeAttribute === 'function') {
+                            card._img.removeAttribute('src');
+                        }
+                    }
+                    if (card.parentNode === stage) {
+                        stage.removeChild(card);
+                    }
+                    this._mountedCards.delete(idx);
+                }
+            }
+            // 2. Prepend newly visible rows above previous window
+            if (startIdx < prevStartIdx) {
+                const prependFrag = document.createDocumentFragment();
+                const prependEnd = Math.min(endIdx, prevStartIdx - 1);
+                for (let i = startIdx; i <= prependEnd; i++) {
+                    const card = this._createGridCard(i);
+                    this._mountedCards.set(i, card);
+                    prependFrag.appendChild(card);
+                }
+                stage.insertBefore(prependFrag, stage.firstChild);
+            }
+            // 3. Append newly visible rows below previous window
+            if (endIdx > prevEndIdx) {
+                const appendFrag = document.createDocumentFragment();
+                const appendStart = Math.max(startIdx, prevEndIdx + 1);
+                for (let i = appendStart; i <= endIdx; i++) {
+                    const card = this._createGridCard(i);
+                    this._mountedCards.set(i, card);
+                    appendFrag.appendChild(card);
+                }
+                stage.appendChild(appendFrag);
+            }
+        } else {
+            stage.innerHTML = '';
+            this._mountedCards.clear();
+            const frag = document.createDocumentFragment();
+            for (let i = startIdx; i <= endIdx; i++) {
+                const card = this._createGridCard(i);
+                this._mountedCards.set(i, card);
+                frag.appendChild(card);
+            }
+            stage.appendChild(frag);
+        }
+
+        if (stage.style) {
+            stage.style.paddingTop = `${startRow * m.rowHeight}px`;
+            stage.style.paddingBottom = `${Math.max(0, totalRows - 1 - endRow) * m.rowHeight}px`;
+        }
+
+        this._winStartRow = startRow;
+        this._winEndRow = endRow;
+        this._renderedCount = endIdx + 1;
     }
 
     _appendNextGridBatch(container) {
@@ -345,11 +596,8 @@ window.IPTV.BrowseView = class {
 
         const frag = document.createDocumentFragment();
         for (let i = start; i < end; i++) {
-            const item = this._filteredItems[i];
-            const card = window.IPTV.Card.create(item, this.cardType, {
-                isFavorite: window.IPTV.CatalogStore.isFavorite(item),
-                onClick: (selectedItem, type) => this.app.onItemClick(selectedItem, type)
-            });
+            const card = this._createGridCard(i);
+            if (this._mountedCards) this._mountedCards.set(i, card);
             frag.appendChild(card);
         }
         container.appendChild(frag);
@@ -357,18 +605,31 @@ window.IPTV.BrowseView = class {
     }
 
     _renderRows(container, items) {
+        this._gridStage = null;
+        if (container.classList) container.classList.remove('is-windowed');
+        if (container.style) {
+            container.style.paddingTop = '';
+            container.style.paddingBottom = '';
+        }
         container.innerHTML = '';
         if (items.length === 0) {
             container.innerHTML = '<p class="empty-state">No content available in this category.</p>';
             return;
         }
 
-        const groups = {};
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            const cat = item.category || 'Uncategorized';
-            if (!groups[cat]) groups[cat] = [];
-            groups[cat].push(item);
+        let groups;
+        if (this.selectedCategory === 'all' && this._byCategory) {
+            groups = this._byCategory;
+        } else if (this.selectedCategory && this.selectedCategory !== 'all') {
+            groups = { [this.selectedCategory]: items };
+        } else {
+            groups = {};
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const cat = item.category || 'Uncategorized';
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push(item);
+            }
         }
 
         const frag = document.createDocumentFragment();

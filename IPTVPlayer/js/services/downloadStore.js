@@ -9,9 +9,51 @@ window.IPTV = window.IPTV || {};
 window.IPTV.DownloadStore = {
     activeTasks: new Map(),
     history: [],
+    _idxSig: '',
+    _byUrl: new Map(),
+    _byId: new Map(),
+    _bySeriesEp: new Map(),
     settings: {
         saveDirectory: '',
         askEveryTime: false
+    },
+
+    _seriesEpKey(seriesName, season, ep) {
+        if (!seriesName || season == null || ep == null) return '';
+        return `${String(seriesName).trim().toLowerCase()}|${String(season)}|${String(ep)}`;
+    },
+
+    _ensureHistoryIndex() {
+        const len = Array.isArray(this.history) ? this.history.length : 0;
+        const first = len > 0 ? this.history[0] : null;
+        const last = len > 0 ? this.history[len - 1] : null;
+        const sig = `${len}:${first ? (first.id + '|' + first.filePath + '|' + first.existsOnDisk) : ''}:${last ? last.id : ''}`;
+        if (this._idxSig === sig) return;
+        this._idxSig = sig;
+        this._byUrl.clear();
+        this._byId.clear();
+        this._bySeriesEp.clear();
+
+        for (let i = 0; i < len; i++) {
+            const h = this.history[i];
+            if (!h || !h.existsOnDisk || !h.filePath) continue;
+            if (h.url && !this._byUrl.has(h.url)) this._byUrl.set(h.url, h);
+            if (h.filePath && !this._byUrl.has(h.filePath)) this._byUrl.set(h.filePath, h);
+            if (h.id && !this._byId.has(String(h.id))) this._byId.set(String(h.id), h);
+            if (h.itemId) {
+                const rawItemId = String(h.itemId);
+                const normItemId = rawItemId.replace(/^series_/, 'ep_');
+                if (!this._byId.has(rawItemId)) this._byId.set(rawItemId, h);
+                if (normItemId && !this._byId.has(normItemId)) this._byId.set(normItemId, h);
+                const lastUnderscore = rawItemId.lastIndexOf('_');
+                if (lastUnderscore !== -1) {
+                    const tail = rawItemId.slice(lastUnderscore + 1);
+                    if (tail && !this._byId.has(tail)) this._byId.set(tail, h);
+                }
+            }
+            const sKey = this._seriesEpKey(h.seriesName, h.seasonNum != null ? h.seasonNum : h.season, h.episodeNum != null ? h.episodeNum : h.episode);
+            if (sKey && !this._bySeriesEp.has(sKey)) this._bySeriesEp.set(sKey, h);
+        }
     },
 
     isDesktop() {
@@ -26,6 +68,8 @@ window.IPTV.DownloadStore = {
         if (!data) return;
         this.settings = data.settings || this.settings;
         this.history = data.history || [];
+        this._idxSig = '';
+        this._ensureHistoryIndex();
         this.activeTasks.clear();
         if (Array.isArray(data.active)) {
             data.active.forEach(t => this.activeTasks.set(t.id, t));
@@ -54,58 +98,59 @@ window.IPTV.DownloadStore = {
 
     getDownloadedItem(target) {
         if (!this.isDesktop() || !target) return null;
+        this._ensureHistoryIndex();
+
         if (typeof target === 'string') {
             const targetStr = String(target);
             const normTarget = targetStr.replace(/^series_/, 'ep_');
-            return this.history.find(h => {
-                if (!h.existsOnDisk || !h.filePath) return false;
-                const hItemId = h.itemId ? String(h.itemId) : '';
-                const normHItemId = hItemId.replace(/^series_/, 'ep_');
-                return (
-                    h.id === targetStr ||
-                    hItemId === targetStr ||
-                    (normHItemId && normHItemId === normTarget) ||
-                    (hItemId && hItemId.endsWith('_' + targetStr)) ||
-                    h.url === targetStr ||
-                    h.filePath === targetStr
-                );
-            }) || null;
+            return (
+                this._byUrl.get(targetStr) ||
+                this._byId.get(targetStr) ||
+                this._byId.get(normTarget) ||
+                null
+            );
         }
 
         const targetUrl = target.url || target.hlsUrl;
+        if (targetUrl) {
+            const byUrl = this._byUrl.get(targetUrl);
+            if (byUrl) return byUrl;
+        }
+
         const targetId = target.id ? String(target.id) : '';
-        const normTargetId = targetId.replace(/^series_/, 'ep_');
+        if (targetId) {
+            const normTargetId = targetId.replace(/^series_/, 'ep_');
+            const byId = this._byId.get(targetId) || this._byId.get(normTargetId);
+            if (byId) return byId;
+        }
+
         const targetItemId = target.itemId ? String(target.itemId) : '';
-        const normTargetItemId = targetItemId.replace(/^series_/, 'ep_');
+        if (targetItemId) {
+            const normTargetItemId = targetItemId.replace(/^series_/, 'ep_');
+            const byItemId = this._byId.get(targetItemId) || this._byId.get(normTargetItemId);
+            if (byItemId) return byItemId;
+        }
+
+        const targetSeason = target.season != null ? target.season : target.seasonNum;
+        const targetEpisode = target.episode != null ? target.episode : target.episodeNum;
+        if (target.seriesName && targetSeason != null && targetEpisode != null) {
+            const sKey = this._seriesEpKey(target.seriesName, targetSeason, targetEpisode);
+            const bySeries = sKey ? this._bySeriesEp.get(sKey) : null;
+            if (bySeries) return bySeries;
+        }
+
         const targetSeriesContext = target.seriesContext;
+        if (targetSeriesContext && targetSeriesContext.seriesName) {
+            const sKey = this._seriesEpKey(
+                targetSeriesContext.seriesName,
+                targetSeriesContext.currentSeason,
+                targetSeriesContext.currentEpisodeNum || (targetSeriesContext.currentEpisodeIndex + 1)
+            );
+            const byCtx = sKey ? this._bySeriesEp.get(sKey) : null;
+            if (byCtx && byCtx.type === 'series') return byCtx;
+        }
 
-        return this.history.find(h => {
-            if (!h.existsOnDisk || !h.filePath) return false;
-
-            const hItemId = h.itemId ? String(h.itemId) : '';
-            const normHItemId = hItemId.replace(/^series_/, 'ep_');
-
-            if (targetUrl && h.url === targetUrl) return true;
-            if (targetId && (h.id === targetId || hItemId === targetId || (normHItemId && normHItemId === normTargetId) || (hItemId && hItemId.endsWith('_' + targetId)))) return true;
-            if (targetItemId && (h.id === targetItemId || hItemId === targetItemId || (normHItemId && normHItemId === normTargetItemId))) return true;
-
-            if (target.seriesName && target.season != null && target.episode != null && h.seriesName) {
-                const sameSeries = h.seriesName.trim().toLowerCase() === String(target.seriesName).trim().toLowerCase();
-                const sameSeason = String(h.seasonNum || h.season) === String(target.season);
-                const sameEp = String(h.episodeNum || h.episode) === String(target.episode);
-                if (sameSeries && sameSeason && sameEp) return true;
-            }
-
-            if (targetSeriesContext && h.type === 'series') {
-                const sameSeries = h.seriesName && targetSeriesContext.seriesName &&
-                    h.seriesName.trim().toLowerCase() === targetSeriesContext.seriesName.trim().toLowerCase();
-                const sameSeason = String(h.seasonNum || h.season) === String(targetSeriesContext.currentSeason);
-                const sameEp = String(h.episodeNum || h.episode) === String(targetSeriesContext.currentEpisodeNum || (targetSeriesContext.currentEpisodeIndex + 1));
-                if (sameSeries && sameSeason && sameEp) return true;
-            }
-
-            return false;
-        }) || null;
+        return null;
     },
 
     isCompleted(target) {

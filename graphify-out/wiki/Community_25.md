@@ -1,36 +1,38 @@
 # Community 25
 
-> 14 nodes · cohesion 0.18
+> 15 nodes · cohesion 0.32
 
 ## Key Concepts
 
-- **catalogStore.js** (13 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **favKey()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **isFavorite()** (3 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getFavoriteItems()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **toggleFavorite()** (2 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **clear()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getCategories()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getLive()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getMovies()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **getSeries()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **init()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setCatalog()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
-- **setConnection()** (1 connections) — `IPTVPlayer/js/core/catalogStore.js`
+- **spatialNav.js** (14 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **focusElement()** (10 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **isFocusable()** (9 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **navigate()** (6 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_ensureSideNavBinding()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_findFirstFocusable()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_navCartesian2D()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_navCategorySidebar()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_navGridView()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_navHorizontalRail()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_navSeriesDetail()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **_navSideRail()** (3 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **2D Cartesian Spatial Navigation & Focus Memory** (2 connections) — `README.md`
+- **ensureVisible()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
+- **getActiveRoot()** (2 connections) — `IPTVPlayer/js/core/spatialNav.js`
 
 ## Relationships
 
-- No strong cross-community connections detected
+- [Community 15](Community_15.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/core/catalogStore.js`
+- `IPTVPlayer/js/core/spatialNav.js`
+- `README.md`
 
 ## Audit Trail
 
-- EXTRACTED: 16 (100%)
-- INFERRED: 0 (0%)
+- EXTRACTED: 33 (94%)
+- INFERRED: 2 (6%)
 - AMBIGUOUS: 0 (0%)
 
 ---

@@ -7,23 +7,18 @@
 const { app, dialog, shell, powerSaveBlocker } = require('electron');
 const fs = require('fs');
 const path = require('path');
-const http = require('http');
-const https = require('https');
-const { URL } = require('url');
 const {
     ensureDir,
     sanitizeFileName,
     formatBytes,
     resolveDownloadTarget,
     serializeTask,
-    parseContentRange,
     remuxToMp4,
     matchesDownloadItem,
-    createSegments,
-    saveSegmentMeta,
-    loadSegmentMeta,
     removeSegmentMeta
 } = require('./downloadUtils');
+const { DownloadPersistence } = require('./downloadPersistence');
+const { abortTaskSockets, executeHttpTransfer } = require('./httpTransfer');
 
 class Downloader {
     constructor() {
@@ -32,6 +27,7 @@ class Downloader {
         this.historyPath = path.join(this.userDataPath, 'download-history.json');
 
         this.defaultDownloadDir = path.join(app.getPath('downloads'), 'MI IPTV Downloads');
+        this.persistence = new DownloadPersistence(this.settingsPath, this.historyPath, this.defaultDownloadDir);
         this.settings = this._loadSettings();
         this.history = this._loadHistory();
 
@@ -83,37 +79,7 @@ class Downloader {
     }
 
     _abortTaskSockets(task) {
-        if (task.request) {
-            try { task.request.destroy(); } catch (e) {}
-            task.request = null;
-        }
-        if (task.fileStream) {
-            const s = task.fileStream;
-            task.fileStream = null;
-            try { s.end(); } catch (e) {}
-            try { s.close(); } catch (e) {}
-        }
-        if (Array.isArray(task.segments)) {
-            for (const seg of task.segments) {
-                seg._aborted = true;
-                seg._handedToStream = false;
-                if (seg.request) {
-                    try { seg.request.destroy(); } catch (e) {}
-                    seg.request = null;
-                }
-                if (seg.fileStream) {
-                    if (typeof seg._attemptStart === 'number' && typeof seg.fileStream.bytesWritten === 'number') {
-                        seg.current = seg._attemptStart + seg.fileStream.bytesWritten;
-                    }
-                    try { seg.fileStream.destroy(); } catch (e) {}
-                    seg.fileStream = null;
-                }
-                if (seg.status === 'active') {
-                    seg.status = 'pending';
-                }
-            }
-            this._saveSegmentMeta(task);
-        }
+        abortTaskSockets(task);
     }
 
     _checkStalledDownloads() {
@@ -130,8 +96,7 @@ class Downloader {
     recoverStalledDownloads() {
         const now = Date.now();
         for (const task of this.activeDownloads.values()) {
-            const hasActiveSeg = Array.isArray(task.segments) && task.segments.some(s => s.status === 'active' && s.request);
-            if (task.status === 'downloading' && !task.retryTimer && ((!task.request && !hasActiveSeg) || (now - task.lastDataTime > 8000))) {
+            if (task.status === 'downloading' && !task.retryTimer && (!task.request || (now - task.lastDataTime > 8000))) {
                 console.log(`[Downloader] Recovering download after wake/unlock: ${task.fileName}`);
                 this._abortTaskSockets(task);
                 task.lastDataTime = now;
@@ -163,6 +128,7 @@ class Downloader {
             } catch (e) {}
             this._powerBlockerId = null;
         }
+        this.persistence.flushIfDirty(this.settings, this.history);
     }
 
     setMainWindow(win) {
@@ -174,61 +140,19 @@ class Downloader {
     }
 
     _loadSettings() {
-        try {
-            if (fs.existsSync(this.settingsPath)) {
-                const data = JSON.parse(fs.readFileSync(this.settingsPath, 'utf8'));
-                if (data && data.saveDirectory) {
-                    return {
-                        saveDirectory: data.saveDirectory,
-                        askEveryTime: Boolean(data.askEveryTime),
-                        autoConvertToMp4: data.autoConvertToMp4 !== false,
-                        maxConcurrent: Math.max(1, parseInt(data.maxConcurrent, 10) || 1)
-                    };
-                }
-            }
-        } catch (e) {
-            console.warn('[Downloader] Error loading settings, using defaults:', e.message);
-        }
-        return {
-            saveDirectory: this.defaultDownloadDir,
-            askEveryTime: false,
-            autoConvertToMp4: true,
-            maxConcurrent: 1
-        };
+        return this.persistence.loadSettings();
     }
 
-    _saveSettings() {
-        try {
-            fs.writeFileSync(this.settingsPath, JSON.stringify(this.settings, null, 2), 'utf8');
-        } catch (e) {
-            console.error('[Downloader] Failed to save settings:', e.message);
-        }
+    _saveSettings(sync = false) {
+        this.persistence.saveSettings(this.settings, sync);
     }
 
     _loadHistory() {
-        try {
-            if (fs.existsSync(this.historyPath)) {
-                const list = JSON.parse(fs.readFileSync(this.historyPath, 'utf8'));
-                if (Array.isArray(list)) {
-                    return list.map(item => ({
-                        ...item,
-                        existsOnDisk: fs.existsSync(item.filePath),
-                        isUniversalMp4: Boolean(item.filePath && path.extname(item.filePath).toLowerCase() === '.mp4')
-                    }));
-                }
-            }
-        } catch (e) {
-            console.warn('[Downloader] Error loading history:', e.message);
-        }
-        return [];
+        return this.persistence.loadHistory();
     }
 
-    _saveHistory() {
-        try {
-            fs.writeFileSync(this.historyPath, JSON.stringify(this.history, null, 2), 'utf8');
-        } catch (e) {
-            console.error('[Downloader] Failed to save history:', e.message);
-        }
+    _saveHistory(sync = false) {
+        this.persistence.saveHistory(this.history, sync);
     }
 
     _sanitizeFileName(name) {
@@ -534,14 +458,6 @@ class Downloader {
         return serializeTask(task);
     }
 
-    _saveSegmentMeta(task) {
-        return saveSegmentMeta(task);
-    }
-
-    _loadSegmentMeta(task) {
-        return loadSegmentMeta(task);
-    }
-
     _removeSegmentMeta(task) {
         return removeSegmentMeta(task);
     }
@@ -550,14 +466,6 @@ class Downloader {
         const now = Date.now();
         const deltaMs = now - task.lastReportTime;
         if (!force && deltaMs < 350) return;
-
-        if (Array.isArray(task.segments)) {
-            task.receivedBytes = task.segments.reduce((acc, s) => acc + Math.max(0, s.current - s.start), 0);
-            if (now - (task.lastMetaSave || 0) >= 2500) {
-                task.lastMetaSave = now;
-                this._saveSegmentMeta(task);
-            }
-        }
 
         if (deltaMs > 0) {
             const deltaBytes = Math.max(0, task.receivedBytes - task.lastReportBytes);
@@ -642,572 +550,13 @@ class Downloader {
         }
     }
 
-    _createSegments(task) {
-        const segments = createSegments(task.totalBytes);
-        task.maxConnections = segments.length;
-        task.segments = segments;
-        return segments;
-    }
-
-    _attachStreamToSegment(task, seg, res, req) {
-        seg._aborted = false;
-        seg._handedToStream = true;
-        const attemptStart = seg.current;
-        seg._attemptStart = attemptStart;
-
-        try {
-            seg.fileStream = fs.createWriteStream(task.partPath, {
-                flags: 'r+',
-                start: attemptStart,
-                highWaterMark: 1024 * 1024
-            });
-        } catch (err) {
-            seg._handedToStream = false;
-            try { req.destroy(); } catch (e) {}
-            return this._handleError(task, err);
-        }
-
-        let attemptSettled = false;
-        let bytesInAttempt = 0;
-
-        const syncFlushedOffset = (stream) => {
-            if (stream && typeof stream.bytesWritten === 'number') {
-                seg.current = attemptStart + stream.bytesWritten;
-            }
-        };
-
-        const failAttempt = (err, fatal = false) => {
-            if (attemptSettled) return;
-            attemptSettled = true;
-            seg._handedToStream = false;
-            seg.request = null;
-            const stream = seg.fileStream;
-            seg.fileStream = null;
-            syncFlushedOffset(stream);
-            if (stream) {
-                try { stream.destroy(); } catch (e) {}
-            }
-            try { req.destroy(); } catch (e) {}
-            if (task.status !== 'downloading' || seg._aborted) return;
-            if (fatal) {
-                return this._handleError(task, err);
-            }
-            seg.status = 'pending';
-            this._retrySegmentOrTask(task, seg, err, bytesInAttempt);
-        };
-
-        req.removeAllListeners('timeout');
-        req.setTimeout(45000, () => {
-            try { req.destroy(new Error(`Segment ${seg.index} timeout`)); } catch (e) {}
-        });
-        req.on('error', (err) => {
-            failAttempt(err);
-        });
-
-        let finishedWriting = false;
-        const finishSegment = () => {
-            if (finishedWriting) return;
-            finishedWriting = true;
-            const stream = seg.fileStream;
-            syncFlushedOffset(stream);
-            seg.request = null;
-            seg.fileStream = null;
-            seg._handedToStream = false;
-            if (task.status !== 'downloading' || seg._aborted) return;
-
-            if (seg.current > seg.end) {
-                attemptSettled = true;
-                seg.status = 'done';
-                if (task.segments.every(s => s.status === 'done')) {
-                    this._completeTask(task);
-                } else {
-                    this._saveSegmentMeta(task);
-                    this._startSegmentWorkers(task);
-                }
-            } else {
-                // Segment ended early before reaching seg.end — re-queue for resume from actual flushed offset
-                failAttempt(new Error(`Segment ${seg.index} closed early`));
-            }
-        };
-
-        seg.fileStream.on('finish', finishSegment);
-        seg.fileStream.on('error', (err) => {
-            failAttempt(err, true);
-        });
-
-        res.on('data', (chunk) => {
-            if (task.status !== 'downloading' || seg.status !== 'active' || attemptSettled) return;
-            const remaining = (seg.end - seg.current) + 1;
-            if (remaining <= 0) {
-                try { req.destroy(); } catch (e) {}
-                return;
-            }
-
-            const toWrite = chunk.length > remaining ? chunk.subarray(0, remaining) : chunk;
-            seg.current += toWrite.length;
-            bytesInAttempt += toWrite.length;
-            task.lastDataTime = Date.now();
-            if (bytesInAttempt >= 16384) {
-                task.retryCount = 0;
-                seg.retryCount = 0;
-            }
-
-            if (seg.fileStream) {
-                const ok = seg.fileStream.write(toWrite);
-                if (!ok) {
-                    res.pause();
-                    seg.fileStream.once('drain', () => {
-                        if (task.status === 'downloading' && seg.status === 'active' && !attemptSettled) {
-                            res.resume();
-                        }
-                    });
-                }
-            }
-
-            this._reportProgress(task);
-
-            if (seg.current > seg.end) {
-                // Segment reached exact end byte; flush write stream and close socket cleanly
-                attemptSettled = true;
-                seg._handedToStream = false;
-                seg.status = 'done';
-                if (seg.fileStream && !seg.fileStream.writableEnded) {
-                    seg.fileStream.end();
-                }
-                try { req.destroy(); } catch (e) {}
-            }
-        });
-
-        res.on('end', () => {
-            if (seg.fileStream && !seg.fileStream.writableEnded) {
-                seg.fileStream.end();
-            }
-        });
-
-        res.on('close', () => {
-            if (!attemptSettled && !res.complete && seg.status === 'active') {
-                if (seg.fileStream && !seg.fileStream.writableEnded) {
-                    seg.fileStream.end();
-                } else {
-                    failAttempt(new Error(`Segment ${seg.index} connection closed prematurely`));
-                }
-            }
-        });
-
-        res.on('error', (err) => {
-            failAttempt(err);
-        });
-    }
-
-    _retrySegmentOrTask(task, seg, err, bytesInAttempt = 0) {
-        if (task.status !== 'downloading') return;
-
-        const otherActive = Array.isArray(task.segments)
-            ? task.segments.filter(s => s !== seg && s.status === 'active').length
-            : 0;
-        if (otherActive > 0 && bytesInAttempt < 65536) {
-            task.maxConnections = Math.max(1, otherActive);
-            seg.status = 'pending';
-            this._saveSegmentMeta(task);
-            console.log(`[Downloader] Segment ${seg.index} dropped early with ${otherActive} active (${err.message}); stepping down to ${task.maxConnections} connection(s)`);
-            return;
-        }
-
-        seg.retryCount = (seg.retryCount || 0) + 1;
-        const maxRetries = task.maxRetries || 10;
-        if (seg.retryCount <= maxRetries) {
-            const delayMs = Math.min(10000, 1000 * seg.retryCount);
-            setTimeout(() => {
-                if (task.status === 'downloading' && seg.status === 'pending') {
-                    this._startSegmentWorkers(task);
-                }
-            }, delayMs);
-        } else {
-            this._handleTransientOrFatalError(task, err);
-        }
-    }
-
-    _startSegmentWorkers(task) {
-        if (task.status !== 'downloading' || !Array.isArray(task.segments)) return;
-        let activeCount = task.segments.filter(s => s.status === 'active').length;
-        const limit = Math.max(1, task.maxConnections || 4);
-
-        for (const seg of task.segments) {
-            if (activeCount >= limit) break;
-            if (seg.status === 'pending' && seg.current <= seg.end) {
-                seg.status = 'active';
-                activeCount++;
-                this._runSegment(task, seg);
-            }
-        }
-    }
-
-    _runSegment(task, seg, redirectCount = 0, overrideUrl = null) {
-        if (task.status !== 'downloading' || seg.status !== 'active') return;
-        seg._aborted = false;
-        seg._handedToStream = false;
-        if (redirectCount > 6) {
-            seg.status = 'pending';
-            return this._handleTransientOrFatalError(task, new Error('Too many HTTP redirects'));
-        }
-
-        // Re-request original URL when resolvedUrl carries a per-connection token so each segment gets its own redirect token
-        const hasRedirectToken = Boolean(task.resolvedUrl && /[?&]token=/i.test(task.resolvedUrl) && task.url);
-        const targetUrl = overrideUrl || (hasRedirectToken ? task.url : (task.resolvedUrl || task.url));
-        let parsedUrl;
-        try {
-            parsedUrl = new URL(targetUrl);
-        } catch (e) {
-            return this._handleError(task, e);
-        }
-
-        const protocol = parsedUrl.protocol === 'https:' ? https : http;
-        const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': '*/*',
-            'Connection': 'keep-alive',
-            'Range': `bytes=${seg.current}-${seg.end}`
-        };
-
-        const req = protocol.get(targetUrl, { headers, highWaterMark: 1024 * 1024 }, (res) => {
-            if (task.status !== 'downloading' || seg.status !== 'active' || seg._aborted) {
-                res.destroy();
-                return;
-            }
-
-            if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
-                let nextUrl = res.headers.location;
-                if (!nextUrl.startsWith('http')) {
-                    nextUrl = new URL(nextUrl, targetUrl).toString();
-                }
-                res.resume();
-                return this._runSegment(task, seg, redirectCount + 1, nextUrl);
-            }
-
-            if (res.statusCode >= 400) {
-                res.resume();
-                const otherActive = task.segments.filter(s => s !== seg && s.status === 'active').length;
-                if (otherActive > 0) {
-                    task.maxConnections = Math.max(1, otherActive);
-                    seg.status = 'pending';
-                    seg.request = null;
-                    this._saveSegmentMeta(task);
-                    console.log(`[Downloader] Server limited concurrent connections (${res.statusCode}), stepping down to ${task.maxConnections} connection(s)`);
-                    return;
-                }
-                seg.status = 'pending';
-                seg.request = null;
-                return this._retrySegmentOrTask(task, seg, new Error(`HTTP ${res.statusCode} on segment ${seg.index}`), 0);
-            }
-
-            if (res.statusCode !== 206 && (seg.current > 0 || seg.index > 0)) {
-                // Server unexpectedly ignored Range on ranged/resumed segment — do not overwrite offset
-                res.resume();
-                if (seg.index > 0) {
-                    task.maxConnections = 1;
-                    seg.status = 'pending';
-                    seg.request = null;
-                    this._saveSegmentMeta(task);
-                    return;
-                }
-                seg.status = 'pending';
-                seg.request = null;
-                return this._retrySegmentOrTask(task, seg, new Error(`HTTP ${res.statusCode} ignored Range for segment ${seg.index}`), 0);
-            }
-
-            if (res.statusCode === 206) {
-                const cr = parseContentRange(res.headers['content-range']);
-                if (cr && cr.start !== seg.current) {
-                    res.destroy();
-                    seg.status = 'pending';
-                    seg.request = null;
-                    return this._retrySegmentOrTask(task, seg, new Error(`Mismatched Content-Range start (${cr.start} !== ${seg.current})`), 0);
-                }
-            }
-
-            seg._handedToStream = true;
-            this._attachStreamToSegment(task, seg, res, req);
-        });
-
-        req.on('socket', (socket) => {
-            socket.setNoDelay(true);
-            socket.setKeepAlive(true, 10000);
-        });
-
-        req.setTimeout(25000, () => {
-            try { req.destroy(new Error(`Segment ${seg.index} timeout`)); } catch (e) {}
-        });
-
-        req.on('error', (err) => {
-            if (seg._handedToStream || seg._aborted || seg.status !== 'active' || task.status !== 'downloading') return;
-            seg.request = null;
-            seg.status = 'pending';
-            this._retrySegmentOrTask(task, seg, err, 0);
-        });
-
-        seg.request = req;
-    }
-
-    _executeDownload(task, redirectCount = 0, currentUrl = null, disableRangeProbe = false) {
-        if (task.status !== 'downloading') return;
-
-        if (task.retryTimer) {
-            clearTimeout(task.retryTimer);
-            task.retryTimer = null;
-        }
-
-        // Resume existing segmented download if segments are in memory or saved on disk
-        if (redirectCount === 0) {
-            if (Array.isArray(task.segments) && task.segments.length > 0) {
-                for (const s of task.segments) {
-                    s._aborted = false;
-                    s._handedToStream = false;
-                    s.request = null;
-                    s.fileStream = null;
-                    if (s.status !== 'done') {
-                        s.status = s.current > s.end ? 'done' : 'pending';
-                        s.retryCount = 0;
-                    }
-                }
-                this._saveSegmentMeta(task);
-                task.lastDataTime = Date.now();
-                task.lastReportTime = Date.now();
-                task.lastReportBytes = task.receivedBytes;
-                console.log(`[Downloader] Resuming segmented download (${task.maxConnections} connections): ${task.fileName}`);
-                return this._startSegmentWorkers(task);
-            } else if (this._loadSegmentMeta(task)) {
-                task.lastDataTime = Date.now();
-                task.lastReportTime = Date.now();
-                task.lastReportBytes = task.receivedBytes;
-                console.log(`[Downloader] Resuming segmented download from disk (${task.maxConnections} connections): ${task.fileName}`);
-                return this._startSegmentWorkers(task);
-            }
-        }
-
-        if (redirectCount > 6) {
-            this._handleError(task, new Error('Too many HTTP redirects'));
-            return;
-        }
-
-        const fetchUrl = currentUrl || task.url;
-        let parsedUrl;
-        try {
-            parsedUrl = new URL(fetchUrl);
-        } catch (e) {
-            this._handleError(task, new Error('Invalid download URL: ' + e.message));
-            return;
-        }
-
-        const protocol = parsedUrl.protocol === 'https:' ? https : http;
-        const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': '*/*',
-            'Connection': 'keep-alive'
-        };
-
-        let flags = 'w';
-        let requestedOffset = 0;
-        if (!Array.isArray(task.segments) && fs.existsSync(task.partPath)) {
-            try {
-                const stat = fs.statSync(task.partPath);
-                if (stat.size > 0 && task.receivedBytes > 0) {
-                    requestedOffset = stat.size;
-                    task.receivedBytes = stat.size;
-                } else {
-                    task.receivedBytes = 0;
-                }
-            } catch (e) {
-                task.receivedBytes = 0;
-            }
-        }
-        if (requestedOffset > 0 && !disableRangeProbe) {
-            headers['Range'] = `bytes=${requestedOffset}-`;
-            flags = 'a';
-        } else if (!disableRangeProbe && task.maxConnections > 1) {
-            // Probe Range support only when multi-connection segmentation is explicitly enabled
-            headers['Range'] = 'bytes=0-';
-        }
-
-        task.lastDataTime = Date.now();
-
-        let handedOffToSegments = false;
-        const req = protocol.get(fetchUrl, { headers, highWaterMark: 1024 * 1024 }, (res) => {
-            if (task.status !== 'downloading') {
-                res.destroy();
-                return;
-            }
-
-            if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
-                let nextUrl = res.headers.location;
-                if (!nextUrl.startsWith('http')) {
-                    nextUrl = new URL(nextUrl, fetchUrl).toString();
-                }
-                console.log(`[Downloader] Redirecting to: ${nextUrl}`);
-                res.resume();
-                return this._executeDownload(task, redirectCount + 1, nextUrl, disableRangeProbe);
-            }
-
-            // If server rejected initial Range: bytes=0- probe, retry cleanly without Range
-            if ((res.statusCode === 400 || res.statusCode === 416) && !disableRangeProbe && task.receivedBytes === 0) {
-                res.resume();
-                return this._executeDownload(task, redirectCount, fetchUrl, true);
-            }
-
-            if (res.statusCode === 416 && task.receivedBytes > 0) {
-                res.resume();
-                task.receivedBytes = 0;
-                task.lastReportBytes = 0;
-                try { if (fs.existsSync(task.partPath)) fs.unlinkSync(task.partPath); } catch (e) {}
-                return this._executeDownload(task, redirectCount, fetchUrl, true);
-            }
-
-            if (res.statusCode >= 400) {
-                const err = new Error(`HTTP ${res.statusCode}: ${res.statusMessage || 'Download failed'}`);
-                const isPermanent = [400, 410].includes(res.statusCode) && task.receivedBytes === 0 && (task.retryCount || 0) >= 2;
-                res.resume();
-                if (isPermanent) {
-                    return this._handleError(task, err);
-                }
-                return this._handleTransientOrFatalError(task, err);
-            }
-
-            task.resolvedUrl = fetchUrl;
-
-            // Parse total file size from Content-Range or Content-Length
-            const contentRange = res.headers['content-range'];
-            const parsedRange = parseContentRange(contentRange);
-            if (parsedRange && parsedRange.total > 0) {
-                task.totalBytes = parsedRange.total;
-            } else {
-                const contentLength = parseInt(res.headers['content-length'], 10);
-                if (!isNaN(contentLength) && contentLength > 0) {
-                    task.totalBytes = res.statusCode === 206 ? requestedOffset + contentLength : contentLength;
-                }
-            }
-
-            // Validate resume offset before appending so mismatched ranges never corrupt .part
-            if (flags === 'a' && requestedOffset > 0) {
-                if (res.statusCode === 206) {
-                    if (!parsedRange || parsedRange.start !== requestedOffset) {
-                        console.warn(`[Downloader] Server returned mismatched Content-Range (${contentRange || 'missing'}) for offset ${requestedOffset}; restarting from 0`);
-                        res.destroy();
-                        task.receivedBytes = 0;
-                        task.lastReportBytes = 0;
-                        return this._executeDownload(task, redirectCount, fetchUrl, true);
-                    }
-                } else if (res.statusCode === 200) {
-                    flags = 'w';
-                    requestedOffset = 0;
-                    task.receivedBytes = 0;
-                    task.lastReportBytes = 0;
-                }
-            }
-
-            // Segmented multi-connection mode only when explicitly enabled (task.maxConnections > 1)
-            const supportsRange = res.statusCode === 206 || String(res.headers['accept-ranges'] || '').toLowerCase() === 'bytes';
-            if (task.maxConnections > 1 && supportsRange && task.receivedBytes === 0 && task.totalBytes >= 4 * 1024 * 1024) {
-                try {
-                    fs.closeSync(fs.openSync(task.partPath, 'w'));
-                } catch (err) {
-                    res.destroy();
-                    return this._handleError(task, err);
-                }
-
-                handedOffToSegments = true;
-                task.request = null;
-                const segments = this._createSegments(task);
-                this._saveSegmentMeta(task);
-                task.lastDataTime = Date.now();
-                task.lastReportTime = Date.now();
-                task.lastReportBytes = 0;
-
-                console.log(`[Downloader] Segmented multi-connection mode (${segments.length} connections) for ${task.fileName} (${this._formatBytes(task.totalBytes)})`);
-                segments[0].request = req;
-                this._attachStreamToSegment(task, segments[0], res, req);
-                this._startSegmentWorkers(task);
-                return;
-            }
-
-            // Single-stream sequential download (bit-exact, no sparse holes or connection resets)
-            if (res.statusCode === 200 && flags === 'a') {
-                flags = 'w';
-                requestedOffset = 0;
-                task.receivedBytes = 0;
-                task.lastReportBytes = 0;
-            }
-
-            let stream;
-            try {
-                stream = fs.createWriteStream(task.partPath, { flags, highWaterMark: 1024 * 1024 });
-                task.fileStream = stream;
-            } catch (err) {
-                return this._handleError(task, err);
-            }
-
-            task.lastDataTime = Date.now();
-            task.lastReportTime = Date.now();
-            task.lastReportBytes = task.receivedBytes;
-
-            res.on('data', (chunk) => {
-                if (task.status !== 'downloading' || task.fileStream !== stream) return;
-                task.receivedBytes += chunk.length;
-                task.lastDataTime = Date.now();
-                task.retryCount = 0;
-                this._reportProgress(task);
-            });
-
-            res.on('error', (err) => {
-                if (task.fileStream !== stream) return;
-                this._handleTransientOrFatalError(task, err);
-            });
-
-            res.on('close', () => {
-                if (task.status === 'downloading' && task.fileStream === stream && !res.complete && !stream.writableEnded) {
-                    stream.end();
-                }
-            });
-
-            res.pipe(stream);
-
-            stream.on('finish', () => {
-                if (task.status !== 'downloading' || task.fileStream !== stream) return;
-                task.fileStream = null;
-
-                stream.close(() => {
-                    const diskSize = fs.existsSync(task.partPath) ? fs.statSync(task.partPath).size : 0;
-                    task.receivedBytes = diskSize;
-                    const isTruncated = !res.complete || (task.totalBytes > 0 && diskSize < task.totalBytes);
-                    if (isTruncated) {
-                        return this._handleTransientOrFatalError(
-                            task,
-                            new Error(`Connection closed early (${diskSize}/${task.totalBytes || '?'} bytes)`)
-                        );
-                    }
-                    this._completeTask(task);
-                });
-            });
-
-            stream.on('error', (err) => {
-                if (task.fileStream !== stream) return;
-                this._handleError(task, err);
-            });
-        });
-
-        req.on('socket', (socket) => {
-            socket.setNoDelay(true);
-            socket.setKeepAlive(true, 10000);
-        });
-
-        req.setTimeout(25000, () => {
-            req.destroy(new Error('Socket timeout (no response for 25s)'));
-        });
-
-        req.on('error', (err) => {
-            if (handedOffToSegments) return;
-            this._handleTransientOrFatalError(task, err);
-        });
-
-        task.request = req;
+    _executeDownload(task, redirectCount = 0, currentUrl = null, disableRange = false) {
+        executeHttpTransfer(task, {
+            onProgress: (t) => this._reportProgress(t),
+            onComplete: (t) => this._completeTask(t),
+            onTransientError: (t, err) => this._handleTransientOrFatalError(t, err),
+            onFatalError: (t, err) => this._handleError(t, err)
+        }, { redirectCount, currentUrl, disableRange });
     }
 
     _handleTransientOrFatalError(task, error) {
@@ -1259,9 +608,6 @@ class Downloader {
         task.error = error.message;
 
         this._abortTaskSockets(task);
-        if (Array.isArray(task.segments)) {
-            this._saveSegmentMeta(task);
-        }
 
         const serialized = this._serializeTask(task);
         this.activeDownloads.delete(task.id);

@@ -1,19 +1,22 @@
 # Community 33
 
-> 10 nodes · cohesion 0.22
+> 13 nodes · cohesion 0.19
 
 ## Key Concepts
 
-- **server.py** (7 connections) — `server.py`
-- **CORSRequestHandler** (3 connections) — `server.py`
-- **run_server()** (2 connections) — `server.py`
-- **socketserver** (2 connections)
-- **http_server** (1 connections)
-- **os** (1 connections)
-- **.end_headers()** (1 connections) — `server.py`
-- **.__init__()** (1 connections) — `server.py`
-- **MI IPTV Player - Lightweight Local Test Server Serves IPTVPlayer/ over HTTP…** (1 connections) — `server.py`
-- **sys** (1 connections)
+- **playbackStrategies.js** (12 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **load()** (3 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **destroy()** (2 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **isAvailable()** (2 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **play()** (2 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **restore()** (2 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **canSeek()** (1 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **getCurrentTime()** (1 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **getDuration()** (1 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **isPaused()** (1 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **pause()** (1 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **seekTo()** (1 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
+- **suspend()** (1 connections) — `IPTVPlayer/js/services/playbackStrategies.js`
 
 ## Relationships
 
@@ -21,11 +24,11 @@
 
 ## Source Files
 
-- `server.py`
+- `IPTVPlayer/js/services/playbackStrategies.js`
 
 ## Audit Trail
 
-- EXTRACTED: 10 (100%)
+- EXTRACTED: 15 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

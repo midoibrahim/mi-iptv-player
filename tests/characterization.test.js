@@ -828,6 +828,7 @@ test('PlaybackEngine & StreamResolver handle desktop VOD proxy candidate and ini
     });
     loadScript(env, 'IPTVPlayer/js/core/platform.js');
     loadScript(env, 'IPTVPlayer/js/services/streamResolver.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackStrategies.js');
     loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
     loadScript(env, 'IPTVPlayer/js/services/playerService.js');
 
@@ -900,11 +901,13 @@ test('PlaybackEngine.getEngineProfile adapts buffer caps for Smart TV vs Desktop
     loadScript(tvEnv, 'IPTVPlayer/js/services/playbackEngine.js');
     const tvProfile = tvEnv.window.IPTV.PlaybackEngine.getEngineProfile();
     assert.equal(tvProfile.enableWorker, false);
-    assert.equal(tvProfile.hlsMaxBufferSize, 30 * 1000 * 1000);
-    assert.equal(tvProfile.hlsMaxBufferLength, 30);
-    assert.equal(tvProfile.hlsBackBufferLength, 15);
+    assert.equal(tvProfile.hlsMaxBufferSize, 20 * 1000 * 1000);
+    assert.equal(tvProfile.hlsMaxBufferLength, 20);
+    assert.equal(tvProfile.hlsBackBufferLength, 10);
     assert.equal(tvProfile.mpegtsLazyLoad, false);
     assert.equal(tvProfile.mpegtsAutoCleanup, true);
+    assert.equal(tvProfile.mpegtsLiveMaxLatency, 15.0);
+    assert.equal(tvProfile.mpegtsLiveMinRemain, 4.0);
 
     const desktopEnv = createBrowserEnv({
         electronDesktop: {},
@@ -919,6 +922,8 @@ test('PlaybackEngine.getEngineProfile adapts buffer caps for Smart TV vs Desktop
     assert.equal(deskProfile.hlsBackBufferLength, 30);
     assert.equal(deskProfile.mpegtsLazyLoad, false);
     assert.equal(deskProfile.mpegtsAutoCleanup, true);
+    assert.equal(deskProfile.mpegtsLiveMaxLatency, 8.0);
+    assert.equal(deskProfile.mpegtsLiveMinRemain, 2.5);
 });
 
 test('IPTVPlayer/index.html defers hls.min.js and mpegts.js out of synchronous boot tags', () => {
@@ -1122,6 +1127,7 @@ test('PlaybackEngine cleans up video listeners, deduplicates seeked handlers, an
         }
     });
     loadScript(env, 'IPTVPlayer/js/core/platform.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackStrategies.js');
     loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
     const { PlaybackEngine } = env.window.IPTV;
 
@@ -1292,11 +1298,20 @@ test('CatalogCache tracks TTL freshness/_idx and BrowseView/Card reclaim resourc
     const loaded = await CatalogCache.get(conn);
     assert.equal(loaded.liveChannels[0]._idx, 0);
 
-    // Card._io disconnect on clearLazyQueue
+    // Card: Desktop loads immediately; Smart TV staggers via queue and clearLazyQueue drains it
+    const deskImg = { dataset: {}, style: {} };
+    Card._scheduleLazyImg(deskImg, 'http://img/desktop.jpg');
+    assert.equal(deskImg.src, 'http://img/desktop.jpg');
+
+    env.window.IPTV.Platform = { isWebOS: () => true, isTizen: () => false };
     Card._immediateQuota = 0;
-    Card._scheduleLazyImg({ dataset: {}, style: {} }, 'http://img/poster.jpg');
+    const tvImg = { dataset: {}, style: {} };
+    Card._scheduleLazyImg(tvImg, 'http://img/tv.jpg');
+    assert.equal(tvImg.dataset.src, 'http://img/tv.jpg');
+    assert.equal(Card._lazyQueue.length, 1);
     Card.clearLazyQueue();
-    assert.equal(ioDisconnected, true);
+    assert.equal(Card._lazyQueue.length, 0);
+    assert.equal(Card._lazyTimer, null);
 
     // BrowseView preserveState & clear
     const view = new BrowseView('movies', { title: 'Movies', cardType: 'movie', unitName: 'movies', app: {} });
@@ -1369,6 +1384,7 @@ test('companionCore caps oversized .m3u8 proxy manifests at 2MB to prevent OOM',
 test('PlaybackEngine stall monitor jumps mpegts buffer gaps, defers to Hls.js gap control, and self-stops on stale sessions', async () => {
     const env = createBrowserEnv({ setInterval, clearInterval });
     loadScript(env, 'IPTVPlayer/js/core/platform.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackStrategies.js');
     loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
     const { PlaybackEngine } = env.window.IPTV;
 
@@ -1463,5 +1479,517 @@ test('BrowseView renders .header-category and updates it when category selection
     assert.equal(catHeader.title, 'News');
     assert.equal(countHeader.textContent, '1 channels');
 });
+
+test('companionCore proxy completes normal GET without aborting and aborts upstream on early client close', async () => {
+    const http = require('http');
+    const companionCore = require(path.join(ROOT, 'IPTVService', 'companionCore.js'));
+
+    let upstreamAborted = false;
+    const upstream = http.createServer((req, res) => {
+        if (req.url === '/ok') {
+            res.writeHead(200, { 'Content-Type': 'video/mp2t' });
+            res.end('stream-ok');
+            return;
+        }
+        res.writeHead(200, { 'Content-Type': 'video/mp2t' });
+        res.write('chunk-1');
+        req.on('close', () => {
+            upstreamAborted = true;
+        });
+    });
+
+    await new Promise((resolve) => upstream.listen(0, '127.0.0.1', resolve));
+    const upPort = upstream.address().port;
+
+    const handler = companionCore.createCompanionHandler({ port: 0, host: '127.0.0.1' });
+    const proxy = http.createServer(handler);
+    await new Promise((resolve) => proxy.listen(0, '127.0.0.1', resolve));
+    const proxyPort = proxy.address().port;
+
+    try {
+        // 1. Normal GET completes cleanly
+        const body = await new Promise((resolve, reject) => {
+            http.get(`http://127.0.0.1:${proxyPort}/api/proxy?url=${encodeURIComponent(`http://127.0.0.1:${upPort}/ok`)}`, (res) => {
+                let data = '';
+                res.on('data', (c) => { data += c.toString(); });
+                res.on('end', () => resolve(data));
+            }).on('error', reject);
+        });
+        assert.equal(body, 'stream-ok');
+
+        // 2. Early client disconnect aborts upstream
+        await new Promise((resolve) => {
+            const req = http.get(`http://127.0.0.1:${proxyPort}/api/proxy?url=${encodeURIComponent(`http://127.0.0.1:${upPort}/slow`)}`, (res) => {
+                res.once('data', () => {
+                    req.destroy();
+                    setTimeout(resolve, 120);
+                });
+            });
+            req.on('error', () => {});
+        });
+        assert.equal(upstreamAborted, true);
+    } finally {
+        proxy.close();
+        upstream.close();
+    }
+});
+
+test('CatalogStore.getFavoriteItems collects favorites across live, movies, and series in-place', () => {
+    const env = createBrowserEnv();
+    env.window.IPTV.Storage = {
+        getFavorites: () => new Set(['live:ch-1', 'movie:mov-2', 'series:ser-3']),
+        saveFavorites: () => {}
+    };
+    env.window.IPTV.EventBus = { emit: () => {} };
+    loadScript(env, 'IPTVPlayer/js/core/catalogStore.js');
+
+    const { CatalogStore } = env.window.IPTV;
+    CatalogStore.init();
+    CatalogStore.setCatalog({ type: 'm3u' }, {
+        liveChannels: [{ id: 'ch-1', type: 'live', name: 'Live 1' }, { id: 'ch-2', type: 'live', name: 'Live 2' }],
+        movies: [{ id: 'mov-1', type: 'movie', name: 'M1' }, { id: 'mov-2', type: 'movie', name: 'M2' }],
+        series: [{ id: 'ser-3', type: 'series', name: 'S3' }],
+        categories: { live: [], movies: [], series: [] }
+    });
+
+    const favs = CatalogStore.getFavoriteItems();
+    assert.deepEqual(Array.from(favs.map((f) => f.id)), ['ch-1', 'mov-2', 'ser-3']);
+});
+
+test('DownloadStore indexed lookups resolve URL, normalized ID, and series/episode in O(1) and refresh on update', () => {
+    const env = createBrowserEnv();
+    env.window.IPTV.Platform = { hasDownloads: () => true };
+    env.window.IPTV.EventBus = { emit: () => {} };
+    loadScript(env, 'IPTVPlayer/js/services/downloadStore.js');
+
+    const { DownloadStore } = env.window.IPTV;
+    DownloadStore.history = [
+        { id: 't1', itemId: 'mov_10', url: 'http://cdn.test/m10.mp4', filePath: '/dl/m10.mp4', existsOnDisk: true },
+        { id: 't2', itemId: 'series_77_s1_e2', url: 'http://cdn.test/s1e2.mp4', filePath: '/dl/s1e2.mp4', existsOnDisk: true, seriesName: 'ShowX', season: 1, episodeNum: 2 }
+    ];
+
+    assert.equal(DownloadStore.getDownloadedItem({ url: 'http://cdn.test/m10.mp4' }).filePath, '/dl/m10.mp4');
+    assert.equal(DownloadStore.getDownloadedItem({ id: 'mov_10' }).filePath, '/dl/m10.mp4');
+    assert.equal(DownloadStore.getDownloadedItem({ id: 'ep_77_s1_e2' }).filePath, '/dl/s1e2.mp4');
+    assert.equal(DownloadStore.getDownloadedItem({ seriesName: 'ShowX', season: 1, episodeNum: 2 }).filePath, '/dl/s1e2.mp4');
+
+    // Mutate history array and verify index auto-invalidates
+    DownloadStore.history = [
+        { id: 't3', itemId: 'mov_99', url: 'http://cdn.test/m99.mp4', filePath: '/dl/m99.mp4', existsOnDisk: true }
+    ];
+    assert.equal(DownloadStore.getDownloadedItem({ id: 'mov_10' }), null);
+    assert.equal(DownloadStore.getDownloadedItem({ id: 'mov_99' }).filePath, '/dl/m99.mp4');
+});
+
+test('SearchView.search cancels stale async searches and avoids mutating _q on Smart TVs', async () => {
+    const env = createBrowserEnv();
+    env.window.IPTV.Platform = { isWebOS: () => true, isTizen: () => false };
+    const appendedItems = [];
+    const resultsEl = {
+        innerHTML: '',
+        className: '',
+        appendChild: (node) => { appendedItems.push(node); }
+    };
+    env.window.document.getElementById = (id) => (id === 'search-results' ? resultsEl : null);
+    env.window.document.createElement = (tag) => ({
+        tagName: tag.toUpperCase(),
+        className: '',
+        textContent: '',
+        dataset: {},
+        children: [],
+        appendChild(c) { this.children.push(c); return c; }
+    });
+    env.window.document.createDocumentFragment = () => ({
+        children: [],
+        appendChild(c) { this.children.push(c); return c; }
+    });
+    env.window.IPTV.Card = {
+        create: (item) => ({ tagName: 'DIV', item })
+    };
+    const liveItems = [];
+    for (let i = 0; i < 4200; i++) {
+        liveItems.push({ id: `c${i}`, name: i === 4199 ? 'Alpha Special' : `Channel ${i}`, category: 'General' });
+    }
+    env.window.IPTV.CatalogStore = {
+        getLive: () => liveItems,
+        getMovies: () => [],
+        getSeries: () => [],
+        isFavorite: () => false
+    };
+    loadScript(env, 'IPTVPlayer/js/views/searchView.js');
+
+    const { SearchView } = env.window.IPTV;
+    SearchView.init({});
+
+    const p1 = SearchView.search('Channel');
+    const p2 = SearchView.search('Alpha Special');
+    await Promise.all([p1, p2]);
+
+    assert.equal(appendedItems.length, 1);
+    const renderedCards = appendedItems[0].children[0].children[1].children;
+    assert.deepEqual(renderedCards.map((c) => c.item.name), ['Alpha Special']);
+    assert.equal(liveItems[0]._q, undefined, 'TV mode must not permanently mutate _q onto catalog items');
+});
+
+test('BrowseView windowed grid caps DOM nodes for 5,000 items, shifts on scroll, and supports release/hydrate', () => {
+    const env = createBrowserEnv();
+    const makeNode = (tag) => {
+        const node = {
+            tagName: tag.toUpperCase(),
+            children: [],
+            style: {},
+            dataset: {},
+            parentNode: null,
+            scrollTop: 0,
+            clientHeight: 760,
+            get firstChild() { return this.children[0] || null; },
+            set innerHTML(val) {
+                if (val === '') {
+                    for (const c of this.children) c.parentNode = null;
+                    this.children = [];
+                }
+            },
+            appendChild(child) {
+                if (child && child._isFrag) {
+                    for (const c of child.children) {
+                        c.parentNode = this;
+                        this.children.push(c);
+                    }
+                    child.children = [];
+                    return child;
+                }
+                child.parentNode = this;
+                this.children.push(child);
+                return child;
+            },
+            insertBefore(child, ref) {
+                const idx = ref ? this.children.indexOf(ref) : this.children.length;
+                const pos = idx >= 0 ? idx : this.children.length;
+                if (child && child._isFrag) {
+                    for (let i = 0; i < child.children.length; i++) {
+                        child.children[i].parentNode = this;
+                    }
+                    this.children.splice(pos, 0, ...child.children);
+                    child.children = [];
+                    return child;
+                }
+                child.parentNode = this;
+                this.children.splice(pos, 0, child);
+                return child;
+            },
+            removeChild(child) {
+                const idx = this.children.indexOf(child);
+                if (idx >= 0) this.children.splice(idx, 1);
+                child.parentNode = null;
+                return child;
+            }
+        };
+        return node;
+    };
+
+    env.window.document.createElement = (tag) => makeNode(tag);
+    env.window.document.createDocumentFragment = () => ({
+        _isFrag: true,
+        children: [],
+        appendChild(c) { this.children.push(c); return c; }
+    });
+    env.window.IPTV.CatalogStore = { isFavorite: () => false };
+    env.window.IPTV.Card = {
+        create: (item) => {
+            const el = makeNode('div');
+            el.itemId = item.id;
+            return el;
+        }
+    };
+
+    const content = makeNode('div');
+    const sectionEl = {
+        querySelector: (sel) => (sel === '.browse-content' ? content : null),
+        classList: { contains: () => true }
+    };
+    env.window.document.getElementById = (id) => (id === 'section-movies' ? sectionEl : null);
+    loadScript(env, 'IPTVPlayer/js/views/browseView.js');
+
+    const { BrowseView } = env.window.IPTV;
+    const view = new BrowseView('movies', { title: 'Movies', cardType: 'movie', unitName: 'movies', app: {} });
+    const items = [];
+    for (let i = 0; i < 5000; i++) {
+        items.push({ id: `m${i}`, name: `Movie ${i}`, category: 'All' });
+    }
+    view.items = items;
+    view._filteredItems = items;
+    view._isRendered = true;
+
+    view._renderGrid(content, items, 0);
+    const stage = content.children[0];
+    assert.ok(stage && stage.className === 'browse-grid-stage');
+    assert.ok(stage.children.length > 0 && stage.children.length <= 60, `Expected <= 60 mounted cards, got ${stage.children.length}`);
+    assert.equal(stage.children[0].dataset.gridIdx, '0');
+
+    // Scroll down ~10 rows (4140px)
+    content.scrollTop = 4140;
+    view._updateGridWindow(content, false);
+    assert.ok(stage.children.length <= 60);
+    const firstIdxAfterScroll = Number(stage.children[0].dataset.gridIdx);
+    assert.ok(firstIdxAfterScroll >= 30, `Expected window to shift forward, got firstIdx=${firstIdxAfterScroll}`);
+
+    // Release content DOM (TV tab switch) and hydrate back
+    sectionEl._lastFocusedCard = stage.children[0];
+    view.releaseContentDom();
+    assert.equal(content.children.length, 0);
+    assert.equal(view._contentReleased, true);
+
+    view.hydrateContentDom();
+    assert.equal(view._contentReleased, false);
+    const hydratedStage = content.children[0];
+    assert.ok(hydratedStage && hydratedStage.children.length > 0 && hydratedStage.children.length <= 60);
+    assert.equal(Number(hydratedStage.children[0].dataset.gridIdx), firstIdxAfterScroll);
+    assert.equal(sectionEl._lastFocusedCard.dataset.gridIdx, String(firstIdxAfterScroll));
+
+    // Verify Live TV ('live') uses 4-column / 268px geometry (matching CSS :nth-child(4n))
+    const liveView = new BrowseView('live', { title: 'Live TV', cardType: 'live', unitName: 'channels', app: {} });
+    const liveMetrics = liveView._getGridMetrics(content);
+    assert.equal(liveMetrics.cols, 4);
+    assert.equal(liveMetrics.rowHeight, 268);
+});
+
+test('PlaybackEngine.destroy atomically clears player._session timers and resets session state', () => {
+    const env = createBrowserEnv();
+    env.setInterval = setInterval;
+    env.clearInterval = clearInterval;
+    loadScript(env, 'IPTVPlayer/js/services/playbackStrategies.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
+    const { PlaybackEngine } = env.window.IPTV;
+
+    const player = {
+        visible: true,
+        currentItem: { id: '1' },
+        video: {
+            addEventListener: () => {},
+            removeEventListener: () => {}
+        },
+        isLiveStream: () => true
+    };
+
+    const session = PlaybackEngine._createSession(player);
+    assert.equal(player._session, session);
+    assert.equal(player._loadSessionId, 1);
+
+    PlaybackEngine.startWatchdog(player, player.currentItem, session.id, 60000);
+    PlaybackEngine.startStallMonitor(player, player.currentItem, session.id, 'http://x.ts', 'mpegts');
+    session.timers.reconnect = setTimeout(() => {}, 60000);
+    session.timers.tsHealthy = setTimeout(() => {}, 60000);
+
+    assert.ok(session.timers.watchdog);
+    assert.ok(session.timers.stall);
+    assert.ok(session.timers.reconnect);
+    assert.ok(session.timers.tsHealthy);
+
+    PlaybackEngine.destroy(player);
+    assert.equal(player._session, null);
+    assert.equal(player._candidateWatchdog, null);
+    assert.equal(player._stallTimer, null);
+    assert.equal(player._reconnectTimer, null);
+    assert.equal(player._tsHealthyTimer, null);
+    assert.equal(player._streamStarted, false);
+});
+
+test('KeyHandler coalesces rapid arrow key repeats and SpatialNav uses preventScroll focus', () => {
+    const env = createBrowserEnv();
+    let navCalls = 0;
+    env.window.IPTV.SpatialNav = {
+        navigate: () => { navCalls++; return true; }
+    };
+    loadScript(env, 'IPTVPlayer/js/core/keyHandler.js');
+    const { KeyHandler } = env.window.IPTV;
+    KeyHandler.app = { playerService: { isVisible: () => false } };
+
+    let prevented = 0;
+    const makeEvt = (repeat) => ({
+        key: 'ArrowDown',
+        keyCode: 40,
+        repeat,
+        preventDefault: () => { prevented++; },
+        stopPropagation: () => {}
+    });
+
+    // First non-repeat press is always immediate
+    KeyHandler.handleKeyDown(makeEvt(false));
+    assert.equal(navCalls, 1);
+
+    // Immediate repeat within 65ms is coalesced (prevents input backlog)
+    KeyHandler.handleKeyDown(makeEvt(true));
+    assert.equal(navCalls, 1);
+    assert.equal(prevented, 2);
+
+    // Repeat after > 65ms proceeds
+    KeyHandler._lastDirRepeatAt = Date.now() - 80;
+    KeyHandler.handleKeyDown(makeEvt(true));
+    assert.equal(navCalls, 2);
+
+    // Verify SpatialNav.focusElement passes { preventScroll: true }
+    loadScript(env, 'IPTVPlayer/js/core/spatialNav.js');
+    const { SpatialNav } = env.window.IPTV;
+    SpatialNav._boundSideNav = true;
+    SpatialNav.ensureVisible = () => {};
+    let focusOpts = null;
+    const fakeEl = {
+        tagName: 'DIV',
+        classList: { contains: () => false },
+        closest: () => null,
+        focus: (opts) => { focusOpts = opts; }
+    };
+    SpatialNav.focusElement(fakeEl);
+    assert.equal(focusOpts && focusOpts.preventScroll, true);
+});
+
+test('PlaybackStrategies implement uniform Liskov contract and PlaybackEngine FSM emits state transitions', () => {
+    const env = createBrowserEnv();
+    const emitted = [];
+    env.window.IPTV.EventBus = { emit: (ev, payload) => { if (ev === 'player:state') emitted.push(payload.state); } };
+    loadScript(env, 'IPTVPlayer/js/services/playbackStrategies.js');
+    loadScript(env, 'IPTVPlayer/js/services/playbackEngine.js');
+
+    const { PlaybackStrategies, PlaybackEngine } = env.window.IPTV;
+    const requiredMethods = ['getCurrentTime', 'getDuration', 'isPaused', 'canSeek', 'play', 'pause', 'seekTo', 'suspend', 'restore', 'destroy'];
+    for (const key of ['hls', 'mpegts', 'native', 'avplay']) {
+        const strat = PlaybackStrategies[key];
+        assert.ok(strat, `Missing strategy: ${key}`);
+        for (const fn of requiredMethods) {
+            assert.equal(typeof strat[fn], 'function', `${key}.${fn} must be a function`);
+        }
+    }
+
+    const player = {
+        visible: true,
+        currentItem: { id: 'm1', name: 'Movie 1' },
+        video: {
+            currentTime: 10,
+            duration: 120,
+            paused: false,
+            seeking: false,
+            play: () => Promise.resolve(),
+            pause: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {}
+        },
+        isLiveStream: () => false,
+        hasValidDuration: () => true,
+        _updatePlayPauseIcon: () => {},
+        _updateProgress: () => {}
+    };
+
+    assert.equal(PlaybackEngine.getState(player), 'IDLE');
+    PlaybackEngine.play(player);
+    PlaybackEngine.pause(player);
+    PlaybackEngine.seekTo(player, 45, true);
+    PlaybackEngine.destroy(player);
+
+    assert.deepEqual(emitted, ['PLAYING', 'PAUSED', 'SEEKING', 'IDLE']);
+    assert.equal(PlaybackEngine.getState(player), 'IDLE');
+});
+
+test('DownloadPersistence loads defaults, coalesces writes, and resolves existsOnDisk/isUniversalMp4', () => {
+    const os = require('os');
+    const { DownloadPersistence } = require(path.join(ROOT, 'windows', 'downloadPersistence.js'));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'miiptv-dl-persist-'));
+    try {
+        const settingsPath = path.join(tmpDir, 'settings.json');
+        const historyPath = path.join(tmpDir, 'history.json');
+        const mp4File = path.join(tmpDir, 'movie.mp4');
+        fs.writeFileSync(mp4File, 'ok');
+
+        const repo = new DownloadPersistence(settingsPath, historyPath, tmpDir);
+        const defaults = repo.loadSettings();
+        assert.equal(defaults.saveDirectory, tmpDir);
+        assert.equal(defaults.maxConcurrent, 1);
+
+        const nextSettings = { ...defaults, askEveryTime: true, maxConcurrent: 2 };
+        repo.saveSettings(nextSettings, true);
+        const reloaded = repo.loadSettings();
+        assert.equal(reloaded.askEveryTime, true);
+        assert.equal(reloaded.maxConcurrent, 2);
+
+        repo.saveHistory([{ id: '1', filePath: mp4File }, { id: '2', filePath: path.join(tmpDir, 'missing.mkv') }], true);
+        const hist = repo.loadHistory();
+        assert.equal(hist[0].existsOnDisk, true);
+        assert.equal(hist[0].isUniversalMp4, true);
+        assert.equal(hist[1].existsOnDisk, false);
+        assert.equal(hist[1].isUniversalMp4, false);
+    } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+});
+
+test('httpTransfer.executeHttpTransfer resumes bit-exactly with verified Content-Range and restarts on mismatch', async () => {
+    const http = require('http');
+    const os = require('os');
+    const { executeHttpTransfer } = require(path.join(ROOT, 'windows', 'httpTransfer.js'));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'miiptv-http-xfer-'));
+    const fullPayload = Buffer.from('0123456789ABCDEF');
+
+    let badRangeOnce = true;
+    const server = http.createServer((req, res) => {
+        const range = req.headers.range;
+        if (req.url === '/good-resume' && range === 'bytes=6-') {
+            const slice = fullPayload.slice(6);
+            res.writeHead(206, {
+                'Content-Range': `bytes 6-${fullPayload.length - 1}/${fullPayload.length}`,
+                'Content-Length': String(slice.length)
+            });
+            res.end(slice);
+            return;
+        }
+        if (req.url === '/bad-range' && range && badRangeOnce) {
+            badRangeOnce = false;
+            // Mismatched start offset (0 instead of 6) must trigger restart from 0
+            res.writeHead(206, {
+                'Content-Range': `bytes 0-${fullPayload.length - 1}/${fullPayload.length}`,
+                'Content-Length': String(fullPayload.length)
+            });
+            res.end(fullPayload);
+            return;
+        }
+        res.writeHead(200, { 'Content-Length': String(fullPayload.length) });
+        res.end(fullPayload);
+    });
+
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = server.address().port;
+
+    try {
+        // 1. Valid 206 resume from byte 6
+        const part1 = path.join(tmpDir, 'file1.part');
+        fs.writeFileSync(part1, fullPayload.slice(0, 6));
+        const task1 = { status: 'downloading', url: `http://127.0.0.1:${port}/good-resume`, partPath: part1, receivedBytes: 6, totalBytes: 0, retryCount: 0 };
+        await new Promise((resolve, reject) => {
+            executeHttpTransfer(task1, {
+                onProgress: () => {},
+                onComplete: () => resolve(),
+                onTransientError: (_t, e) => reject(e),
+                onFatalError: (_t, e) => reject(e)
+            });
+        });
+        assert.equal(fs.readFileSync(part1, 'utf8'), fullPayload.toString('utf8'));
+
+        // 2. Mismatched Content-Range restarts cleanly from 0
+        const part2 = path.join(tmpDir, 'file2.part');
+        fs.writeFileSync(part2, fullPayload.slice(0, 6));
+        const task2 = { status: 'downloading', url: `http://127.0.0.1:${port}/bad-range`, partPath: part2, receivedBytes: 6, totalBytes: 0, retryCount: 0 };
+        await new Promise((resolve, reject) => {
+            executeHttpTransfer(task2, {
+                onProgress: () => {},
+                onComplete: () => resolve(),
+                onTransientError: (_t, e) => reject(e),
+                onFatalError: (_t, e) => reject(e)
+            });
+        });
+        assert.equal(fs.readFileSync(part2, 'utf8'), fullPayload.toString('utf8'));
+    } finally {
+        server.close();
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+});
+
 
 

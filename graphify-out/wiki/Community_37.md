@@ -1,34 +1,32 @@
 # Community 37
 
-> 9 nodes · cohesion 0.25
+> 10 nodes · cohesion 0.22
 
 ## Key Concepts
 
-- **pe()** (6 connections) — `IPTVPlayer/js/hls.min.js`
-- **jt()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **ft()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **ot()** (4 connections) — `IPTVPlayer/js/hls.min.js`
-- **bt()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **Wl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **jl()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Kt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **qt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **server.py** (7 connections) — `server.py`
+- **CORSRequestHandler** (3 connections) — `server.py`
+- **run_server()** (2 connections) — `server.py`
+- **socketserver** (2 connections)
+- **http_server** (1 connections)
+- **os** (1 connections)
+- **.end_headers()** (1 connections) — `server.py`
+- **.__init__()** (1 connections) — `server.py`
+- **MI IPTV Player - Lightweight Local Test Server Serves IPTVPlayer/ over HTTP…** (1 connections) — `server.py`
+- **sys** (1 connections)
 
 ## Relationships
 
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (9 shared connections)
-- [Community 15](Community_15.md) (2 shared connections)
-- [webOS Platform SDK Bridge](webOS_Platform_SDK_Bridge.md) (1 shared connections)
-- [QR Code Generation Library](QR_Code_Generation_Library.md) (1 shared connections)
+- No strong cross-community connections detected
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `server.py`
 
 ## Audit Trail
 
-- EXTRACTED: 21 (95%)
-- INFERRED: 1 (5%)
+- EXTRACTED: 10 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

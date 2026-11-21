@@ -101,33 +101,12 @@ class IPTVApp {
     }
 
     _bindNavigation() {
-        // Side rail navigation items
+        // Side rail navigation items (focus transfer and side-nav collapse happen cleanly inside navigateTo)
         document.querySelectorAll('.nav-item[data-section]').forEach(item => {
             item.addEventListener('click', () => {
                 this.navigateTo(item.dataset.section);
-                // When selecting a navigation item, immediately move focus into the section content
-                // and collapse the side navigation rail
-                setTimeout(() => {
-                    const sec = document.getElementById(`section-${item.dataset.section}`);
-                    if (sec) {
-                        const target = sec.querySelector('.category-item.active, .category-item, .card, .theme-swatch-card.active, .btn-primary, button:not([disabled])');
-                        if (target && window.IPTV.SpatialNav) {
-                            window.IPTV.SpatialNav.focusElement(target);
-                        }
-                    }
-                }, 80);
             });
         });
-
-        // Mouse wheel scroll support for content area
-        const contentArea = document.getElementById('content-area');
-        if (contentArea) {
-            contentArea.addEventListener('wheel', (e) => {
-                if (e.deltaY !== 0) {
-                    contentArea.scrollTop += e.deltaY;
-                }
-            }, { passive: true });
-        }
     }
 
     registerSectionHook(section, onActivate) {
@@ -138,12 +117,24 @@ class IPTVApp {
 
     navigateTo(section, pushHistory = true) {
         const contentArea = document.getElementById('content-area');
-        const prevSec = this.currentSection ? document.getElementById(`section-${this.currentSection}`) : null;
+        const prevSectionName = this.currentSection;
+        const prevSec = prevSectionName ? document.getElementById(`section-${prevSectionName}`) : null;
         if (prevSec && contentArea) {
             prevSec._savedScrollTop = contentArea.scrollTop;
         }
 
+        // On Smart TVs, release inactive BrowseView poster grids to keep RAM low
+        const P = window.IPTV && window.IPTV.Platform;
+        const isTv = Boolean(P && ((typeof P.isWebOS === 'function' && P.isWebOS()) || (typeof P.isTizen === 'function' && P.isTizen())));
+        if (isTv && prevSectionName && prevSectionName !== section && this.browseViews && this.browseViews[prevSectionName] && typeof this.browseViews[prevSectionName].releaseContentDom === 'function') {
+            this.browseViews[prevSectionName].releaseContentDom();
+        }
+
         this.currentSection = section;
+
+        // Collapse side navigation immediately for snappy section transition
+        const sideNav = document.getElementById('side-nav');
+        if (sideNav) sideNav.classList.remove('expanded');
 
         // Update nav items
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -165,8 +156,8 @@ class IPTVApp {
                 contentArea.scrollTop = typeof sec._savedScrollTop === 'number' ? sec._savedScrollTop : 0;
             }
 
-            // Restore last focused item in section or focus first non-input focusable item
-            setTimeout(() => {
+            // Focus section on next animation frame (snappy 16ms instead of 60ms+80ms double timers)
+            const focusSectionTarget = () => {
                 if (!sec.classList.contains('active')) return;
                 const curActive = document.activeElement;
                 if (curActive && sec.contains(curActive) &&
@@ -190,7 +181,12 @@ class IPTVApp {
                         target.focus();
                     }
                 }
-            }, 60);
+            };
+            if (typeof requestAnimationFrame === 'function') {
+                requestAnimationFrame(focusSectionTarget);
+            } else {
+                setTimeout(focusSectionTarget, 16);
+            }
         }
     }
 

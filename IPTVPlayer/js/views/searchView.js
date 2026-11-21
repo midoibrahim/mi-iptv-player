@@ -40,23 +40,57 @@ window.IPTV.SearchView = {
         try { this.input.select(); } catch(err) {}
     },
 
-    _collectPoolMatches(arr, q, maxPerGroup) {
-        const matches = [];
-        if (!arr || !arr.length) return matches;
-        for (let i = 0; i < arr.length && matches.length < maxPerGroup; i++) {
-            const item = arr[i];
+    _isTv() {
+        const P = window.IPTV && window.IPTV.Platform;
+        return Boolean(P && ((typeof P.isWebOS === 'function' && P.isWebOS()) || (typeof P.isTizen === 'function' && P.isTizen())));
+    },
+
+    _matchesItem(item, q, cacheQuery) {
+        if (!item) return false;
+        if (cacheQuery) {
             if (item._q === undefined) {
                 item._q = ((item.name || '') + ' ' + (item.category || '')).toLowerCase();
             }
-            if (item._q.indexOf(q) !== -1) {
-                matches.push(item);
+            return item._q.indexOf(q) !== -1;
+        }
+        const name = item.name ? String(item.name).toLowerCase() : '';
+        if (name.indexOf(q) !== -1) return true;
+        const cat = item.category ? String(item.category).toLowerCase() : '';
+        return cat.indexOf(q) !== -1;
+    },
+
+    _collectPoolMatches(arr, q, maxPerGroup) {
+        const matches = [];
+        if (!arr || !arr.length) return matches;
+        const cacheQuery = !this._isTv();
+        for (let i = 0; i < arr.length && matches.length < maxPerGroup; i++) {
+            if (this._matchesItem(arr[i], q, cacheQuery)) {
+                matches.push(arr[i]);
             }
         }
         return matches;
     },
 
-    search(query) {
+    async _collectPoolMatchesAsync(arr, q, maxPerGroup, gen) {
+        const matches = [];
+        if (!arr || !arr.length) return matches;
+        const cacheQuery = !this._isTv();
+        for (let i = 0; i < arr.length && matches.length < maxPerGroup; i++) {
+            if (i > 0 && (i & 4095) === 0) {
+                await new Promise(r => setTimeout(r, 0));
+                if (this._searchGen !== gen) return null;
+            }
+            if (this._matchesItem(arr[i], q, cacheQuery)) {
+                matches.push(arr[i]);
+            }
+        }
+        return matches;
+    },
+
+    async search(query) {
         if (!this.resultsContainer) return;
+        this._searchGen = (this._searchGen || 0) + 1;
+        const gen = this._searchGen;
 
         if (!query) {
             this.resultsContainer.className = 'browse-content grid-view';
@@ -67,10 +101,17 @@ window.IPTV.SearchView = {
         const q = query.toLowerCase();
         const maxPerGroup = 36;
 
+        const liveMatches = await this._collectPoolMatchesAsync(window.IPTV.CatalogStore.getLive(), q, maxPerGroup, gen);
+        if (liveMatches === null || this._searchGen !== gen) return;
+        const movieMatches = await this._collectPoolMatchesAsync(window.IPTV.CatalogStore.getMovies(), q, maxPerGroup, gen);
+        if (movieMatches === null || this._searchGen !== gen) return;
+        const seriesMatches = await this._collectPoolMatchesAsync(window.IPTV.CatalogStore.getSeries(), q, maxPerGroup, gen);
+        if (seriesMatches === null || this._searchGen !== gen) return;
+
         const groups = [
-            { title: 'Live Channels', type: 'live', items: this._collectPoolMatches(window.IPTV.CatalogStore.getLive(), q, maxPerGroup) },
-            { title: 'Movies',        type: 'movie', items: this._collectPoolMatches(window.IPTV.CatalogStore.getMovies(), q, maxPerGroup) },
-            { title: 'Series',        type: 'series', items: this._collectPoolMatches(window.IPTV.CatalogStore.getSeries(), q, maxPerGroup) }
+            { title: 'Live Channels', type: 'live', items: liveMatches },
+            { title: 'Movies',        type: 'movie', items: movieMatches },
+            { title: 'Series',        type: 'series', items: seriesMatches }
         ].filter(g => g.items.length > 0);
 
         if (window.IPTV.Card && window.IPTV.Card.clearLazyQueue) {

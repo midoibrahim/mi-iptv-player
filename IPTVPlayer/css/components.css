@@ -628,12 +628,13 @@
     border-radius: var(--radius);
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.14s ease-out, border-color 0.14s ease-out, background 0.14s ease-out;
+    transition: transform 0.08s ease-out;
     border: 2px solid var(--border-subtle);
     box-shadow: var(--shadow-card);
     position: relative;
     display: flex;
     flex-direction: column;
+    contain: layout style paint;
 }
 .card:hover {
     background: var(--bg-card-h);
@@ -641,7 +642,6 @@
 }
 .card:focus {
     transform: scale(1.05);
-    will-change: transform;
     background: var(--bg-card-h);
     border-color: var(--border-focus);
     z-index: 8;

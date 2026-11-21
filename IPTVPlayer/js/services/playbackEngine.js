@@ -1,13 +1,50 @@
 /* ============================================================
-   IPTV Player â€” Multi-Stage Playback Engine
-   Manages <video>, Hls.js MSE, mpegts.js MSE, candidate
-   watchdog timers, and automatic fallback sequencing.
+   IPTV Player — Multi-Stage Playback Engine (Orchestrator & FSM)
+   Coordinates PlaybackStrategies (Hls, MpegTs, Native, TizenAvPlay),
+   explicit playback states, candidate watchdogs, and stall monitor.
    ============================================================ */
 
 window.IPTV = window.IPTV || {};
 
 window.IPTV.PlaybackEngine = {
+    STATES: {
+        IDLE: 'IDLE',
+        LOADING: 'LOADING',
+        PLAYING: 'PLAYING',
+        PAUSED: 'PAUSED',
+        SEEKING: 'SEEKING',
+        RECOVERING: 'RECOVERING',
+        ERROR: 'ERROR'
+    },
+
     _scriptPromises: {},
+
+    setState(player, nextState) {
+        if (!player || !nextState) return;
+        const prev = player._playbackState || this.STATES.IDLE;
+        if (prev === nextState) return;
+        player._playbackState = nextState;
+        if (window.IPTV.EventBus && typeof window.IPTV.EventBus.emit === 'function') {
+            window.IPTV.EventBus.emit('player:state', { prev, state: nextState, item: player.currentItem || null });
+        }
+    },
+
+    getState(player) {
+        return (player && player._playbackState) || this.STATES.IDLE;
+    },
+
+    _strategies() {
+        return (window.IPTV && window.IPTV.PlaybackStrategies) || {};
+    },
+
+    _getStrategy(player) {
+        const S = this._strategies();
+        if (player && player._avplayActive && S.avplay) return S.avplay;
+        if (player && player._session && player._session.strategy) return player._session.strategy;
+        if (player && player.hls && S.hls) return S.hls;
+        if (player && player.mpegtsPlayer && S.mpegts) return S.mpegts;
+        return S.native || null;
+    },
 
     loadScriptOnce(src) {
         if (this._scriptPromises[src]) return this._scriptPromises[src];
@@ -36,19 +73,19 @@ window.IPTV.PlaybackEngine = {
         if (isTv) {
             return {
                 enableWorker: false,
-                hlsMaxBufferLength: 30,
-                hlsMaxMaxBufferLength: 60,
-                hlsMaxBufferSize: 30 * 1000 * 1000,
-                hlsBackBufferLength: 15,
-                hlsLiveBackBufferLength: 10,
+                hlsMaxBufferLength: 20,
+                hlsMaxMaxBufferLength: 36,
+                hlsMaxBufferSize: 20 * 1000 * 1000,
+                hlsBackBufferLength: 10,
+                hlsLiveBackBufferLength: 8,
                 hlsCapLevelToPlayerSize: true,
                 mpegtsLazyLoad: false,
-                // ~384KB (mpegts.js documented default). Larger initial stashes delay first
-                // frame AND every in-place reconnect, because data is only dispatched once full.
                 mpegtsStashInitialSize: 384 * 1024,
                 mpegtsAutoCleanup: true,
                 mpegtsAutoCleanupMaxBackward: 25,
-                mpegtsAutoCleanupMinBackward: 12
+                mpegtsAutoCleanupMinBackward: 12,
+                mpegtsLiveMaxLatency: 15.0,
+                mpegtsLiveMinRemain: 4.0
             };
         }
         return {
@@ -63,134 +100,61 @@ window.IPTV.PlaybackEngine = {
             mpegtsStashInitialSize: 384 * 1024,
             mpegtsAutoCleanup: true,
             mpegtsAutoCleanupMaxBackward: 60,
-            mpegtsAutoCleanupMinBackward: 30
+            mpegtsAutoCleanupMinBackward: 30,
+            mpegtsLiveMaxLatency: 8.0,
+            mpegtsLiveMinRemain: 2.5
         };
     },
 
     getCurrentTime(player) {
-        if (player._avplayActive) return player._avplayCurrentTime || 0;
-        return (player.video && player.video.currentTime) ? player.video.currentTime : 0;
+        const strat = this._getStrategy(player);
+        return strat ? strat.getCurrentTime(player) : ((player && player.video && player.video.currentTime) || 0);
     },
 
     getDuration(player) {
-        if (player._avplayActive) return player._avplayDuration || 0;
-        return (player.video && player.video.duration) ? player.video.duration : 0;
+        const strat = this._getStrategy(player);
+        return strat ? strat.getDuration(player) : ((player && player.video && player.video.duration) || 0);
     },
 
     isPaused(player) {
-        if (player._avplayActive) return !!player._avplayPaused;
-        return Boolean(player.video && player.video.paused);
+        const strat = this._getStrategy(player);
+        return strat ? strat.isPaused(player) : Boolean(player && player.video && player.video.paused);
     },
 
     play(player) {
         if (!player || !player.video) return;
         player._userPaused = false;
-        if (player._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                window.webapis.avplay.play();
-                player._avplayPaused = false;
-            } catch (e) {}
-        } else {
-            const p = player.video.play();
-            if (p && typeof p.catch === 'function') {
-                p.catch(e => console.warn('Play blocked:', e));
-            }
+        const strat = this._getStrategy(player);
+        if (strat) strat.play(player);
+        this.setState(player, this.STATES.PLAYING);
+        if (typeof player._updatePlayPauseIcon === 'function') {
+            player._updatePlayPauseIcon(true);
         }
-        player._updatePlayPauseIcon(true);
     },
 
     pause(player) {
         if (!player || !player.video) return;
         player._userPaused = true;
-        if (player._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                window.webapis.avplay.pause();
-                player._avplayPaused = true;
-            } catch (e) {}
-            player._recordWatchProgress();
-        } else {
-            player.video.pause();
+        const strat = this._getStrategy(player);
+        if (strat) strat.pause(player);
+        this.setState(player, this.STATES.PAUSED);
+        if (typeof player._updatePlayPauseIcon === 'function') {
+            player._updatePlayPauseIcon(false);
         }
-        player._updatePlayPauseIcon(false);
     },
 
     canSeek(player) {
         if (!player || !player.video || player.isLiveStream()) return false;
         if (!player.hasValidDuration()) return false;
-        if (player._avplayActive) return true;
-        try {
-            const seekable = player.video.seekable;
-            if (!seekable || seekable.length === 0) {
-                return player.hasValidDuration() && player.video.duration > 0;
-            }
-            return seekable.end(seekable.length - 1) > 0;
-        } catch (e) {
-            return false;
-        }
+        const strat = this._getStrategy(player);
+        return strat ? strat.canSeek(player) : Boolean(player.video.duration > 0);
     },
 
     seekTo(player, clamped, startPlaying = true) {
-        if (player._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                window.webapis.avplay.seekTo(Math.floor(clamped * 1000), () => {
-                    player._avplayCurrentTime = clamped;
-                    if (startPlaying) {
-                        player._userPaused = false;
-                        player._avplayPaused = false;
-                        try { window.webapis.avplay.play(); } catch (e) {}
-                        player._updatePlayPauseIcon(true);
-                    }
-                    player._updateProgress();
-                }, () => {});
-            } catch (err) {
-                console.warn('[PlayerService] AVPlay seek error:', err);
-            }
-            return;
-        }
-
-        if (player.hls && typeof player.hls.startLoad === 'function') {
-            try { player.hls.startLoad(clamped); } catch (e) {}
-        }
-
-        try {
-            player.video.currentTime = clamped;
-        } catch (err) {
-            console.warn('[PlayerService] Seek error:', err);
-        }
-
-        if (startPlaying) {
-            player._userPaused = false;
-        }
-
-        const ensurePlaying = () => {
-            if (!player._userPaused) {
-                const p = player.video.play();
-                if (p && typeof p.then === 'function') {
-                    p.catch(e => console.warn('[PlayerService] Play after seek caught:', e));
-                }
-                player._updatePlayPauseIcon(true);
-            }
-        };
-
-        if (player._onSeekedHandler) {
-            try { player.video.removeEventListener('seeked', player._onSeekedHandler); } catch (e) {}
-            player._onSeekedHandler = null;
-        }
-
-        const onSeeked = () => {
-            player.video.removeEventListener('seeked', onSeeked);
-            if (player._onSeekedHandler === onSeeked) {
-                player._onSeekedHandler = null;
-            }
-            ensurePlaying();
-            player._updateProgress();
-        };
-        player._onSeekedHandler = onSeeked;
-        player.video.addEventListener('seeked', onSeeked);
-
-        if (!player.video.seeking) {
-            ensurePlaying();
-        }
+        if (!player) return;
+        this.setState(player, this.STATES.SEEKING);
+        const strat = this._getStrategy(player);
+        if (strat) strat.seekTo(player, clamped, startPlaying);
     },
 
     _addCandidateListener(player, type, fn) {
@@ -221,91 +185,80 @@ window.IPTV.PlaybackEngine = {
         if (!player || !player.visible) return;
         player._wasPlayingBeforeHidden = !this.isPaused(player) && !player._userPaused;
         this.clearWatchdog(player);
-
-        if (player._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                if (typeof window.webapis.avplay.suspend === 'function') {
-                    window.webapis.avplay.suspend();
-                } else if (typeof window.webapis.avplay.pause === 'function') {
-                    window.webapis.avplay.pause();
-                }
-                player._avplayPaused = true;
-            } catch (e) {}
-            return;
-        }
-
-        if (player.hls && typeof player.hls.stopLoad === 'function') {
-            try { player.hls.stopLoad(); } catch (e) {}
-        }
-        if (player.video) {
-            try { player.video.pause(); } catch (e) {}
-        }
+        const strat = this._getStrategy(player);
+        if (strat) strat.suspend(player);
     },
 
     restore(player) {
         if (!player || !player.visible) return;
         const shouldResume = Boolean(player._wasPlayingBeforeHidden && !player._userPaused);
         player._wasPlayingBeforeHidden = false;
-
-        if (player._avplayActive && window.webapis && window.webapis.avplay) {
-            try {
-                if (typeof window.webapis.avplay.restore === 'function') {
-                    window.webapis.avplay.restore();
-                }
-                if (shouldResume) {
-                    if (typeof window.webapis.avplay.play === 'function') {
-                        window.webapis.avplay.play();
-                    }
-                    player._avplayPaused = false;
-                    if (typeof player._updatePlayPauseIcon === 'function') {
-                        player._updatePlayPauseIcon(true);
-                    }
-                }
-            } catch (e) {}
-            return;
-        }
-
+        const strat = this._getStrategy(player);
+        if (strat) strat.restore(player, shouldResume);
         if (shouldResume) {
-            if (player.hls && typeof player.hls.startLoad === 'function') {
-                try { player.hls.startLoad(); } catch (e) {}
-            }
-            this.play(player);
+            this.setState(player, this.STATES.PLAYING);
         }
+    },
+
+    _createSession(player) {
+        const nextId = (player._loadSessionId || 0) + 1;
+        player._loadSessionId = nextId;
+        const session = {
+            id: nextId,
+            engine: null,
+            strategy: null,
+            started: false,
+            hlsNetRetries: 0,
+            hlsMediaRecovered: false,
+            hlsCodecSwapped: false,
+            tsReconnects: 0,
+            timers: {
+                watchdog: null,
+                stall: null,
+                reconnect: null,
+                tsHealthy: null
+            }
+        };
+        player._session = session;
+        player._streamStarted = false;
+        return session;
     },
 
     clearWatchdog(player) {
-        if (player && player._candidateWatchdog) {
-            clearTimeout(player._candidateWatchdog);
-            player._candidateWatchdog = null;
+        if (!player) return;
+        const wd = (player._session && player._session.timers && player._session.timers.watchdog) || player._candidateWatchdog;
+        if (wd) clearTimeout(wd);
+        if (player._session && player._session.timers) {
+            player._session.timers.watchdog = null;
         }
+        player._candidateWatchdog = null;
     },
 
     stopStallMonitor(player) {
-        if (player && player._stallTimer) {
-            clearInterval(player._stallTimer);
-            player._stallTimer = null;
+        if (!player) return;
+        const timers = player._session && player._session.timers;
+        const stall = (timers && timers.stall) || player._stallTimer;
+        if (stall) clearInterval(stall);
+        const reconnect = (timers && timers.reconnect) || player._reconnectTimer;
+        if (reconnect) clearTimeout(reconnect);
+        const healthy = (timers && timers.tsHealthy) || player._tsHealthyTimer;
+        if (healthy) clearTimeout(healthy);
+
+        if (timers) {
+            timers.stall = null;
+            timers.reconnect = null;
+            timers.tsHealthy = null;
         }
-        if (player && player._reconnectTimer) {
-            clearTimeout(player._reconnectTimer);
-            player._reconnectTimer = null;
-        }
-        if (player && player._tsHealthyTimer) {
-            clearTimeout(player._tsHealthyTimer);
-            player._tsHealthyTimer = null;
-        }
+        player._stallTimer = null;
+        player._reconnectTimer = null;
+        player._tsHealthyTimer = null;
     },
 
-    /**
-     * Playback stall monitor (runs after the first frame has rendered).
-     * - mpegts.js / native: jumps small buffered gaps (timestamp discontinuities are common
-     *   on IPTV TS streams and mpegts.js has no built-in gap controller) and nudges stuck decoders.
-     *   Hls.js has its own GapController, so gap handling is skipped for it.
-     * - Live (all engines): if the picture is frozen for 10s with nothing buffered, reloads
-     *   the same candidate in place (up to 3 times) before falling back to the next candidate.
-     */
     startStallMonitor(player, item, sessionId, rawCandidateUrl, engine) {
-        if (player && player._stallTimer) {
-            clearInterval(player._stallTimer);
+        if (player) {
+            const prevStall = (player._session && player._session.timers && player._session.timers.stall) || player._stallTimer;
+            if (prevStall) clearInterval(prevStall);
+            if (player._session && player._session.timers) player._session.timers.stall = null;
             player._stallTimer = null;
         }
         if (!player || !player.video) return;
@@ -313,7 +266,7 @@ window.IPTV.PlaybackEngine = {
         let lastTime = -1;
         let stuckSince = 0;
 
-        player._stallTimer = setInterval(() => {
+        const stallId = setInterval(() => {
             if (player._loadSessionId !== sessionId || !player.visible || player.currentItem !== item || player._avplayActive) {
                 this.stopStallMonitor(player);
                 return;
@@ -374,6 +327,7 @@ window.IPTV.PlaybackEngine = {
                 player._liveReloads = (player._liveReloads || 0) + 1;
                 if (player._liveReloads <= 3) {
                     console.warn(`[PlaybackEngine] Live stream frozen for 10s, reloading in place (${player._liveReloads}/3)`);
+                    this.setState(player, this.STATES.RECOVERING);
                     player.currentCandidateIndex = Math.max(0, player.currentCandidateIndex);
                     this.loadCandidate(player, rawCandidateUrl, item);
                 } else {
@@ -383,11 +337,16 @@ window.IPTV.PlaybackEngine = {
                 }
             }
         }, 500);
+
+        player._stallTimer = stallId;
+        if (player._session && player._session.timers) {
+            player._session.timers.stall = stallId;
+        }
     },
 
     startWatchdog(player, item, sessionId, timeoutMs = 8500) {
         this.clearWatchdog(player);
-        player._candidateWatchdog = setTimeout(() => {
+        const wdId = setTimeout(() => {
             if (player._loadSessionId !== sessionId) return;
             if (!player.visible || player.currentItem !== item) return;
 
@@ -407,6 +366,10 @@ window.IPTV.PlaybackEngine = {
                 this.tryNextCandidate(player, item, sessionId);
             }
         }, timeoutMs);
+        player._candidateWatchdog = wdId;
+        if (player._session && player._session.timers) {
+            player._session.timers.watchdog = wdId;
+        }
     },
 
     destroy(player) {
@@ -421,163 +384,43 @@ window.IPTV.PlaybackEngine = {
             player.video.oncanplay = null;
             player.video.onended = null;
         }
-        if (player.hls) {
-            try { player.hls.destroy(); } catch (e) {}
-            player.hls = null;
-        }
-        if (player.mpegtsPlayer) {
-            try {
-                player.mpegtsPlayer.pause();
-                player.mpegtsPlayer.unload();
-                player.mpegtsPlayer.detachMediaElement();
-                player.mpegtsPlayer.destroy();
-            } catch (e) {}
-            player.mpegtsPlayer = null;
-        }
+        const S = this._strategies();
+        if (player.hls && S.hls) S.hls.destroy(player);
+        else if (player.hls) { try { player.hls.destroy(); } catch (e) {} player.hls = null; }
+
+        if (player.mpegtsPlayer && S.mpegts) S.mpegts.destroy(player);
+        else if (player.mpegtsPlayer) { try { player.mpegtsPlayer.destroy(); } catch (e) {} player.mpegtsPlayer = null; }
+
         if (player._avplayActive) {
             this.destroyTizenAvPlay(player);
         }
+        player._session = null;
+        player._streamStarted = false;
+        this.setState(player, this.STATES.IDLE);
     },
 
     isTizenAvPlayAvailable() {
-        return !!(
-            window.IPTV.Platform &&
-            window.IPTV.Platform.isTizen() &&
-            window.webapis &&
-            window.webapis.avplay &&
-            typeof window.webapis.avplay.open === 'function'
-        );
+        const S = this._strategies();
+        return Boolean(S.avplay && S.avplay.isAvailable());
     },
 
     destroyTizenAvPlay(player) {
-        if (!player) return;
-        player._avplayActive = false;
-        player._avplayPaused = false;
-        player._avplayCurrentTime = 0;
-        player._avplayDuration = 0;
-        if (window.webapis && window.webapis.avplay) {
-            try { window.webapis.avplay.stop(); } catch (e) {}
-            try { window.webapis.avplay.close(); } catch (e) {}
-        }
-        document.body.classList.remove('avplay-active');
-        if (player.video) {
-            player.video.style.visibility = '';
-        }
+        const S = this._strategies();
+        if (S.avplay) S.avplay.destroy(player);
     },
 
     playTizenAvPlay(player, url, item, sessionId) {
-        if (!player || !this.isTizenAvPlayAvailable()) return false;
-        try {
-            const avplay = window.webapis.avplay;
-            let avObj = document.getElementById('av-player');
-            if (!avObj && player.playerScreen) {
-                avObj = document.createElement('object');
-                avObj.id = 'av-player';
-                avObj.setAttribute('type', 'application/avplayer');
-                avObj.style.cssText = 'position:absolute;top:0;left:0;width:1920px;height:1080px;z-index:1;pointer-events:none;';
-                player.playerScreen.insertBefore(avObj, player.playerScreen.firstChild);
-            }
-
-            try { avplay.stop(); } catch (e) {}
-            try { avplay.close(); } catch (e) {}
-
-            player._avplayActive = true;
-            player._avplayPaused = false;
-            player._avplayCurrentTime = 0;
-            player._avplayDuration = 0;
-            document.body.classList.add('avplay-active');
-            if (player.video) {
-                player.video.style.visibility = 'hidden';
-            }
-
-            const isLive = player.isLiveStream();
-            this.startWatchdog(player, item, sessionId, isLive ? 10000 : 15000);
-
-            avplay.open(url);
-            try { avplay.setDisplayRect(0, 0, 1920, 1080); } catch (e) {}
-            try { avplay.setDisplayMethod('PLAYER_DISPLAY_MODE_LETTER_BOX'); } catch (e) {}
-
-            avplay.setListener({
-                onbufferingstart: () => {},
-                onbufferingprogress: () => {},
-                onbufferingcomplete: () => {
-                    if (player._loadSessionId !== sessionId) return;
-                    this.clearWatchdog(player);
-                },
-                oncurrentplaytime: (currentTimeMs) => {
-                    if (player._loadSessionId !== sessionId || !player._avplayActive) return;
-                    player._avplayCurrentTime = (currentTimeMs || 0) / 1000;
-                    if (!player._avplayDuration && !isLive) {
-                        try {
-                            const durMs = avplay.getDuration();
-                            if (durMs > 0) player._avplayDuration = durMs / 1000;
-                        } catch (e) {}
-                    }
-                    player._updateProgress();
-                },
-                onstreamcompleted: () => {
-                    if (player._loadSessionId !== sessionId || !player._avplayActive) return;
-                    try { avplay.stop(); } catch (e) {}
-                    player._recordWatchProgress(true);
-                    if (player.currentItem && player.currentItem.type === 'series') {
-                        const settings = window.IPTV.Storage ? window.IPTV.Storage.getSettings() : null;
-                        const autoplay = !settings || settings.autoplay !== false;
-                        if (autoplay && player.hasNextEpisode()) {
-                            player.nextEpisode();
-                        }
-                    }
-                },
-                onerror: (eventType) => {
-                    if (player._loadSessionId !== sessionId || !player._avplayActive) return;
-                    console.warn('[PlaybackEngine] Tizen AVPlay error:', eventType);
-                    this.destroyTizenAvPlay(player);
-                    if (window.IPTV.EventBus) {
-                        window.IPTV.EventBus.toast('Unable to play stream. Server unreachable or format unsupported.');
-                    }
-                }
-            });
-
-            avplay.prepareAsync(() => {
-                if (player._loadSessionId !== sessionId || !player._avplayActive) return;
-                this.clearWatchdog(player);
-                player._markCandidateSuccess(url);
-                if (!isLive) {
-                    try {
-                        const durMs = avplay.getDuration();
-                        if (durMs > 0) player._avplayDuration = durMs / 1000;
-                    } catch (e) {}
-                }
-                try {
-                    avplay.play();
-                    player._avplayPaused = false;
-                    player._updatePlayPauseIcon(true);
-                    player._checkPendingInitialSeek();
-                } catch (playErr) {
-                    console.warn('[PlaybackEngine] AVPlay play() failed:', playErr);
-                }
-            }, (prepErr) => {
-                if (player._loadSessionId !== sessionId || !player._avplayActive) return;
-                console.warn('[PlaybackEngine] AVPlay prepareAsync failed:', prepErr);
-                this.destroyTizenAvPlay(player);
-                if (window.IPTV.EventBus) {
-                    window.IPTV.EventBus.toast('Unable to play stream. Server unreachable or format unsupported.');
-                }
-            });
-
-            return true;
-        } catch (err) {
-            console.warn('[PlaybackEngine] Tizen AVPlay exception:', err);
-            this.destroyTizenAvPlay(player);
-            return false;
-        }
+        const S = this._strategies();
+        return Boolean(S.avplay && S.avplay.load(this, player, url, item, sessionId));
     },
 
     async loadCandidate(player, rawCandidateUrl, item) {
         this.destroy(player);
         if (!player || !player.video) return;
 
-        player._loadSessionId = (player._loadSessionId || 0) + 1;
-        const currentSessionId = player._loadSessionId;
+        const session = this._createSession(player);
+        const currentSessionId = session.id;
+        this.setState(player, this.STATES.LOADING);
 
         player.video.pause();
         try {
@@ -598,265 +441,53 @@ window.IPTV.PlaybackEngine = {
 
         console.log(`[PlaybackEngine] Loading stream candidate [${player.currentCandidateIndex + 1}/${player.currentCandidates.length}]: ${rawCandidateUrl}`);
 
-        // Per-item resilience counters (survive in-place reloads of the same item)
         if (player._resilienceItem !== item) {
             player._resilienceItem = item;
             player._liveReloads = 0;
         }
-        player._streamStarted = false;
-        player._hlsNetRetries = 0;
-        player._tsReconnects = 0;
 
         this.startWatchdog(player, item, currentSessionId, isLive ? 7000 : 12000);
-
         const profile = this.getEngineProfile();
 
-        // Arms the stall monitor once the first frame actually renders
-        const armStallMonitor = (engine) => {
+        const armStallMonitor = (engineName) => {
+            session.engine = engineName;
             const onFirstPlaying = () => {
                 if (player._loadSessionId !== currentSessionId) return;
                 player.video.removeEventListener('playing', onFirstPlaying);
+                session.started = true;
                 player._streamStarted = true;
-                this.startStallMonitor(player, item, currentSessionId, rawCandidateUrl, engine);
+                this.setState(player, this.STATES.PLAYING);
+                this.startStallMonitor(player, item, currentSessionId, rawCandidateUrl, engineName);
             };
             this._addCandidateListener(player, 'playing', onFirstPlaying);
         };
 
-        // 1. HLS (.m3u8) streams via Hls.js MSE
-        if (isM3u8 && (forceMseHls || typeof window.MediaSource !== 'undefined')) {
-            if (!window.Hls) {
-                await this.loadScriptOnce('js/hls.min.js');
-                if (player._loadSessionId !== currentSessionId) return;
-            }
-            if (window.Hls && Hls.isSupported()) {
-                try {
-                    const hlsConfig = {
-                        enableWorker: profile.enableWorker,
-                        lowLatencyMode: false,
-                        maxBufferLength: profile.hlsMaxBufferLength,
-                        maxMaxBufferLength: profile.hlsMaxMaxBufferLength,
-                        maxBufferSize: profile.hlsMaxBufferSize,
-                        backBufferLength: profile.hlsBackBufferLength,
-                        liveBackBufferLength: profile.hlsLiveBackBufferLength,
-                        // Smoothness / resilience tuning for IPTV providers
-                        maxBufferHole: 0.5,
-                        nudgeMaxRetry: 6,
-                        startFragPrefetch: true,
-                        capLevelToPlayerSize: profile.hlsCapLevelToPlayerSize,
-                        liveSyncDurationCount: 3,
-                        liveMaxLatencyDurationCount: 10,
-                        manifestLoadingMaxRetry: 2,
-                        levelLoadingMaxRetry: 4,
-                        fragLoadingMaxRetry: 6
-                    };
-                    if (player._initialSeekPending !== null && player._initialSeekPending > 0) {
-                        hlsConfig.startPosition = player._initialSeekPending;
-                    }
-                    player._hlsMediaRecovered = false;
-                    player._hlsCodecSwapped = false;
-                    const hls = new Hls(hlsConfig);
-                    player.hls = hls;
-                    hls.loadSource(url);
-                    hls.attachMedia(player.video);
-                    armStallMonitor('hls');
+        const S = this._strategies();
+        const ctx = { url, rawCandidateUrl, item, isLive, session, profile, armStallMonitor };
 
-                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                        if (player._loadSessionId !== currentSessionId) return;
-                        player._markCandidateSuccess(rawCandidateUrl);
-                        const p = player.video.play();
-                        if (p && typeof p.catch === 'function') p.catch(() => {});
-                    });
-
-                    hls.on(Hls.Events.FRAG_BUFFERED, () => {
-                        if (player._loadSessionId !== currentSessionId) return;
-                        player._hlsNetRetries = 0;
-                    });
-
-                    hls.on(Hls.Events.ERROR, (event, data) => {
-                        if (player._loadSessionId !== currentSessionId) return;
-                        if (!data.fatal) return;
-
-                        // Network hiccup after playback started: resume loading in place instead of
-                        // tearing down and restarting the whole candidate chain (= long black "loading").
-                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && player._streamStarted && player._hlsNetRetries < 4) {
-                            player._hlsNetRetries++;
-                            const delay = 500 * player._hlsNetRetries;
-                            console.warn(`[PlaybackEngine] HLS network error (${data.details}), resuming load in ${delay}ms (${player._hlsNetRetries}/4)`);
-                            clearTimeout(player._reconnectTimer);
-                            player._reconnectTimer = setTimeout(() => {
-                                if (player._loadSessionId !== currentSessionId || player.hls !== hls) return;
-                                try { hls.startLoad(); } catch (err) { this.tryNextCandidate(player, item, currentSessionId); }
-                            }, delay);
-                            return;
-                        }
-
-                        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && typeof hls.recoverMediaError === 'function') {
-                            if (!player._hlsMediaRecovered) {
-                                player._hlsMediaRecovered = true;
-                                console.warn('[PlaybackEngine] HLS media error, attempting in-place recovery:', data.details);
-                                try { hls.recoverMediaError(); return; } catch (err) {}
-                            } else if (!player._hlsCodecSwapped && typeof hls.swapAudioCodec === 'function') {
-                                player._hlsCodecSwapped = true;
-                                console.warn('[PlaybackEngine] HLS media error persists, swapping audio codec and recovering');
-                                try { hls.swapAudioCodec(); hls.recoverMediaError(); return; } catch (err) {}
-                            }
-                        }
-
-                        console.warn('[PlaybackEngine] HLS fatal error:', data.type, data.details);
-                        this.tryNextCandidate(player, item, currentSessionId);
-                    });
-                    return;
-                } catch (e) {
-                    console.warn('[PlaybackEngine] Hls.js init failed, falling back to native:', e);
-                }
-            }
+        // 1. HLS (.m3u8) Strategy
+        if (isM3u8 && (forceMseHls || typeof window.MediaSource !== 'undefined') && S.hls) {
+            if (await S.hls.load(this, player, ctx)) return;
         }
 
-        // 2. MPEG-TS (.ts) streams via mpegts.js MSE
-        if (isTs && (forceMseTs || typeof window.MediaSource !== 'undefined')) {
-            if (!window.mpegts) {
-                await this.loadScriptOnce('js/mpegts.js');
-                if (player._loadSessionId !== currentSessionId) return;
-            }
-            if (window.mpegts && mpegts.isSupported()) {
-                try {
-                    const tsPlayer = mpegts.createPlayer({
-                        type: 'mse',
-                        isLive: isLive,
-                        url: url
-                    }, {
-                        enableWorker: profile.enableWorker,
-                        enableStashBuffer: true,
-                        stashInitialSize: profile.mpegtsStashInitialSize,
-                        lazyLoad: profile.mpegtsLazyLoad,
-                        autoCleanupSourceBuffer: profile.mpegtsAutoCleanup,
-                        autoCleanupMaxBackwardDuration: profile.mpegtsAutoCleanupMaxBackward,
-                        autoCleanupMinBackwardDuration: profile.mpegtsAutoCleanupMinBackward,
-                        seekType: isLive ? 'range' : 'param'
-                    });
-                    player.mpegtsPlayer = tsPlayer;
-                    tsPlayer.attachMediaElement(player.video);
-                    tsPlayer.load();
-                    const p = tsPlayer.play();
-                    if (p && typeof p.catch === 'function') p.catch(() => {});
-
-                    const onMsePlaying = () => {
-                        if (player._loadSessionId !== currentSessionId) return;
-                        player._markCandidateSuccess(rawCandidateUrl);
-                        player.video.removeEventListener('playing', onMsePlaying);
-                        player.video.removeEventListener('loadeddata', onMsePlaying);
-                    };
-                    this._addCandidateListener(player, 'playing', onMsePlaying);
-                    this._addCandidateListener(player, 'loadeddata', onMsePlaying);
-                    armStallMonitor('mpegts');
-
-                    // Live TS: providers routinely drop/close the HTTP connection. Reconnect the
-                    // same player in place (fast) instead of restarting the whole candidate chain.
-                    const reconnectLiveTs = (reason) => {
-                        if (player._loadSessionId !== currentSessionId || player.mpegtsPlayer !== tsPlayer) return false;
-                        if (!isLive || !player._streamStarted || player._tsReconnects >= 5) return false;
-                        player._tsReconnects++;
-                        const delay = 300 * player._tsReconnects;
-                        console.warn(`[PlaybackEngine] Live TS ${reason}, reconnecting in place in ${delay}ms (${player._tsReconnects}/5)`);
-                        clearTimeout(player._reconnectTimer);
-                        player._reconnectTimer = setTimeout(() => {
-                            if (player._loadSessionId !== currentSessionId || player.mpegtsPlayer !== tsPlayer) return;
-                            try {
-                                tsPlayer.unload();
-                                tsPlayer.load();
-                                const rp = tsPlayer.play();
-                                if (rp && typeof rp.catch === 'function') rp.catch(() => {});
-                            } catch (err) {
-                                this.tryNextCandidate(player, item, currentSessionId);
-                            }
-                        }, delay);
-                        return true;
-                    };
-
-                    // Reset the reconnect budget once playback is healthy again
-                    this._addCandidateListener(player, 'playing', () => {
-                        if (player._loadSessionId !== currentSessionId) return;
-                        clearTimeout(player._tsHealthyTimer);
-                        player._tsHealthyTimer = setTimeout(() => {
-                            if (player._loadSessionId === currentSessionId) player._tsReconnects = 0;
-                        }, 30000);
-                    });
-
-                    if (mpegts.Events.LOADING_COMPLETE) {
-                        tsPlayer.on(mpegts.Events.LOADING_COMPLETE, () => {
-                            // A live stream should never "complete"; the server closed the socket.
-                            reconnectLiveTs('stream ended by server');
-                        });
-                    }
-
-                    tsPlayer.on(mpegts.Events.ERROR, (errType, errDetail) => {
-                        if (player._loadSessionId !== currentSessionId) return;
-                        const isNetErr = mpegts.ErrorTypes && errType === mpegts.ErrorTypes.NETWORK_ERROR;
-                        if (isNetErr && reconnectLiveTs(`network error (${errDetail})`)) return;
-                        player.video.removeEventListener('playing', onMsePlaying);
-                        player.video.removeEventListener('loadeddata', onMsePlaying);
-                        console.warn('[PlaybackEngine] mpegts error:', errType, errDetail);
-                        this.tryNextCandidate(player, item, currentSessionId);
-                    });
-                    return;
-                } catch (e) {
-                    console.warn('[PlaybackEngine] mpegts init error:', e);
-                }
-            }
+        // 2. MPEG-TS (.ts) Strategy
+        if (isTs && (forceMseTs || typeof window.MediaSource !== 'undefined') && S.mpegts) {
+            if (await S.mpegts.load(this, player, ctx)) return;
         }
 
-        // 3. Direct native hardware video playback
+        // 3. Direct Native Video Strategy
         armStallMonitor('native');
         this.playNativeDirect(player, url, item, rawCandidateUrl, currentSessionId);
     },
 
     playNativeDirect(player, url, item, rawCandidateUrl, sessionId) {
-        if (!player || !player.video) return;
-
-        while (player.video.firstChild) {
-            player.video.removeChild(player.video.firstChild);
-        }
-
-        const onPlaying = () => {
-            if (player._loadSessionId !== sessionId) return;
-            // If an initial resume seek is still pending or the video is currently seeking,
-            // wait until the seek completes and video actually renders before marking candidate success
-            if (player._initialSeekPending !== null || (player.video && player.video.seeking)) {
-                return;
-            }
-            player._markCandidateSuccess(rawCandidateUrl || url);
-            player.video.removeEventListener('playing', onPlaying);
-            player.video.removeEventListener('loadeddata', onPlaying);
-        };
-        this._addCandidateListener(player, 'playing', onPlaying);
-        this._addCandidateListener(player, 'loadeddata', onPlaying);
-
-        const onSeeked = () => {
-            if (player._loadSessionId !== sessionId) return;
-            if (!player.video || player.video.seeking || player._initialSeekPending !== null) return;
-            player._markCandidateSuccess(rawCandidateUrl || url);
-            player.video.removeEventListener('seeked', onSeeked);
-        };
-        this._addCandidateListener(player, 'seeked', onSeeked);
-
-        player.video.onerror = () => {
-            if (player._loadSessionId !== sessionId) return;
-            player.video.removeEventListener('playing', onPlaying);
-            player.video.removeEventListener('loadeddata', onPlaying);
-            player.video.removeEventListener('seeked', onSeeked);
-            player.video.onerror = null;
-            const err = player.video.error;
-            console.warn('[PlaybackEngine] Native video error:', err ? err.code : 'unknown', 'on URL:', url);
-            this.tryNextCandidate(player, item, sessionId);
-        };
-
-        player.video.src = url;
-        player.video.load();
-
-        const p = player.video.play();
-        if (p && typeof p.catch === 'function') {
-            p.catch(e => {
-                console.warn('[PlaybackEngine] Native play error:', e);
+        const S = this._strategies();
+        if (S.native) {
+            S.native.load(this, player, {
+                url,
+                item,
+                rawCandidateUrl,
+                session: player._session || { id: sessionId }
             });
         }
     },
@@ -879,16 +510,15 @@ window.IPTV.PlaybackEngine = {
                 const rawUrl = item && (item.url || item.hlsUrl || item.fallbackUrl);
                 if (rawUrl) {
                     console.log('[PlaybackEngine] Falling back to Samsung Tizen AVPlay hardware decoder:', rawUrl);
-                    player._loadSessionId = (player._loadSessionId || 0) + 1;
-                    if (this.playTizenAvPlay(player, rawUrl, item, player._loadSessionId)) {
+                    const avSession = this._createSession(player);
+                    avSession.engine = 'avplay';
+                    this.setState(player, this.STATES.LOADING);
+                    if (this.playTizenAvPlay(player, rawUrl, item, avSession.id)) {
                         return;
                     }
                 }
             }
 
-            // If an initial resume seek was attempted and failed across all candidates
-            // (e.g. provider server does not support HTTP Range requests for seeking),
-            // gracefully fall back to playing from the beginning (0) so the user is never stuck on a black screen!
             if (player._initialSeekAttempted) {
                 console.warn('[PlaybackEngine] Seeking to resume position failed across all candidates. Playing from beginning.');
                 player._initialSeekAttempted = false;
@@ -901,6 +531,7 @@ window.IPTV.PlaybackEngine = {
                 return;
             }
 
+            this.setState(player, this.STATES.ERROR);
             console.error('[PlaybackEngine] All stream candidates failed for:', item ? item.name : 'Unknown');
             if (window.IPTV.EventBus) {
                 window.IPTV.EventBus.toast('Unable to play stream. Server unreachable or format unsupported.');
@@ -908,4 +539,3 @@ window.IPTV.PlaybackEngine = {
         }
     }
 };
-

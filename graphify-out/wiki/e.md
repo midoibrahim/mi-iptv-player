@@ -2,7 +2,7 @@
 
 > God node · 24 connections · `IPTVPlayer/js/mpegts.js`
 
-**Community:** [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md)
+**Community:** [Community 5](Community_5.md)
 
 ## Connections by Relation
 

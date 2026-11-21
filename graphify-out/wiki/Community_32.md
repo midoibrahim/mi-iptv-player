@@ -1,38 +1,38 @@
 # Community 32
 
-> 11 nodes · cohesion 0.18
+> 13 nodes · cohesion 0.15
 
 ## Key Concepts
 
-- **main.js** (14 connections) — `windows/main.js`
-- **ref_path** (6 connections)
-- **Windows Desktop Offline Download System** (3 connections) — `windows/main.js`
-- **{ app, BrowserWindow, Menu, ipcMain, powerMonitor }** (1 connections) — `windows/main.js`
-- **companionCore** (1 connections) — `windows/main.js`
-- **createWindow()** (1 connections) — `windows/main.js`
-- **fs** (1 connections) — `windows/main.js`
-- **http** (1 connections) — `windows/main.js`
-- **path** (1 connections) — `windows/main.js`
-- **setupIpcHandlers()** (1 connections) — `windows/main.js`
-- **startCompanionServer()** (1 connections) — `windows/main.js`
+- **ln()** (11 connections) — `IPTVPlayer/js/hls.min.js`
+- **sn()** (5 connections) — `IPTVPlayer/js/hls.min.js`
+- **dn()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **mn()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **wn()** (4 connections) — `IPTVPlayer/js/hls.min.js`
+- **Xi()** (3 connections) — `IPTVPlayer/js/hls.min.js`
+- **en()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **fn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **nn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **pn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **un()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **yn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **zi()** (2 connections) — `IPTVPlayer/js/hls.min.js`
 
 ## Relationships
 
-- [Video Player & OSD Pipeline](Video_Player_&_OSD_Pipeline.md) (4 shared connections)
-- [test_diag.js & { app, BrowserWin...](test_diag.js_&_{_app,_BrowserWin.md) (3 shared connections)
-- [Storage & Profile Persistence](Storage_&_Profile_Persistence.md) (1 shared connections)
-- [HLS.js MSE Streaming Engine (Part 43)](HLS.js_MSE_Streaming_Engine_Part_43.md) (1 shared connections)
-- [Spatial Navigation & Key Handling](Spatial_Navigation_&_Key_Handling.md) (1 shared connections)
-- [Package Configuration & Dependencies (17)](Package_Configuration_&_Dependencies_17.md) (1 shared connections)
+- [Community 0](Community_0.md) (13 shared connections)
+- [Community 6](Community_6.md) (6 shared connections)
+- [Community 16](Community_16.md) (1 shared connections)
+- [Community 35](Community_35.md) (1 shared connections)
 
 ## Source Files
 
-- `windows/main.js`
+- `IPTVPlayer/js/hls.min.js`
 
 ## Audit Trail
 
-- EXTRACTED: 18 (86%)
-- INFERRED: 3 (14%)
+- EXTRACTED: 30 (91%)
+- INFERRED: 3 (9%)
 - AMBIGUOUS: 0 (0%)
 
 ---

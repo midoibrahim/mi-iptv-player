@@ -19,7 +19,8 @@
     padding: 36px 0;
     z-index: 100;
     overflow: hidden;
-    transition: width 0.18s ease-out;
+    transition: width 0.10s ease-out;
+    contain: layout style;
 }
 
 /* Modal Drawer Overlay Scrim (Explicit .expanded class for Chromium 38 + :focus-within for modern) */
@@ -72,7 +73,7 @@
     border-radius: var(--radius);
     border: 2px solid transparent;
     cursor: pointer;
-    transition: background 0.14s ease-out, transform 0.14s ease-out, border-color 0.14s ease-out;
+    transition: transform 0.07s ease-out;
     white-space: nowrap;
     overflow: hidden;
     flex-shrink: 0;

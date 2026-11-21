@@ -27,7 +27,7 @@ html, body {
     letter-spacing: 0.01em;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizeSpeed;
     user-select: none;
     -webkit-user-select: none;
 }

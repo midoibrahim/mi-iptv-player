@@ -45,7 +45,8 @@ body.player-active #login-screen {
     flex-direction: column;
     justify-content: space-between;
     z-index: 10;
-    transition: opacity 0.20s ease-out;
+    transition: opacity 0.12s ease-out;
+    contain: layout style;
 }
 .player-osd.hidden {
     opacity: 0;

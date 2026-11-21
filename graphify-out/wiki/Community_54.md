@@ -1,10 +1,14 @@
 # Community 54
 
-> 1 nodes · cohesion 1.00
+> 5 nodes · cohesion 0.60
 
 ## Key Concepts
 
-- **.abort()** (0 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **eventBus.js** (4 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **emit()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **off()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **on()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
+- **toast()** (2 connections) — `IPTVPlayer/js/core/eventBus.js`
 
 ## Relationships
 
@@ -12,11 +16,11 @@
 
 ## Source Files
 
-- `IPTVPlayer/js/core/polyfills.js`
+- `IPTVPlayer/js/core/eventBus.js`
 
 ## Audit Trail
 
-- EXTRACTED: 0 (0%)
+- EXTRACTED: 6 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

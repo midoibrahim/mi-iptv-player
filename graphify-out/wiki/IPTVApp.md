@@ -2,7 +2,7 @@
 
 > God node · 24 connections · `IPTVPlayer/js/app.js`
 
-**Community:** [Community 13](Community_13.md)
+**Community:** [Community 11](Community_11.md)
 
 ## Connections by Relation
 

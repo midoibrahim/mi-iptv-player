@@ -410,6 +410,20 @@ window.IPTV.KeyHandler = {
         // ---- 5. Smart TV Remote Arrow Key 2D Navigation (Browse Mode) ----
         const dir = this.getDirection(e);
         if (dir) {
+            const active = document.activeElement;
+            const isEditingInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') && !active.readOnly;
+            if (!isEditingInput && e.repeat) {
+                const now = Date.now();
+                if (this._lastDirRepeatAt && (now - this._lastDirRepeatAt) < 65) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                this._lastDirRepeatAt = now;
+            } else if (!e.repeat) {
+                this._lastDirRepeatAt = Date.now();
+            }
+
             const handled = window.IPTV.SpatialNav.navigate(dir);
             if (handled) {
                 e.preventDefault();

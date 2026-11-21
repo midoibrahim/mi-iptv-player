@@ -119,8 +119,17 @@ window.IPTV.CatalogStore = {
     },
 
     getFavoriteItems() {
-        const allItems = [...this.liveChannels, ...this.movies, ...this.series];
-        return allItems.filter(i => this.isFavorite(i));
+        const result = [];
+        const pools = [this.liveChannels, this.movies, this.series];
+        for (let p = 0; p < pools.length; p++) {
+            const arr = pools[p];
+            if (!Array.isArray(arr)) continue;
+            for (let i = 0; i < arr.length; i++) {
+                const item = arr[i];
+                if (this.isFavorite(item)) result.push(item);
+            }
+        }
+        return result;
     }
 };
 

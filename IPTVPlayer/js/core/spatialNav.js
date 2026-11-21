@@ -55,15 +55,19 @@ window.IPTV.SpatialNav = {
             window.removeEventListener('testPassive', null, opts);
         } catch (e) {}
 
-        window.addEventListener('wheel', (e) => {
-            // Support LG Magic Remote scroll wheel on any scrollable container under the cursor or active focus
-            const target = e.target && e.target.nodeType === 1 ? e.target : document.activeElement;
-            if (!target) return;
-            const scroller = target.closest('.browse-content, .category-list, #series-detail-screen, .content-area, .login-page-view');
-            if (scroller && scroller.scrollHeight > scroller.clientHeight) {
-                scroller.scrollTop += (e.deltaY > 0 ? 180 : -180);
-            }
-        }, passiveOpt);
+        const P = window.IPTV && window.IPTV.Platform;
+        const isTv = Boolean(P && ((typeof P.isWebOS === 'function' && P.isWebOS()) || (typeof P.isTizen === 'function' && P.isTizen())));
+        if (isTv) {
+            window.addEventListener('wheel', (e) => {
+                // Support LG Magic Remote scroll wheel on Smart TVs where nested containers don't natively scroll
+                const target = e.target && e.target.nodeType === 1 ? e.target : document.activeElement;
+                if (!target) return;
+                const scroller = target.closest('.browse-content, .category-list, #series-detail-screen, .content-area, .login-page-view');
+                if (scroller && scroller.scrollHeight > scroller.clientHeight) {
+                    scroller.scrollTop += (e.deltaY > 0 ? 180 : -180);
+                }
+            }, passiveOpt);
+        }
     },
 
     getActiveRoot() {
@@ -127,7 +131,7 @@ window.IPTV.SpatialNav = {
     focusElement(el) {
         if (!el) return false;
         this._ensureSideNavBinding();
-        const nav = document.getElementById('side-nav');
+        const nav = this._sideNavEl || (this._sideNavEl = document.getElementById('side-nav'));
         if (nav) {
             if (nav.contains(el)) nav.classList.add('expanded');
             else nav.classList.remove('expanded');
@@ -141,14 +145,19 @@ window.IPTV.SpatialNav = {
         const sec = el.closest && el.closest('.section');
         if (sec && el.tagName !== 'INPUT') {
             sec._lastFocusedEl = el;
-            if (el.closest('.browse-content') && el.classList.contains('card')) {
+            if (el.classList && el.classList.contains('card') && el.closest('.browse-content')) {
                 sec._lastFocusedCard = el;
-            } else if (el.closest('.category-sidebar') && el.classList.contains('category-item')) {
+            } else if (el.classList && el.classList.contains('category-item') && el.closest('.category-sidebar')) {
                 sec._lastFocusedCategory = el;
             }
         }
 
-        el.focus();
+        // Use preventScroll so ensureVisible() performs a single, jitter-free scroll pass
+        try {
+            el.focus({ preventScroll: true });
+        } catch (e) {
+            el.focus();
+        }
         this.ensureVisible(el);
         return true;
     },
@@ -181,238 +190,270 @@ window.IPTV.SpatialNav = {
             if (dir === 'right' && current.selectionEnd !== valLen) return false;
         }
 
-        // ---- 1. Dedicated 1D Side Navigation Rail Traversal ----
-        if (current.classList.contains('nav-item')) {
-            const navItems = Array.from(document.querySelectorAll('#side-nav .nav-item'))
-                .filter(el => this.isFocusable(el, activeRoot));
-            const idx = navItems.indexOf(current);
-
-            if (dir === 'down') {
-                if (idx >= 0 && idx < navItems.length - 1) {
-                    return this.focusElement(navItems[idx + 1]);
-                }
-                return true; // Clamp at bottom
-            } else if (dir === 'up') {
-                if (idx > 0) {
-                    return this.focusElement(navItems[idx - 1]);
-                }
-                return true; // Clamp at top
-            } else if (dir === 'right') {
-                const activeSec = document.querySelector('#main-shell .section.active');
-                if (activeSec) {
-                    if (activeSec._lastFocusedEl && document.contains(activeSec._lastFocusedEl) && this.isFocusable(activeSec._lastFocusedEl, activeRoot)) {
-                        return this.focusElement(activeSec._lastFocusedEl);
-                    }
-                    const target = activeSec.querySelector('.category-item.active, .category-item, .card, .theme-swatch-card.active, .theme-swatch-card, .btn-primary, button:not([disabled]), select, [tabindex="0"]');
-                    if (target && this.isFocusable(target, activeRoot)) {
-                        return this.focusElement(target);
-                    }
-                }
-                return true;
-            } else if (dir === 'left') {
-                return true; // Clamp at left edge
-            }
+        // ---- Ordered Focus Zone Pipeline (O(1) zones first, 2D Cartesian fallback last) ----
+        const zones = [
+            this._navSideRail,
+            this._navCategorySidebar,
+            this._navSeriesDetail,
+            this._navHorizontalRail,
+            this._navGridView,
+            this._navCartesian2D
+        ];
+        for (let i = 0; i < zones.length; i++) {
+            const res = zones[i].call(this, current, dir, activeRoot);
+            if (res !== null) return res;
         }
+        return false;
+    },
 
-        // ---- 2. Dedicated 1D Category Sidebar List Traversal (O(1) Sibling Walk) ----
+    // ---- Zone 1: 1D Side Navigation Rail ----
+    _navSideRail(current, dir, activeRoot) {
+        if (!current.classList.contains('nav-item')) return null;
+        const navItems = Array.from(document.querySelectorAll('#side-nav .nav-item'))
+            .filter(el => this.isFocusable(el, activeRoot));
+        const idx = navItems.indexOf(current);
+
+        if (dir === 'down') {
+            if (idx >= 0 && idx < navItems.length - 1) return this.focusElement(navItems[idx + 1]);
+            return true;
+        }
+        if (dir === 'up') {
+            if (idx > 0) return this.focusElement(navItems[idx - 1]);
+            return true;
+        }
+        if (dir === 'right') {
+            const activeSec = document.querySelector('#main-shell .section.active');
+            if (activeSec) {
+                if (activeSec._lastFocusedEl && document.contains(activeSec._lastFocusedEl) && this.isFocusable(activeSec._lastFocusedEl, activeRoot)) {
+                    return this.focusElement(activeSec._lastFocusedEl);
+                }
+                const target = activeSec.querySelector('.category-item.active, .category-item, .card, .theme-swatch-card.active, .theme-swatch-card, .btn-primary, button:not([disabled]), select, [tabindex="0"]');
+                if (target && this.isFocusable(target, activeRoot)) return this.focusElement(target);
+            }
+            return true;
+        }
+        if (dir === 'left') return true;
+        return null;
+    },
+
+    // ---- Zone 2: 1D Category Sidebar List (O(1) Sibling Walk) ----
+    _navCategorySidebar(current, dir, activeRoot) {
         const catSidebar = current.closest('.category-sidebar');
-        if (catSidebar) {
-            const searchInput = catSidebar.querySelector('.cat-search-input');
+        if (!catSidebar) return null;
+        const searchInput = catSidebar.querySelector('.cat-search-input');
 
-            if (current.classList.contains('category-item')) {
-                if (dir === 'down') {
-                    let next = current.nextElementSibling;
-                    while (next && next.style.display === 'none') {
-                        next = next.nextElementSibling;
-                    }
-                    if (next) return this.focusElement(next);
-                    return true; // Clamp at bottom of category list
-                } else if (dir === 'up') {
-                    let prev = current.previousElementSibling;
-                    while (prev && prev.style.display === 'none') {
-                        prev = prev.previousElementSibling;
-                    }
-                    if (prev) return this.focusElement(prev);
-                    if (searchInput && this.isFocusable(searchInput, activeRoot)) {
-                        return this.focusElement(searchInput);
-                    }
-                    return true;
-                } else if (dir === 'left') {
-                    const nav = document.getElementById('side-nav');
-                    const activeNav = nav && (nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item'));
-                    if (activeNav) return this.focusElement(activeNav);
-                    return true;
-                } else if (dir === 'right') {
-                    const sec = catSidebar.closest('.section');
-                    if (sec) {
-                        if (sec._lastFocusedCard && document.contains(sec._lastFocusedCard) && this.isFocusable(sec._lastFocusedCard, activeRoot)) {
-                            return this.focusElement(sec._lastFocusedCard);
-                        }
-                        const firstCard = sec.querySelector('.browse-content .card, .view-btn.active, .view-btn');
-                        if (firstCard && this.isFocusable(firstCard, activeRoot)) {
-                            return this.focusElement(firstCard);
-                        }
-                    }
-                }
-            } else if (current === searchInput) {
-                if (dir === 'down') {
-                    const activeCat = catSidebar.querySelector('.category-item.active');
-                    if (activeCat && activeCat.style.display !== 'none') {
-                        return this.focusElement(activeCat);
-                    }
-                    const catList = catSidebar.querySelector('.category-list');
-                    let firstVis = catList ? catList.firstElementChild : null;
-                    while (firstVis && firstVis.style.display === 'none') {
-                        firstVis = firstVis.nextElementSibling;
-                    }
-                    if (firstVis) return this.focusElement(firstVis);
-                } else if (dir === 'left') {
-                    const nav = document.getElementById('side-nav');
-                    const activeNav = nav && (nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item'));
-                    if (activeNav) return this.focusElement(activeNav);
-                    return true;
-                } else if (dir === 'right') {
-                    const sec = catSidebar.closest('.section');
-                    if (sec) {
-                        const firstCard = sec.querySelector('.browse-content .card, .view-btn.active, .view-btn');
-                        if (firstCard && this.isFocusable(firstCard, activeRoot)) {
-                            return this.focusElement(firstCard);
-                        }
-                    }
-                }
+        if (current.classList.contains('category-item')) {
+            if (dir === 'down') {
+                let next = current.nextElementSibling;
+                while (next && next.style.display === 'none') next = next.nextElementSibling;
+                return next ? this.focusElement(next) : true;
             }
-        }
-
-        // ---- 2b. Series Detail Predictable Focus Order (Back -> Favorite -> Download Series -> Season Tabs -> Download Season -> Episodes) ----
-        if (activeRoot && activeRoot.id === 'series-detail-screen') {
-            if (current.id === 'series-back-btn' || current.id === 'series-fav-btn' || current.id === 'series-download-all-btn') {
-                if (dir === 'right' && current.id === 'series-back-btn') {
-                    const favBtn = document.getElementById('series-fav-btn');
-                    if (favBtn && this.isFocusable(favBtn, activeRoot)) return this.focusElement(favBtn);
-                } else if (dir === 'right' && current.id === 'series-fav-btn') {
-                    const dlAllBtn = document.getElementById('series-download-all-btn');
-                    if (dlAllBtn && this.isFocusable(dlAllBtn, activeRoot)) return this.focusElement(dlAllBtn);
-                } else if (dir === 'left' && current.id === 'series-download-all-btn') {
-                    const favBtn = document.getElementById('series-fav-btn');
-                    if (favBtn && this.isFocusable(favBtn, activeRoot)) return this.focusElement(favBtn);
-                } else if (dir === 'left' && current.id === 'series-fav-btn') {
-                    const backBtn = document.getElementById('series-back-btn');
-                    if (backBtn && this.isFocusable(backBtn, activeRoot)) return this.focusElement(backBtn);
-                } else if (dir === 'down') {
-                    const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
-                    if (activeSeason && this.isFocusable(activeSeason, activeRoot)) return this.focusElement(activeSeason);
-                    const firstEp = activeRoot.querySelector('.episode-card');
-                    if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
-                }
-            } else if (current.classList.contains('season-tab-btn')) {
-                if (dir === 'up') {
-                    const backBtn = document.getElementById('series-back-btn');
-                    if (backBtn && this.isFocusable(backBtn, activeRoot)) return this.focusElement(backBtn);
-                } else if (dir === 'down') {
-                    const sDlBtn = document.getElementById('season-download-btn');
-                    if (sDlBtn && this.isFocusable(sDlBtn, activeRoot)) return this.focusElement(sDlBtn);
-                    const firstEp = activeRoot.querySelector('.episode-card');
-                    if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
-                }
-            } else if (current.id === 'season-download-btn') {
-                if (dir === 'up') {
-                    const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
-                    if (activeSeason && this.isFocusable(activeSeason, activeRoot)) return this.focusElement(activeSeason);
-                } else if (dir === 'down') {
-                    const firstEp = activeRoot.querySelector('.episode-card');
-                    if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
-                }
+            if (dir === 'up') {
+                let prev = current.previousElementSibling;
+                while (prev && prev.style.display === 'none') prev = prev.previousElementSibling;
+                if (prev) return this.focusElement(prev);
+                if (searchInput && this.isFocusable(searchInput, activeRoot)) return this.focusElement(searchInput);
+                return true;
             }
-        }
-
-        // ---- 3. Horizontal Rail (.row-scroll / .seasons-tabs-container / .theme-swatch-grid) 1D Left/Right Traversal ----
-        const horizRail = current.closest('.row-scroll, .seasons-tabs-container, .theme-swatch-grid');
-        if (horizRail && (dir === 'left' || dir === 'right')) {
-            const items = Array.from(horizRail.children).filter(el => this.isFocusable(el, activeRoot));
-            const idx = items.indexOf(current);
-            if (idx >= 0) {
-                if (dir === 'right') {
-                    if (idx < items.length - 1) {
-                        return this.focusElement(items[idx + 1]);
-                    }
-                    return true; // Clamp at right end of rail (never wrap)
-                } else if (dir === 'left') {
-                    if (idx > 0) {
-                        return this.focusElement(items[idx - 1]);
-                    }
-                    // Leftmost item in horizontal rail: escape to category sidebar or side-nav
-                    const sec = horizRail.closest('.section');
-                    const sidebar = sec && sec.querySelector('.category-sidebar');
-                    if (sidebar) {
-                        const activeCat = sidebar.querySelector('.category-item.active') || sidebar.querySelector('.category-item');
-                        if (activeCat && this.isFocusable(activeCat, activeRoot)) {
-                            return this.focusElement(activeCat);
-                        }
-                    }
-                    const nav = document.getElementById('side-nav');
-                    if (nav && activeRoot.contains(nav)) {
-                        const activeNav = nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item');
-                        if (activeNav && this.isFocusable(activeNav, activeRoot)) {
-                            return this.focusElement(activeNav);
-                        }
-                    }
-                    return true;
-                }
-            }
-        }
-
-        // ---- 3b. O(1) Grid Fast Path inside .browse-content.grid-view ----
-        // Avoids querySelectorAll + getBoundingClientRect() across hundreds of rendered cards per keypress
-        const gridView = current.closest('.browse-content.grid-view');
-        if (gridView && current.classList.contains('card')) {
-            const curTop = current.offsetTop;
-            const curLeft = current.offsetLeft;
-            const curW = current.offsetWidth || 1;
             if (dir === 'left') {
-                const prev = current.previousElementSibling;
-                if (prev && prev.classList.contains('card') && Math.abs(prev.offsetTop - curTop) <= 12) {
-                    return this.focusElement(prev);
+                const nav = this._sideNavEl || (this._sideNavEl = document.getElementById('side-nav'));
+                const activeNav = nav && (nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item'));
+                return activeNav ? this.focusElement(activeNav) : true;
+            }
+            if (dir === 'right') {
+                const sec = catSidebar.closest('.section');
+                if (sec) {
+                    if (sec._lastFocusedCard && document.contains(sec._lastFocusedCard) && this.isFocusable(sec._lastFocusedCard, activeRoot)) {
+                        return this.focusElement(sec._lastFocusedCard);
+                    }
+                    const firstCard = sec.querySelector('.browse-content .card, .view-btn.active, .view-btn');
+                    if (firstCard && this.isFocusable(firstCard, activeRoot)) return this.focusElement(firstCard);
                 }
+            }
+        } else if (current === searchInput) {
+            if (dir === 'down') {
+                const activeCat = catSidebar.querySelector('.category-item.active');
+                if (activeCat && activeCat.style.display !== 'none') return this.focusElement(activeCat);
+                const catList = catSidebar.querySelector('.category-list');
+                let firstVis = catList ? catList.firstElementChild : null;
+                while (firstVis && firstVis.style.display === 'none') firstVis = firstVis.nextElementSibling;
+                if (firstVis) return this.focusElement(firstVis);
+            } else if (dir === 'left') {
+                const nav = this._sideNavEl || (this._sideNavEl = document.getElementById('side-nav'));
+                const activeNav = nav && (nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item'));
+                return activeNav ? this.focusElement(activeNav) : true;
             } else if (dir === 'right') {
-                const next = current.nextElementSibling;
-                if (next && next.classList.contains('card') && Math.abs(next.offsetTop - curTop) <= 12) {
-                    return this.focusElement(next);
-                }
-            } else if (dir === 'up' || dir === 'down') {
+                const sec = catSidebar.closest('.section');
+                const firstCard = sec && sec.querySelector('.browse-content .card, .view-btn.active, .view-btn');
+                if (firstCard && this.isFocusable(firstCard, activeRoot)) return this.focusElement(firstCard);
+            }
+        }
+        return null;
+    },
+
+    // ---- Zone 3: Series Detail Predictable Focus Order ----
+    _navSeriesDetail(current, dir, activeRoot) {
+        if (!activeRoot || activeRoot.id !== 'series-detail-screen') return null;
+
+        if (current.id === 'series-back-btn' || current.id === 'series-fav-btn' || current.id === 'series-download-all-btn') {
+            if (dir === 'right' && current.id === 'series-back-btn') {
+                const favBtn = document.getElementById('series-fav-btn');
+                if (favBtn && this.isFocusable(favBtn, activeRoot)) return this.focusElement(favBtn);
+            } else if (dir === 'right' && current.id === 'series-fav-btn') {
+                const dlAllBtn = document.getElementById('series-download-all-btn');
+                if (dlAllBtn && this.isFocusable(dlAllBtn, activeRoot)) return this.focusElement(dlAllBtn);
+            } else if (dir === 'left' && current.id === 'series-download-all-btn') {
+                const favBtn = document.getElementById('series-fav-btn');
+                if (favBtn && this.isFocusable(favBtn, activeRoot)) return this.focusElement(favBtn);
+            } else if (dir === 'left' && current.id === 'series-fav-btn') {
+                const backBtn = document.getElementById('series-back-btn');
+                if (backBtn && this.isFocusable(backBtn, activeRoot)) return this.focusElement(backBtn);
+            } else if (dir === 'down') {
+                const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
+                if (activeSeason && this.isFocusable(activeSeason, activeRoot)) return this.focusElement(activeSeason);
+                const firstEp = activeRoot.querySelector('.episode-card');
+                if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
+            }
+        } else if (current.classList.contains('season-tab-btn')) {
+            if (dir === 'up') {
+                const backBtn = document.getElementById('series-back-btn');
+                if (backBtn && this.isFocusable(backBtn, activeRoot)) return this.focusElement(backBtn);
+            } else if (dir === 'down') {
+                const sDlBtn = document.getElementById('season-download-btn');
+                if (sDlBtn && this.isFocusable(sDlBtn, activeRoot)) return this.focusElement(sDlBtn);
+                const firstEp = activeRoot.querySelector('.episode-card');
+                if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
+            }
+        } else if (current.id === 'season-download-btn') {
+            if (dir === 'up') {
+                const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
+                if (activeSeason && this.isFocusable(activeSeason, activeRoot)) return this.focusElement(activeSeason);
+            } else if (dir === 'down') {
+                const firstEp = activeRoot.querySelector('.episode-card');
+                if (firstEp && this.isFocusable(firstEp, activeRoot)) return this.focusElement(firstEp);
+            }
+        }
+        return null;
+    },
+
+    // ---- Zone 4: Horizontal Rail (.row-scroll / .seasons-tabs-container / .theme-swatch-grid) ----
+    _navHorizontalRail(current, dir, activeRoot) {
+        if (dir !== 'left' && dir !== 'right') return null;
+        const horizRail = current.closest('.row-scroll, .seasons-tabs-container, .theme-swatch-grid');
+        if (!horizRail) return null;
+
+        const items = Array.from(horizRail.children).filter(el => this.isFocusable(el, activeRoot));
+        const idx = items.indexOf(current);
+        if (idx < 0) return null;
+
+        if (dir === 'right') {
+            return (idx < items.length - 1) ? this.focusElement(items[idx + 1]) : true;
+        }
+        if (idx > 0) return this.focusElement(items[idx - 1]);
+
+        const sec = horizRail.closest('.section');
+        const sidebar = sec && sec.querySelector('.category-sidebar');
+        if (sidebar) {
+            const activeCat = sidebar.querySelector('.category-item.active') || sidebar.querySelector('.category-item');
+            if (activeCat && this.isFocusable(activeCat, activeRoot)) return this.focusElement(activeCat);
+        }
+        const nav = this._sideNavEl || (this._sideNavEl = document.getElementById('side-nav'));
+        if (nav && activeRoot.contains(nav)) {
+            const activeNav = nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item');
+            if (activeNav && this.isFocusable(activeNav, activeRoot)) return this.focusElement(activeNav);
+        }
+        return true;
+    },
+
+    // ---- Zone 5: O(1) Grid Fast Path (.browse-content.grid-view) ----
+    _navGridView(current, dir, activeRoot) {
+        const gridView = current.closest('.browse-content.grid-view');
+        if (!gridView || !current.classList.contains('card')) return null;
+
+        const curTop = current.offsetTop;
+        const curLeft = current.offsetLeft;
+        const curW = current.offsetWidth || 1;
+
+        if (dir === 'left') {
+            const prev = current.previousElementSibling;
+            if (prev && prev.classList.contains('card') && Math.abs(prev.offsetTop - curTop) <= 12) {
+                return this.focusElement(prev);
+            }
+            const sec = gridView.closest('.section');
+            const sidebar = sec && sec.querySelector('.category-sidebar');
+            if (sidebar) {
+                const targetCat = (sec._lastFocusedCategory && document.contains(sec._lastFocusedCategory) && this.isFocusable(sec._lastFocusedCategory, activeRoot))
+                    ? sec._lastFocusedCategory
+                    : (sidebar.querySelector('.category-item.active') || sidebar.querySelector('.category-item'));
+                if (targetCat && this.isFocusable(targetCat, activeRoot)) return this.focusElement(targetCat);
+            }
+            const nav = this._sideNavEl || (this._sideNavEl = document.getElementById('side-nav'));
+            if (nav && activeRoot.contains(nav)) {
+                const activeNav = nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item');
+                if (activeNav && this.isFocusable(activeNav, activeRoot)) return this.focusElement(activeNav);
+            }
+            return true;
+        }
+
+        if (dir === 'right') {
+            const next = current.nextElementSibling;
+            if (next && next.classList.contains('card') && Math.abs(next.offsetTop - curTop) <= 12) {
+                return this.focusElement(next);
+            }
+            return true;
+        }
+
+        if (dir === 'up' || dir === 'down') {
+            const findVerticalCard = () => {
                 const step = dir === 'up' ? 'previousElementSibling' : 'nextElementSibling';
                 let scan = current[step];
                 let hops = 0;
-                while (scan && hops < 32) {
+                let fallbackInNextRow = null;
+                while (scan && hops < 12) {
                     if (scan.classList.contains('card')) {
                         const rowDiff = dir === 'up' ? (curTop - scan.offsetTop) : (scan.offsetTop - curTop);
-                        if (rowDiff > 12 && Math.abs(scan.offsetLeft - curLeft) < curW * 0.55) {
-                            return this.focusElement(scan);
+                        if (rowDiff > 12) {
+                            if (Math.abs(scan.offsetLeft - curLeft) < curW * 0.55) return scan;
+                            if (dir === 'down' && !fallbackInNextRow) fallbackInNextRow = scan;
                         }
                     }
                     scan = scan[step];
                     hops++;
                 }
-            }
-        }
+                return fallbackInNextRow;
+            };
 
-        // ---- 4. Scoped 2D Cartesian Spatial Navigation ----
+            let targetCard = findVerticalCard();
+            if (!targetCard && typeof gridView._syncWindowNow === 'function') {
+                gridView._syncWindowNow();
+                targetCard = findVerticalCard();
+            }
+            if (targetCard) return this.focusElement(targetCard);
+            if (dir === 'up') {
+                const sec = gridView.closest('.section');
+                const headerBtn = sec && sec.querySelector('.view-btn.active, .view-btn');
+                if (headerBtn && this.isFocusable(headerBtn, activeRoot)) return this.focusElement(headerBtn);
+            }
+            return true;
+        }
+        return null;
+    },
+
+    // ---- Zone 6: Scoped 2D Cartesian Spatial Navigation Fallback ----
+    _navCartesian2D(current, dir, activeRoot) {
         const currentRect = current.getBoundingClientRect();
         const cX = currentRect.left + currentRect.width / 2;
         const cY = currentRect.top + currentRect.height / 2;
 
-        // Scope query to active section or active screen to keep DOM query tiny (< 60 elements)
         const queryScope = (activeRoot.id === 'main-shell')
             ? (activeRoot.querySelector('.section.active') || activeRoot)
             : activeRoot;
 
         const inBrowseMain = current.closest('.browse-main-content');
-
         const selector = 'button, input, select, [tabindex="0"], .card, .category-item, .season-tab-btn, .episode-card, .profile-card, .add-profile-card, .theme-swatch-card';
         const candidates = Array.from(queryScope.querySelectorAll(selector))
             .filter(el => {
                 if (el === current || !this.isFocusable(el, activeRoot)) return false;
-                // When navigating left inside .browse-main-content, do not pick arbitrary off-row category items via 2D math;
-                // if there is no card to the left in .browse-main-content, we will cleanly jump to .category-item.active!
                 if (inBrowseMain && dir === 'left' && el.closest('.category-sidebar')) return false;
                 return true;
             });
@@ -425,19 +466,15 @@ window.IPTV.SpatialNav = {
             const rect = cand.getBoundingClientRect();
             const candCX = rect.left + rect.width / 2;
             const candCY = rect.top + rect.height / 2;
-
             const dx = candCX - cX;
             const dy = candCY - cY;
 
             let isDirectionMatch = false;
-
-            // Primary bounding edge checks
             if (dir === 'left' && rect.right <= currentRect.left + 18) isDirectionMatch = true;
             else if (dir === 'right' && rect.left >= currentRect.right - 18) isDirectionMatch = true;
             else if (dir === 'up' && rect.bottom <= currentRect.top + 18) isDirectionMatch = true;
             else if (dir === 'down' && rect.top >= currentRect.bottom - 18) isDirectionMatch = true;
 
-            // Secondary direction cone check
             if (!isDirectionMatch) {
                 if (dir === 'left' && dx < -24 && Math.abs(dy) <= Math.abs(dx) * 1.35) isDirectionMatch = true;
                 else if (dir === 'right' && dx > 24 && Math.abs(dy) <= Math.abs(dx) * 1.35) isDirectionMatch = true;
@@ -446,15 +483,9 @@ window.IPTV.SpatialNav = {
             }
 
             if (isDirectionMatch) {
-                let score = 0;
-                if (dir === 'left' || dir === 'right') {
-                    // Strongly prefer items on the same visual row
-                    score = Math.abs(dx) + Math.abs(dy) * 3.2;
-                } else {
-                    // Strongly prefer items aligned in the same column
-                    score = Math.abs(dy) + Math.abs(dx) * 2.4;
-                }
-
+                const score = (dir === 'left' || dir === 'right')
+                    ? Math.abs(dx) + Math.abs(dy) * 3.2
+                    : Math.abs(dy) + Math.abs(dx) * 2.4;
                 if (score < bestScore) {
                     bestScore = score;
                     bestCandidate = cand;
@@ -462,7 +493,6 @@ window.IPTV.SpatialNav = {
             }
         }
 
-        // Edge Escape from Browse Content Grid -> Active Category in Category Sidebar -> Left Navigation Rail
         if (!bestCandidate && dir === 'left') {
             if (inBrowseMain) {
                 const sec = inBrowseMain.closest('.section');
@@ -471,34 +501,22 @@ window.IPTV.SpatialNav = {
                     const targetCat = (sec._lastFocusedCategory && document.contains(sec._lastFocusedCategory) && this.isFocusable(sec._lastFocusedCategory, activeRoot))
                         ? sec._lastFocusedCategory
                         : (sidebar.querySelector('.category-item.active') || sidebar.querySelector('.category-item'));
-                    if (targetCat && this.isFocusable(targetCat, activeRoot)) {
-                        return this.focusElement(targetCat);
-                    }
+                    if (targetCat && this.isFocusable(targetCat, activeRoot)) return this.focusElement(targetCat);
                 }
             }
-
-            const nav = document.getElementById('side-nav');
+            const nav = this._sideNavEl || (this._sideNavEl = document.getElementById('side-nav'));
             if (nav && !nav.contains(current) && activeRoot.contains(nav)) {
                 const activeNav = nav.querySelector('.nav-item.active') || nav.querySelector('.nav-item');
-                if (activeNav && this.isFocusable(activeNav, activeRoot)) {
-                    bestCandidate = activeNav;
-                }
+                if (activeNav && this.isFocusable(activeNav, activeRoot)) bestCandidate = activeNav;
             }
         }
 
-        // In Series Detail: if pressing Up from top row of episode cards, jump cleanly to active Season Tab
         if (!bestCandidate && dir === 'up' && current.classList.contains('episode-card') && activeRoot.id === 'series-detail-screen') {
             const activeSeason = activeRoot.querySelector('.season-tab-btn.active, .season-tab-btn');
-            if (activeSeason && this.isFocusable(activeSeason, activeRoot)) {
-                bestCandidate = activeSeason;
-            }
+            if (activeSeason && this.isFocusable(activeSeason, activeRoot)) bestCandidate = activeSeason;
         }
 
-        if (bestCandidate) {
-            return this.focusElement(bestCandidate);
-        }
-
-        return false;
+        return bestCandidate ? this.focusElement(bestCandidate) : false;
     },
 
     _findFirstFocusable(root) {
@@ -526,9 +544,11 @@ window.IPTV.SpatialNav = {
             const eRect = el.getBoundingClientRect();
             const pad = 36;
             if (eRect.left < rRect.left + pad) {
-                rowScroll.scrollLeft = Math.max(0, rowScroll.scrollLeft - (rRect.left + pad - eRect.left));
+                const nextLeft = Math.max(0, rowScroll.scrollLeft - (rRect.left + pad - eRect.left));
+                if (Math.abs(nextLeft - rowScroll.scrollLeft) >= 2) rowScroll.scrollLeft = nextLeft;
             } else if (eRect.right > rRect.right - pad) {
-                rowScroll.scrollLeft += (eRect.right - (rRect.right - pad));
+                const delta = eRect.right - (rRect.right - pad);
+                if (delta >= 2) rowScroll.scrollLeft += delta;
             }
         }
 
@@ -540,15 +560,24 @@ window.IPTV.SpatialNav = {
             const cRect = vScroll.getBoundingClientRect();
             const eRect = el.getBoundingClientRect();
             const margin = 80; // 10-foot safe margin
+            let scrolled = false;
 
             if (eRect.top < cRect.top + margin) {
-                vScroll.scrollTop = Math.max(0, vScroll.scrollTop - (cRect.top + margin - eRect.top));
+                const nextTop = Math.max(0, vScroll.scrollTop - (cRect.top + margin - eRect.top));
+                if (Math.abs(nextTop - vScroll.scrollTop) >= 2) {
+                    vScroll.scrollTop = nextTop;
+                    scrolled = true;
+                }
             } else if (eRect.bottom > cRect.bottom - margin) {
-                vScroll.scrollTop += (eRect.bottom - (cRect.bottom - margin));
+                const delta = eRect.bottom - (cRect.bottom - margin);
+                if (delta >= 2) {
+                    vScroll.scrollTop += delta;
+                    scrolled = true;
+                }
             }
 
-            // Trigger progressive load if scrolling near bottom of browse-content
-            if (vScroll.classList && vScroll.classList.contains('browse-content') && vScroll._onScrollCheck) {
+            // Trigger progressive/windowed load only when vertical scroll actually changed
+            if (scrolled && vScroll.classList && vScroll.classList.contains('browse-content') && vScroll._onScrollCheck) {
                 vScroll._onScrollCheck();
             }
         }

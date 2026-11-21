@@ -239,11 +239,15 @@ function proxyStream(req, res, target, port, agents, redirects) {
             if (up.headers[h]) out[h] = up.headers[h];
         });
         res.writeHead(up.statusCode, out);
+        if (res.socket && typeof res.socket.setNoDelay === 'function') {
+            res.socket.setNoDelay(true);
+        }
         up.pipe(res);
     });
 
     // Set connect/response-header timeout only, NOT an idle stream timeout on live video
     upstream.on('socket', function (socket) {
+        if (typeof socket.setNoDelay === 'function') socket.setNoDelay(true);
         socket.setTimeout(15000);
         socket.once('timeout', function () { upstream.abort(); });
     });
@@ -254,7 +258,9 @@ function proxyStream(req, res, target, port, agents, redirects) {
         if (!res.headersSent) sendJson(res, 502, { error: 'Streaming proxy error: ' + e.message });
         else res.end();
     });
-    req.on('close', function () { upstream.abort(); });
+    res.on('close', function () {
+        if (!res.finished && !res.writableEnded) upstream.abort();
+    });
     upstream.end();
 }
 

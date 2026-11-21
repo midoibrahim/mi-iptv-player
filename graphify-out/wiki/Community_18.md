@@ -1,45 +1,42 @@
 # Community 18
 
-> 17 nodes · cohesion 0.15
+> 18 nodes · cohesion 0.12
 
 ## Key Concepts
 
-- **rt()** (18 connections) — `IPTVPlayer/js/hls.min.js`
-- **qn()** (9 connections) — `IPTVPlayer/js/hls.min.js`
-- **d()** (8 connections) — `IPTVPlayer/js/hls.min.js`
-- **p()** (8 connections) — `IPTVPlayer/js/hls.min.js`
-- **u()** (8 connections) — `IPTVPlayer/js/hls.min.js`
-- **ei()** (7 connections) — `IPTVPlayer/js/hls.min.js`
-- **h()** (6 connections) — `IPTVPlayer/js/hls.min.js`
-- **r()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **g()** (5 connections) — `IPTVPlayer/js/hls.min.js`
-- **gl()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **it()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **st()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **yi()** (3 connections) — `IPTVPlayer/js/hls.min.js`
-- **at()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **Jr()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **nt()** (2 connections) — `IPTVPlayer/js/hls.min.js`
-- **zn()** (2 connections) — `IPTVPlayer/js/hls.min.js`
+- **windows/package.json** (11 connections) — `windows/package.json`
+- **electron** (5 connections) — `windows/package.json`
+- **devDependencies** (3 connections) — `windows/package.json`
+- **scripts** (3 connections) — `windows/package.json`
+- **@electron/packager** (2 connections) — `windows/package.json`
+- **electron@^33.2.1** (2 connections) — `windows/package.json`
+- **@electron/packager@^18.3.6** (2 connections) — `windows/package.json`
+- **preload.js** (2 connections) — `windows/preload.js`
+- **author** (1 connections) — `windows/package.json`
+- **description** (1 connections) — `windows/package.json`
+- **keywords** (1 connections) — `windows/package.json`
+- **license** (1 connections) — `windows/package.json`
+- **main** (1 connections) — `windows/package.json`
+- **name** (1 connections) — `windows/package.json`
+- **build** (1 connections) — `windows/package.json`
+- **start** (1 connections) — `windows/package.json`
+- **version** (1 connections) — `windows/package.json`
+- **{ contextBridge, ipcRenderer }** (1 connections) — `windows/preload.js`
 
 ## Relationships
 
-- [Electron Background Downloader](Electron_Background_Downloader.md) (18 shared connections)
-- [HLS.js MSE Streaming Engine (Part 0)](HLS.js_MSE_Streaming_Engine_Part_0.md) (16 shared connections)
-- [Community 15](Community_15.md) (5 shared connections)
-- [QR Code Generation Library](QR_Code_Generation_Library.md) (3 shared connections)
-- [HLS.js MSE Streaming Engine (Part 3)](HLS.js_MSE_Streaming_Engine_Part_3.md) (2 shared connections)
-- [Settings & Preferences View](Settings_&_Preferences_View.md) (1 shared connections)
-- [Series Detail & Episode Browser](Series_Detail_&_Episode_Browser.md) (1 shared connections)
+- [Community 13](Community_13.md) (1 shared connections)
+- [Community 24](Community_24.md) (1 shared connections)
 
 ## Source Files
 
-- `IPTVPlayer/js/hls.min.js`
+- `windows/package.json`
+- `windows/preload.js`
 
 ## Audit Trail
 
-- EXTRACTED: 43 (61%)
-- INFERRED: 27 (39%)
+- EXTRACTED: 21 (100%)
+- INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 
 ---

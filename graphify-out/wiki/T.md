@@ -2,7 +2,7 @@
 
 > God node · 27 connections · `IPTVPlayer/js/hls.min.js`
 
-**Community:** [Community 15](Community_15.md)
+**Community:** [Community 23](Community_23.md)
 
 ## Connections by Relation
 

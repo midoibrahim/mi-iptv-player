@@ -1,10 +1,11 @@
 # Community 59
 
-> 1 nodes · cohesion 1.00
+> 2 nodes · cohesion 1.00
 
 ## Key Concepts
 
-- **LG webOS CLI Installation Guide** (0 connections) — `README.md`
+- **polyfills.js** (1 connections) — `IPTVPlayer/js/core/polyfills.js`
+- **NOTE: function expression (not declaration) - Chromium 38 rejects block-level** (1 connections) — `IPTVPlayer/js/core/polyfills.js`
 
 ## Relationships
 
@@ -12,11 +13,11 @@
 
 ## Source Files
 
-- `README.md`
+- `IPTVPlayer/js/core/polyfills.js`
 
 ## Audit Trail
 
-- EXTRACTED: 0 (0%)
+- EXTRACTED: 1 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

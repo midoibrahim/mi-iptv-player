@@ -1,33 +1,31 @@
 # Community 14
 
-> 24 nodes · cohesion 0.11
+> 22 nodes · cohesion 0.22
 
 ## Key Concepts
 
-- **webos-build/package.json** (14 connections) — `webos-build/package.json`
-- **devDependencies** (9 connections) — `webos-build/package.json`
-- **acorn** (2 connections) — `webos-build/package.json`
-- **autoprefixer** (2 connections) — `webos-build/package.json`
-- **@babel/core** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env** (2 connections) — `webos-build/package.json`
-- **core-js** (2 connections) — `webos-build/package.json`
-- **esbuild** (2 connections) — `webos-build/package.json`
-- **postcss** (2 connections) — `webos-build/package.json`
-- **regenerator-runtime** (2 connections) — `webos-build/package.json`
-- **acorn@^8.19.0** (2 connections) — `webos-build/package.json`
-- **autoprefixer@^10.6.2** (2 connections) — `webos-build/package.json`
-- **@babel/core@^7.26.0** (2 connections) — `webos-build/package.json`
-- **@babel/preset-env@^7.26.0** (2 connections) — `webos-build/package.json`
-- **core-js@^3.39.0** (2 connections) — `webos-build/package.json`
-- **esbuild@^0.24.0** (2 connections) — `webos-build/package.json`
-- **postcss@^8.4.49** (2 connections) — `webos-build/package.json`
-- **regenerator-runtime@^0.14.1** (2 connections) — `webos-build/package.json`
-- **scripts** (2 connections) — `webos-build/package.json`
-- **description** (1 connections) — `webos-build/package.json`
-- **name** (1 connections) — `webos-build/package.json`
-- **private** (1 connections) — `webos-build/package.json`
-- **build** (1 connections) — `webos-build/package.json`
-- **type** (1 connections) — `webos-build/package.json`
+- **browseView.js** (21 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_bindControls()** (8 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_refreshContent()** (6 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_renderGrid()** (6 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_updateGridWindow()** (6 connections) — `IPTVPlayer/js/views/browseView.js`
+- **render()** (5 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_renderCategories()** (5 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_appendNextGridBatch()** (4 connections) — `IPTVPlayer/js/views/browseView.js`
+- **ensureRendered()** (4 connections) — `IPTVPlayer/js/views/browseView.js`
+- **hydrateContentDom()** (4 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_isWindowedGrid()** (4 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_scheduleGridWindowUpdate()** (4 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_createCategoryLi()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_createGridCard()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_flushRemainingCategories()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_rebuildCategoryBuckets()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_renderRows()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **setData()** (3 connections) — `IPTVPlayer/js/views/browseView.js`
+- **_getGridMetrics()** (2 connections) — `IPTVPlayer/js/views/browseView.js`
+- **clear()** (1 connections) — `IPTVPlayer/js/views/browseView.js`
+- **constructor()** (1 connections) — `IPTVPlayer/js/views/browseView.js`
+- **releaseContentDom()** (1 connections) — `IPTVPlayer/js/views/browseView.js`
 
 ## Relationships
 
@@ -35,11 +33,11 @@
 
 ## Source Files
 
-- `webos-build/package.json`
+- `IPTVPlayer/js/views/browseView.js`
 
 ## Audit Trail
 
-- EXTRACTED: 31 (100%)
+- EXTRACTED: 50 (100%)
 - INFERRED: 0 (0%)
 - AMBIGUOUS: 0 (0%)
 

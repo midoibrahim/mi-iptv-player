@@ -105,13 +105,16 @@ window.IPTV.PlayerService = {
             });
         }
 
-        // Pointer move on player screen keeps OSD alive while user moves Magic Remote
+        // Pointer move on player screen keeps OSD alive while user moves Magic Remote (throttled to 250ms)
         if (this.playerScreen) {
+            let lastMoveTs = 0;
             this.playerScreen.addEventListener('mousemove', () => {
-                if (this.visible && this.isOSDVisible() && !this._isProgressBarDragging && !this.isChannelDrawerOpen) {
-                    this.autoHideOSD();
-                }
-            });
+                if (!this.visible || !this.isOSDVisible() || this._isProgressBarDragging || this.isChannelDrawerOpen) return;
+                const now = Date.now();
+                if (now - lastMoveTs < 250) return;
+                lastMoveTs = now;
+                this.autoHideOSD();
+            }, { passive: true });
         }
 
         // Interactive Playbar Seeking (Click & Drag for Magic Remote Mouse & Touch Events)
@@ -756,7 +759,7 @@ window.IPTV.PlayerService = {
 
     _throttledSaveProgress() {
         const now = Date.now();
-        if (!this._lastProgressSaveTime || now - this._lastProgressSaveTime >= 5000) {
+        if (!this._lastProgressSaveTime || now - this._lastProgressSaveTime >= 20000) {
             this._lastProgressSaveTime = now;
             this._recordWatchProgress();
         }
